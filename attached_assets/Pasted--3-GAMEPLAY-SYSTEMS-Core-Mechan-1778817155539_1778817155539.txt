@@ -1,0 +1,158 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧩 المرحلة 3 — GAMEPLAY SYSTEMS
+أنظمة اللعب الأساسية (Core Mechanics)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 هدف المرحلة:
+تحويل القصة لعناصر لعب حقيقية (Interactive Systems)
+
+━━━━━━━━━━━━━━━━━━━━━━
+🧠 الفكرة الأساسية
+━━━━━━━━━━━━━━━━━━━━━━
+
+هنا بنحوّل:
+Story → Gameplay
+
+يعني اللاعب مايبقاش بيتفرج…
+لكن “بيشتغل جوه القصة”.
+
+━━━━━━━━━━━━━━━━━━━━━━
+🎮 أنظمة اللعب الأساسية
+━━━━━━━━━━━━━━━━━━━━━━
+
+1) Question Engine
+2) Challenge System
+3) Interaction System
+4) Reward System
+5) Fail/Success Logic
+
+━━━━━━━━━━━━━━━━━━━━━━
+🧠 1) Question Engine (محرك الأسئلة)
+━━━━━━━━━━━━━━━━━━━━━━
+
+ده قلب اللعبة.
+
+بيتحكم في:
+- نوع السؤال
+- صعوبته
+- توقيته
+- مصدره (فيديو / صورة / صوت / نص)
+
+━━━━━━━━━━━━━━━━━━━━━━
+⚙️ بيتعمل إزاي؟
+
+Database:
+- Questions Table
+- Media Links
+- Difficulty Level
+- Tags (Science, History…)
+
+Backend:
+- اختيار السؤال حسب اللاعب
+- Randomization
+- Anti-repeat system
+
+Frontend:
+- عرض السؤال بشكل سينمائي
+- Timer + Animation
+
+━━━━━━━━━━━━━━━━━━━━━━
+📊 2) Difficulty Scaling System
+━━━━━━━━━━━━━━━━━━━━━━
+
+اللعبة لازم تتأقلم مع اللاعب.
+
+لو اللاعب قوي:
+→ الأسئلة أصعب
+
+لو ضعيف:
+→ أسهل + شرح أكتر
+
+━━━━━━━━━━━━━━━━━━━━━━
+🧠 بيتعمل إزاي؟
+━━━━━━━━━━━━━━━━━━━━━━
+
+- Track Performance
+- Win/Loss Ratio
+- Response Time
+- Accuracy
+
+ثم AI/Algorithm يحدد المستوى.
+
+━━━━━━━━━━━━━━━━━━━━━━
+🎯 3) Challenge System
+━━━━━━━━━━━━━━━━━━━━━━
+
+مش مجرد أسئلة.
+
+أنواع التحديات:
+
+- Video Analysis
+- Audio Decoding
+- Image Investigation
+- Logic Puzzle
+- Time Pressure Decisions
+
+━━━━━━━━━━━━━━━━━━━━━━
+⚙️ التنفيذ
+━━━━━━━━━━━━━━━━━━━━━━
+
+كل Challenge = Module
+
+مثال:
+Video Challenge Module:
+- video URL
+- questions after playback
+- hints system
+
+━━━━━━━━━━━━━━━━━━━━━━
+🎁 4) Reward System
+━━━━━━━━━━━━━━━━━━━━━━
+
+كل فعل لازم يعطي إحساس مكافأة.
+
+━━━━━━━━━━━━━━━━━━━━━━
+أنواع المكافآت:
+━━━━━━━━━━━━━━━━━━━━━━
+
+- XP
+- Coins
+- Unlockables
+- Story Progress
+- Items
+- Rank Points
+
+━━━━━━━━━━━━━━━━━━━━━━
+⚙️ Implementation
+
+Backend:
+- Reward calculator
+- Event triggers
+
+Frontend:
+- Animations
+- Sound effects
+- Level-up screens
+
+━━━━━━━━━━━━━━━━━━━━━━
+💀 5) Fail / Success Logic
+━━━━━━━━━━━━━━━━━━━━━━
+
+اللعبة لازم تحسها “حية”.
+
+مش:
+صح/غلط وخلاص
+
+لكن:
+- خسارة تؤثر على القصة
+- نجاح يفتح مسارات جديدة
+
+━━━━━━━━━━━━━━━━━━━━━━
+📦 Output المرحلة
+━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Question Engine
+✅ Adaptive Difficulty System
+✅ Challenge Modules
+✅ Reward System
+✅ Game State Logic

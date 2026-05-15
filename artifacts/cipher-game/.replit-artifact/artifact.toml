@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "CIPHER — Intelligence Game"
+version = "1.0.0"
+id = "artifacts/cipher-game"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21840
+
+[services.development]
+run = "pnpm --filter @workspace/cipher-game run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/cipher-game", "run", "build" ]
+publicDir = "artifacts/cipher-game/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21840"
+BASE_PATH = "/"

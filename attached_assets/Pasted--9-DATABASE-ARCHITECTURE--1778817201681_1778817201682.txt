@@ -1,0 +1,294 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🗄️ المرحلة 9 — DATABASE ARCHITECTURE
+تصميم قاعدة البيانات الكاملة (Game Backend Blueprint)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 هدف المرحلة:
+تحويل كل أنظمة اللعبة إلى بيانات حقيقية قابلة للتنفيذ
+
+━━━━━━━━━━━━━━━━━━━━━━
+🧠 الفكرة الأساسية
+━━━━━━━━━━━━━━━━━━━━━━
+
+أي حاجة في اللعبة = Data
+
+- اللاعب = User Table
+- القصة = Story Tables
+- الأسئلة = Question Tables
+- التقدم = Progress Tables
+- المنافسة = Match Tables
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+👤 1) USERS SYSTEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📦 users
+
+- id (UUID)
+- username
+- email
+- password_hash
+- avatar_url
+- created_at
+- last_login
+
+━━━━━━━━━━━━━━━━━━━━━━
+📊 user_stats
+
+- user_id (FK)
+- xp
+- level
+- coins
+- rank_points
+- streak
+- total_games
+- wins
+- losses
+
+━━━━━━━━━━━━━━━━━━━━━━
+🧠 الهدف:
+تخزين تقدم اللاعب بشكل كامل
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎮 2) GAMEPLAY SYSTEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📦 matches
+
+- id
+- type (PvP / Story / Co-op)
+- status (active / finished)
+- created_at
+
+━━━━━━━━━━━━━━━━━━━━━━
+📦 match_players
+
+- match_id
+- user_id
+- score
+- rank_change
+- is_winner
+
+━━━━━━━━━━━━━━━━━━━━━━
+📦 match_events
+
+- id
+- match_id
+- type (answer / timeout / bonus)
+- payload (json)
+- timestamp
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧩 3) QUESTION SYSTEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📦 questions
+
+- id
+- type (text / image / video / audio)
+- question_text
+- difficulty
+- category
+- media_url
+- correct_answer
+
+━━━━━━━━━━━━━━━━━━━━━━
+📦 question_options
+
+- id
+- question_id
+- option_text
+- is_correct
+
+━━━━━━━━━━━━━━━━━━━━━━
+📦 question_usage
+
+- question_id
+- times_used
+- avg_correct_rate
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📖 4) STORY SYSTEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📦 story_chapters
+
+- id
+- title
+- description
+- order_index
+- unlock_level
+
+━━━━━━━━━━━━━━━━━━━━━━
+📦 story_nodes
+
+- id
+- chapter_id
+- type (dialogue / challenge / decision)
+- content
+- media_url
+
+━━━━━━━━━━━━━━━━━━━━━━
+📦 story_choices
+
+- id
+- node_id
+- text
+- next_node_id
+- consequence_flag
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎭 5) PLAYER PROGRESSION SYSTEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📦 player_progress
+
+- user_id
+- current_chapter
+- current_node
+- story_flags (json)
+- reputation_score
+
+━━━━━━━━━━━━━━━━━━━━━━
+📦 achievements
+
+- id
+- name
+- description
+- reward_xp
+
+━━━━━━━━━━━━━━━━━━━━━━
+📦 user_achievements
+
+- user_id
+- achievement_id
+- unlocked_at
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏆 6) RANKING SYSTEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📦 rankings
+
+- user_id
+- season_id
+- mmr
+- rank_tier
+- rank_points
+
+━━━━━━━━━━━━━━━━━━━━━━
+📦 seasons
+
+- id
+- name
+- start_date
+- end_date
+- theme
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🤖 7) AI SYSTEM DATA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📦 ai_player_profile
+
+- user_id
+- strengths (json)
+- weaknesses (json)
+- behavior_type
+- learning_curve
+
+━━━━━━━━━━━━━━━━━━━━━━
+📦 ai_memory_log
+
+- id
+- user_id
+- event_type
+- content
+- timestamp
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💬 8) SOCIAL SYSTEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📦 friends
+
+- user_id
+- friend_id
+- status (pending / accepted)
+
+━━━━━━━━━━━━━━━━━━━━━━
+📦 chat_messages
+
+- id
+- sender_id
+- receiver_id / room_id
+- message
+- timestamp
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎁 9) ECONOMY SYSTEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📦 wallet
+
+- user_id
+- coins
+- premium_currency
+
+━━━━━━━━━━━━━━━━━━━━━━
+📦 transactions
+
+- id
+- user_id
+- type (earn / spend)
+- amount
+- reason
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧠 10) SYSTEM RELATION MAP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+users
+  ├── user_stats
+  ├── player_progress
+  ├── rankings
+  ├── wallet
+  ├── ai_player_profile
+
+matches
+  ├── match_players
+  ├── match_events
+
+story_chapters
+  ├── story_nodes
+      ├── story_choices
+
+questions
+  ├── question_options
+  ├── question_usage
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚙️ IMPLEMENTATION STACK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Backend:
+- NestJS / Node.js
+
+Database:
+- PostgreSQL
+
+ORM:
+- Prisma
+
+Realtime:
+- Socket.IO
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📦 OUTPUT المرحلة
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Full Database Schema
+✅ Relationships Design
+✅ Game State Structure
+✅ Progress System Storage
+✅ Multiplayer Data Model

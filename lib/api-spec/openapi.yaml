@@ -1,22 +1,27 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: CIPHER Intelligence Game API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: auth
+  - name: users
+  - name: gameplay
+  - name: story
+  - name: ranking
+  - name: social
+  - name: ai
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +29,1187 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ─── AUTH ──────────────────────────────────────────────────
+  /auth/register:
+    post:
+      operationId: registerUser
+      tags: [auth]
+      summary: Register new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Validation error
+
+  /auth/login:
+    post:
+      operationId: loginUser
+      tags: [auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Unauthorized
+
+  /auth/guest:
+    post:
+      operationId: guestLogin
+      tags: [auth]
+      summary: Login as guest
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+
+  /auth/logout:
+    post:
+      operationId: logoutUser
+      tags: [auth]
+      summary: Logout
+      responses:
+        "200":
+          description: Logged out
+
+  /auth/me:
+    get:
+      operationId: getCurrentUser
+      tags: [auth]
+      summary: Get current session user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        "401":
+          description: Not authenticated
+
+  # ─── USERS ─────────────────────────────────────────────────
+  /users/{userId}:
+    get:
+      operationId: getUserProfile
+      tags: [users]
+      summary: Get user profile
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  /users/{userId}/stats:
+    get:
+      operationId: getUserStats
+      tags: [users]
+      summary: Get user game stats
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserStats"
+
+  /users/me/avatar:
+    patch:
+      operationId: updateAvatar
+      tags: [users]
+      summary: Update avatar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AvatarUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  # ─── GAMEPLAY ───────────────────────────────────────────────
+  /questions:
+    get:
+      operationId: getQuestions
+      tags: [gameplay]
+      summary: Get questions for current session
+      parameters:
+        - name: difficulty
+          in: query
+          schema:
+            type: string
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Questions list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Question"
+
+  /questions/{questionId}/answer:
+    post:
+      operationId: submitAnswer
+      tags: [gameplay]
+      summary: Submit an answer to a question
+      parameters:
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnswerInput"
+      responses:
+        "200":
+          description: Answer result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnswerResult"
+
+  /gameplay/daily-challenge:
+    get:
+      operationId: getDailyChallenge
+      tags: [gameplay]
+      summary: Get today's daily challenge
+      responses:
+        "200":
+          description: Daily challenge
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailyChallenge"
+
+  /gameplay/summary:
+    get:
+      operationId: getGameSummary
+      tags: [gameplay]
+      summary: Get gameplay summary for current user
+      responses:
+        "200":
+          description: Summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GameSummary"
+
+  /matches:
+    get:
+      operationId: getMatches
+      tags: [gameplay]
+      summary: Get recent matches
+      responses:
+        "200":
+          description: Match list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Match"
+
+    post:
+      operationId: createMatch
+      tags: [gameplay]
+      summary: Create a new match
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MatchInput"
+      responses:
+        "201":
+          description: Match created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Match"
+
+  /matches/{matchId}:
+    get:
+      operationId: getMatch
+      tags: [gameplay]
+      summary: Get match details
+      parameters:
+        - name: matchId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Match
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Match"
+
+  /matches/{matchId}/complete:
+    post:
+      operationId: completeMatch
+      tags: [gameplay]
+      summary: Complete a match and calculate results
+      parameters:
+        - name: matchId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MatchResultInput"
+      responses:
+        "200":
+          description: Final result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MatchResult"
+
+  /xp/award:
+    post:
+      operationId: awardXp
+      tags: [gameplay]
+      summary: Award XP for an action
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/XpAwardInput"
+      responses:
+        "200":
+          description: XP awarded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/XpAwardResult"
+
+  /achievements:
+    get:
+      operationId: getAchievements
+      tags: [gameplay]
+      summary: Get all achievements
+      responses:
+        "200":
+          description: Achievement list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Achievement"
+
+  /achievements/user:
+    get:
+      operationId: getUserAchievements
+      tags: [gameplay]
+      summary: Get current user's unlocked achievements
+      responses:
+        "200":
+          description: User achievements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserAchievement"
+
+  # ─── STORY ──────────────────────────────────────────────────
+  /story/chapters:
+    get:
+      operationId: getChapters
+      tags: [story]
+      summary: Get all story chapters
+      responses:
+        "200":
+          description: Chapter list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Chapter"
+
+  /story/chapters/{chapterId}:
+    get:
+      operationId: getChapter
+      tags: [story]
+      summary: Get chapter detail with nodes
+      parameters:
+        - name: chapterId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Chapter with nodes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChapterDetail"
+
+  /story/progress:
+    get:
+      operationId: getStoryProgress
+      tags: [story]
+      summary: Get current user's story progress
+      responses:
+        "200":
+          description: Progress
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StoryProgress"
+
+  /story/choose:
+    post:
+      operationId: makeStoryChoice
+      tags: [story]
+      summary: Make a choice in the story
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StoryChoiceInput"
+      responses:
+        "200":
+          description: Next node
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StoryNode"
+
+  /story/lore:
+    get:
+      operationId: getLoreEntries
+      tags: [story]
+      summary: Get world lore entries (unlocked)
+      responses:
+        "200":
+          description: Lore entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LoreEntry"
+
+  # ─── RANKING ────────────────────────────────────────────────
+  /rankings/global:
+    get:
+      operationId: getGlobalLeaderboard
+      tags: [ranking]
+      summary: Get global leaderboard
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Leaderboard
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LeaderboardEntry"
+
+  /rankings/daily:
+    get:
+      operationId: getDailyLeaderboard
+      tags: [ranking]
+      summary: Get today's leaderboard
+      responses:
+        "200":
+          description: Daily leaderboard
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LeaderboardEntry"
+
+  /rankings/me:
+    get:
+      operationId: getMyRanking
+      tags: [ranking]
+      summary: Get current user's ranking info
+      responses:
+        "200":
+          description: Ranking
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlayerRanking"
+
+  /seasons/current:
+    get:
+      operationId: getCurrentSeason
+      tags: [ranking]
+      summary: Get current active season
+      responses:
+        "200":
+          description: Season
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Season"
+
+  # ─── SOCIAL ─────────────────────────────────────────────────
+  /social/friends:
+    get:
+      operationId: getFriends
+      tags: [social]
+      summary: Get friends list
+      responses:
+        "200":
+          description: Friends
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FriendEntry"
+
+  /social/friends/request:
+    post:
+      operationId: sendFriendRequest
+      tags: [social]
+      summary: Send a friend request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FriendRequestInput"
+      responses:
+        "200":
+          description: Request sent
+
+  # ─── AI ─────────────────────────────────────────────────────
+  /ai/narrate:
+    post:
+      operationId: getNarration
+      tags: [ai]
+      summary: Get AI narration for a story moment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NarrationInput"
+      responses:
+        "200":
+          description: Narration text
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NarrationResponse"
+
+  /ai/explain:
+    post:
+      operationId: getExplanation
+      tags: [ai]
+      summary: Get AI explanation for an answer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExplanationInput"
+      responses:
+        "200":
+          description: Explanation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExplanationResponse"
+
+  /ai/player-profile:
+    get:
+      operationId: getAiPlayerProfile
+      tags: [ai]
+      summary: Get AI-analyzed player intelligence profile
+      responses:
+        "200":
+          description: Profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiPlayerProfile"
+
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
 
+    # ─── AUTH ────────────────────────────────────
+    RegisterInput:
+      type: object
+      required: [username, email, password]
+      properties:
+        username:
+          type: string
+          minLength: 3
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      required: [user, token]
+      properties:
+        user:
+          $ref: "#/components/schemas/UserProfile"
+        token:
+          type: string
+
+    UserProfile:
+      type: object
+      required: [id, username, avatarUrl, isGuest, createdAt]
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        email:
+          type: ["string", "null"]
+        avatarUrl:
+          type: ["string", "null"]
+        isGuest:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    AvatarUpdate:
+      type: object
+      required: [avatarUrl]
+      properties:
+        avatarUrl:
+          type: string
+
+    # ─── STATS ───────────────────────────────────
+    UserStats:
+      type: object
+      required: [userId, xp, level, coins, rankPoints, streak, totalGames, wins, losses, prestigeLevel]
+      properties:
+        userId:
+          type: integer
+        xp:
+          type: integer
+        level:
+          type: integer
+        coins:
+          type: integer
+        rankPoints:
+          type: integer
+        streak:
+          type: integer
+        totalGames:
+          type: integer
+        wins:
+          type: integer
+        losses:
+          type: integer
+        prestigeLevel:
+          type: integer
+        rankTier:
+          type: string
+        accuracyRate:
+          type: number
+
+    GameSummary:
+      type: object
+      required: [userId, totalXp, currentLevel, rankTier, streak, recentActivity, weeklyXp, todayGames]
+      properties:
+        userId:
+          type: integer
+        totalXp:
+          type: integer
+        currentLevel:
+          type: integer
+        rankTier:
+          type: string
+        streak:
+          type: integer
+        weeklyXp:
+          type: integer
+        todayGames:
+          type: integer
+        recentActivity:
+          type: array
+          items:
+            $ref: "#/components/schemas/ActivityItem"
+
+    ActivityItem:
+      type: object
+      required: [type, description, xpGained, timestamp]
+      properties:
+        type:
+          type: string
+        description:
+          type: string
+        xpGained:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+
+    # ─── QUESTIONS ───────────────────────────────
+    Question:
+      type: object
+      required: [id, type, questionText, difficulty, category, options]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [text, image, video, audio, logic]
+        questionText:
+          type: string
+        difficulty:
+          type: integer
+          minimum: 1
+          maximum: 10
+        category:
+          type: string
+        mediaUrl:
+          type: ["string", "null"]
+        options:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuestionOption"
+        timeLimit:
+          type: integer
+
+    QuestionOption:
+      type: object
+      required: [id, text]
+      properties:
+        id:
+          type: integer
+        text:
+          type: string
+
+    AnswerInput:
+      type: object
+      required: [optionId, timeSpentMs]
+      properties:
+        optionId:
+          type: integer
+        timeSpentMs:
+          type: integer
+
+    AnswerResult:
+      type: object
+      required: [correct, xpGained, correctOptionId, explanation]
+      properties:
+        correct:
+          type: boolean
+        xpGained:
+          type: integer
+        correctOptionId:
+          type: integer
+        explanation:
+          type: string
+        streakBonus:
+          type: integer
+        newLevel:
+          type: ["integer", "null"]
+
+    DailyChallenge:
+      type: object
+      required: [date, questions, bonusXp, completed]
+      properties:
+        date:
+          type: string
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Question"
+        bonusXp:
+          type: integer
+        completed:
+          type: boolean
+
+    # ─── XP ──────────────────────────────────────
+    XpAwardInput:
+      type: object
+      required: [action, amount]
+      properties:
+        action:
+          type: string
+        amount:
+          type: integer
+        multiplier:
+          type: number
+
+    XpAwardResult:
+      type: object
+      required: [xpGained, totalXp, newLevel, leveledUp]
+      properties:
+        xpGained:
+          type: integer
+        totalXp:
+          type: integer
+        newLevel:
+          type: integer
+        leveledUp:
+          type: boolean
+        unlocks:
+          type: array
+          items:
+            type: string
+
+    # ─── MATCHES ─────────────────────────────────
+    Match:
+      type: object
+      required: [id, type, status, createdAt]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [pvp, story, coop, ranked, survival]
+        status:
+          type: string
+          enum: [waiting, active, finished]
+        players:
+          type: array
+          items:
+            $ref: "#/components/schemas/MatchPlayer"
+        createdAt:
+          type: string
+          format: date-time
+
+    MatchPlayer:
+      type: object
+      required: [userId, username, score, isWinner]
+      properties:
+        userId:
+          type: integer
+        username:
+          type: string
+        score:
+          type: integer
+        rankChange:
+          type: integer
+        isWinner:
+          type: boolean
+
+    MatchInput:
+      type: object
+      required: [type]
+      properties:
+        type:
+          type: string
+          enum: [pvp, story, coop, ranked, survival]
+        opponentId:
+          type: ["integer", "null"]
+
+    MatchResultInput:
+      type: object
+      required: [score, correctAnswers, totalQuestions, timeMs]
+      properties:
+        score:
+          type: integer
+        correctAnswers:
+          type: integer
+        totalQuestions:
+          type: integer
+        timeMs:
+          type: integer
+
+    MatchResult:
+      type: object
+      required: [matchId, isWinner, xpGained, rankChange, newRankTier]
+      properties:
+        matchId:
+          type: integer
+        isWinner:
+          type: boolean
+        xpGained:
+          type: integer
+        rankChange:
+          type: integer
+        newRankTier:
+          type: string
+
+    # ─── ACHIEVEMENTS ─────────────────────────────
+    Achievement:
+      type: object
+      required: [id, name, description, rewardXp, iconUrl]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        rewardXp:
+          type: integer
+        iconUrl:
+          type: ["string", "null"]
+
+    UserAchievement:
+      type: object
+      required: [achievement, unlockedAt]
+      properties:
+        achievement:
+          $ref: "#/components/schemas/Achievement"
+        unlockedAt:
+          type: string
+          format: date-time
+
+    # ─── STORY ───────────────────────────────────
+    Chapter:
+      type: object
+      required: [id, title, description, orderIndex, unlockLevel, isUnlocked]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        orderIndex:
+          type: integer
+        unlockLevel:
+          type: integer
+        isUnlocked:
+          type: boolean
+        coverImageUrl:
+          type: ["string", "null"]
+
+    ChapterDetail:
+      type: object
+      required: [id, title, description, orderIndex, unlockLevel, isUnlocked, nodes]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        orderIndex:
+          type: integer
+        unlockLevel:
+          type: integer
+        isUnlocked:
+          type: boolean
+        coverImageUrl:
+          type: ["string", "null"]
+        nodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/StoryNode"
+
+    StoryNode:
+      type: object
+      required: [id, chapterId, type, content]
+      properties:
+        id:
+          type: integer
+        chapterId:
+          type: integer
+        type:
+          type: string
+          enum: [dialogue, challenge, decision, cinematic, revelation]
+        content:
+          type: string
+        speakerName:
+          type: ["string", "null"]
+        mediaUrl:
+          type: ["string", "null"]
+        choices:
+          type: array
+          items:
+            $ref: "#/components/schemas/StoryChoice"
+
+    StoryChoice:
+      type: object
+      required: [id, text]
+      properties:
+        id:
+          type: integer
+        text:
+          type: string
+        consequenceFlag:
+          type: ["string", "null"]
+        nextNodeId:
+          type: ["integer", "null"]
+
+    StoryChoiceInput:
+      type: object
+      required: [nodeId, choiceId]
+      properties:
+        nodeId:
+          type: integer
+        choiceId:
+          type: integer
+
+    StoryProgress:
+      type: object
+      required: [userId, currentChapterId, currentNodeId, reputationScore, flags]
+      properties:
+        userId:
+          type: integer
+        currentChapterId:
+          type: integer
+        currentNodeId:
+          type: integer
+        reputationScore:
+          type: integer
+        flags:
+          type: object
+          additionalProperties:
+            type: string
+
+    LoreEntry:
+      type: object
+      required: [id, title, content, category, isSecret]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        content:
+          type: string
+        category:
+          type: string
+        isSecret:
+          type: boolean
+        unlockedAt:
+          type: ["string", "null"]
+          format: date-time
+
+    # ─── RANKING ─────────────────────────────────
+    LeaderboardEntry:
+      type: object
+      required: [rank, userId, username, avatarUrl, xp, level, rankTier, score]
+      properties:
+        rank:
+          type: integer
+        userId:
+          type: integer
+        username:
+          type: string
+        avatarUrl:
+          type: ["string", "null"]
+        xp:
+          type: integer
+        level:
+          type: integer
+        rankTier:
+          type: string
+        score:
+          type: integer
+
+    PlayerRanking:
+      type: object
+      required: [userId, mmr, rankTier, rankPoints, seasonId, position]
+      properties:
+        userId:
+          type: integer
+        mmr:
+          type: integer
+        rankTier:
+          type: string
+        rankPoints:
+          type: integer
+        seasonId:
+          type: integer
+        position:
+          type: integer
+
+    Season:
+      type: object
+      required: [id, name, theme, startDate, endDate, isActive]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        theme:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        isActive:
+          type: boolean
+
+    # ─── SOCIAL ──────────────────────────────────
+    FriendEntry:
+      type: object
+      required: [userId, username, avatarUrl, status, isOnline]
+      properties:
+        userId:
+          type: integer
+        username:
+          type: string
+        avatarUrl:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [pending, accepted]
+        isOnline:
+          type: boolean
+
+    FriendRequestInput:
+      type: object
+      required: [targetUsername]
+      properties:
+        targetUsername:
+          type: string
+
+    # ─── AI ──────────────────────────────────────
+    NarrationInput:
+      type: object
+      required: [context, mood]
+      properties:
+        context:
+          type: string
+        mood:
+          type: string
+          enum: [tense, calm, triumphant, mysterious, urgent]
+        characterName:
+          type: ["string", "null"]
+
+    NarrationResponse:
+      type: object
+      required: [text, mood]
+      properties:
+        text:
+          type: string
+        mood:
+          type: string
+
+    ExplanationInput:
+      type: object
+      required: [questionId, correctAnswer, userAnswer]
+      properties:
+        questionId:
+          type: integer
+        correctAnswer:
+          type: string
+        userAnswer:
+          type: string
+        category:
+          type: string
+
+    ExplanationResponse:
+      type: object
+      required: [explanation, additionalFacts]
+      properties:
+        explanation:
+          type: string
+        additionalFacts:
+          type: array
+          items:
+            type: string
+
+    AiPlayerProfile:
+      type: object
+      required: [userId, strengths, weaknesses, behaviorType, intelligenceScore]
+      properties:
+        userId:
+          type: integer
+        strengths:
+          type: array
+          items:
+            type: string
+        weaknesses:
+          type: array
+          items:
+            type: string
+        behaviorType:
+          type: string
+        intelligenceScore:
+          type: integer
+        learningCurve:
+          type: string
+        recommendedDifficulty:
+          type: integer

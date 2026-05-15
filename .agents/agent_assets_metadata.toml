@@ -1,0 +1,14 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "yoBaw7mm_s7O-wp1FJ5Ea"
+uri = "file://artifacts/cipher-game/public/bg-landing.png"
+type = "image"
+title = "Landing page background"
+
+[[generated]]
+id = "sLrAqaOrBCC4bd0fwH57a"
+uri = "file://artifacts/cipher-game/public/story-cover-1.png"
+type = "image"
+title = "Story chapter cover 1"
