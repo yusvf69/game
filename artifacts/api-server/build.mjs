@@ -19,15 +19,13 @@ async function buildAll() {
     platform: "node",
     bundle: true,
     format: "esm",
-    outfile: path.resolve(artifactDir, "src/app.js"),
+    outfile: path.resolve(artifactDir, "dist/app-bundle.mjs"),
     logLevel: "info",
     external: ["*.node", "sharp", "pg-native", "drizzle-orm", "pg"],
     sourcemap: false,
     plugins: [],
     banner: {
-      js: `import express from "express";
-import cors from "cors";
-import { createRequire as __bannerCrReq } from 'node:module';
+      js: `import { createRequire as __bannerCrReq } from 'node:module';
 import __bannerPath from 'node:path';
 import __bannerUrl from 'node:url';
 
