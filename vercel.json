@@ -1,8 +1,5 @@
 {
   "buildCommand": "npx vite build",
   "outputDirectory": "dist",
-    "installCommand": "pnpm install --no-frozen-lockfile --ignore-scripts",
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
+  "installCommand": "pnpm install --no-frozen-lockfile --ignore-scripts"
 }

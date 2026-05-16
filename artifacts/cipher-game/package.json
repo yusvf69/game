@@ -10,11 +10,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "zustand": "^5.0.13",
-    "express": "^5.2.1",
-    "cors": "^2.8.5",
-    "@workspace/db": "workspace:*",
-    "drizzle-orm": "catalog:"
+    "zustand": "^5.0.13"
   },
   "devDependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -54,8 +50,6 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "@types/express": "^5.0.3",
-    "@types/cors": "^2.8.17",
     "@vitejs/plugin-react": "catalog:",
     "@workspace/api-client-react": "workspace:*",
     "class-variance-authority": "catalog:",
