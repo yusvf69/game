@@ -20,14 +20,14 @@ const BOOT_STEPS = [
 ];
 
 const DOMAIN_CATEGORIES: Record<string, string[]> = {
-  cyber_systems: ["technology", "cybersecurity"],
-  cognitive_analysis: ["logic", "reasoning"],
+  cyber_systems: ["technology", "security"],
+  cognitive_analysis: ["logic", "intelligence"],
   historical_archives: ["history"],
-  threat_intelligence: ["security", "defense"],
-  scientific_division: ["science", "physics", "biology", "chemistry"],
-  behavioral_analysis: ["psychology"],
-  global_mapping: ["geography"],
-  cipher_division: ["cryptography"],
+  threat_intelligence: ["security", "intelligence"],
+  scientific_division: ["technology"],
+  behavioral_analysis: ["intelligence"],
+  global_mapping: ["history", "technology"],
+  cipher_division: ["security", "intelligence"],
 };
 
 const DIFFICULTY_CONFIG: Record<string, { diffRange: number[] }> = {
@@ -86,9 +86,12 @@ export default function LocalOperationPage() {
         params.set("maxDiff", String(diffCfg.diffRange[1]));
         params.set("limit", String(questionCount));
 
-        const res = await fetch(`${BASE_URL}/api/questions?${params.toString()}`, {
+        const url = `${BASE_URL}/api/questions?${params.toString()}`;
+        console.log("[LocalOp] Fetching questions:", url, "token:", !!token);
+        const res = await fetch(url, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
+        console.log("[LocalOp] Response status:", res.status);
 
         if (!res.ok) {
           // Fallback: generate dummy questions for offline/demo
@@ -115,9 +118,10 @@ export default function LocalOperationPage() {
         }
 
         const data = await res.json();
+        const questionsList = Array.isArray(data) ? data : (data.questions || []);
 
-        if (data.questions && data.questions.length > 0) {
-          setQuestions(data.questions.map((q: any) => ({
+        if (questionsList.length > 0) {
+          setQuestions(questionsList.map((q: any) => ({
             id: q.id,
             questionText: q.questionText,
             difficulty: q.difficulty,
@@ -125,7 +129,7 @@ export default function LocalOperationPage() {
             options: q.options || [],
             timeLimit: q.timeLimit || 30,
             type: q.type || "text",
-            correctAnswer: q.correctAnswer,
+            correctAnswer: q.correctAnswer || q.options?.find((o: any) => o.isCorrect)?.id,
             explanation: q.explanation,
           })));
           setPhase("playing");

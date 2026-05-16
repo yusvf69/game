@@ -22,6 +22,9 @@ import ShopPage from "@/pages/shop";
 import WorldEventsPage from "@/pages/worldEvents";
 import TeamOpsPage from "@/pages/TeamOpsPage";
 import BuzzerPage from "@/pages/BuzzerPage";
+import LocalOperationPage from "@/pages/LocalOperationPage";
+import StagePage from "@/pages/StagePage";
+import HostControl from "@/pages/HostControl";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -88,6 +91,13 @@ function Router() {
         {() => <ProtectedRoute component={TeamOpsPage} />}
       </Route>
       <Route path="/buzzer" component={BuzzerPage} />
+      <Route path="/local-operation">
+        {() => <ProtectedRoute component={LocalOperationPage} />}
+      </Route>
+      <Route path="/stage" component={StagePage} />
+      <Route path="/host-control">
+        {() => <ProtectedRoute component={HostControl} />}
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );

@@ -1,0 +1,10 @@
+{
+  "framework": "vite",
+  "rootDirectory": "artifacts/cipher-game",
+  "buildCommand": "npx vite build",
+  "outputDirectory": "dist",
+  "installCommand": "pnpm install --frozen-lockfile --ignore-scripts --config.minimumReleaseAge=0",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

@@ -60,6 +60,10 @@ export function createSocketServer(httpServer: HTTPServer) {
   ioInstance = io;
 
   io.use(async (socket, next) => {
+    // Allow stage/buzzer connections without token
+    const stageConn = socket.handshake.auth?.stage || socket.handshake.query?.stage;
+    if (stageConn) { return next(); }
+
     const token = socket.handshake.auth?.token || socket.handshake.query?.token as string;
     if (!token) { return next(new Error("Authentication required")); }
     const user = await getUserFromToken(token);
@@ -69,9 +73,31 @@ export function createSocketServer(httpServer: HTTPServer) {
   });
 
   io.on("connection", (socket) => {
+    const stageConn = socket.handshake.auth?.stage || socket.handshake.query?.stage;
+    const matchId = parseInt(socket.handshake.auth?.matchId || socket.handshake.query?.matchId || "0");
+
+    if (stageConn && matchId) {
+      socket.join(`stage:${matchId}`);
+      socket.data.stageOnly = true;
+
+      socket.on("stage:join", () => {
+        socket.join(`stage:${matchId}`);
+      });
+
+      socket.on("disconnect", () => {});
+      return;
+    }
+
     const user = (socket as any).user as { id: number; username: string };
+    if (!user) { socket.disconnect(); return; }
     socket.join(`user:${user.id}`);
     io.emit("user:online", { userId: user.id, username: user.username });
+
+    // Allow host to join stage rooms for real-time events
+    socket.on("stage:join", (data) => {
+      const sMatchId = data?.matchId || socket.handshake.query?.matchId;
+      if (sMatchId) socket.join(`stage:${sMatchId}`);
+    });
 
     socket.on("matchmaking:join", async (data = {}) => {
       const existing = matchmakingQueue.find(p => p.userId === user.id);

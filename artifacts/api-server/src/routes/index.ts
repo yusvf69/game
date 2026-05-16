@@ -19,6 +19,7 @@ import antiCheatRouter from "./antiCheat";
 import missionRouter from "./mission";
 import tacticalRouter from "./tactical";
 import teamOpsRouter from "./teamOps";
+import stageRouter from "./stage";
 
 const router: IRouter = Router();
 
@@ -42,5 +43,6 @@ router.use(antiCheatRouter);
 router.use(missionRouter);
 router.use(tacticalRouter);
 router.use(teamOpsRouter);
+router.use(stageRouter);
 
 export default router;

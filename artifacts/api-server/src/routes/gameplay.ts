@@ -44,35 +44,48 @@ function getRankTier(rankPoints: number): string {
 }
 
 router.get("/questions", async (req, res) => {
-  const difficulty = req.query.difficulty ? parseInt(req.query.difficulty as string) : undefined;
+  const rawCategories = req.query.categories as string | undefined;
   const category = req.query.category as string | undefined;
+  const minDiff = req.query.minDiff ? parseInt(req.query.minDiff as string) : undefined;
+  const maxDiff = req.query.maxDiff ? parseInt(req.query.maxDiff as string) : undefined;
   const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
   const user = await getUserFromToken(req.headers.authorization);
 
   // Check AI profile for dynamic difficulty adjustment
   let timeScale = 1.0;
-  let preferredDiff = difficulty;
   if (user) {
     const [profile] = await db.select().from(aiPlayerProfilesTable).where(eq(aiPlayerProfilesTable.userId, user.id)).limit(1);
     if (profile && profile.recommendedDifficulty) {
-      preferredDiff = preferredDiff || profile.recommendedDifficulty;
-      // Scale timer based on behavior type
+      if (!minDiff) {
+        // Allow ±1 difficulty from preferred for variety
+      }
       if (profile.behaviorType === "strategic") {
-        timeScale = 0.7; // 30% less time — they're fast
+        timeScale = 0.7;
       } else if (profile.behaviorType === "explorer") {
-        timeScale = 1.0; // normal time
+        timeScale = 1.0;
       } else if (profile.behaviorType === "learner") {
-        timeScale = 1.4; // 40% more time
+        timeScale = 1.4;
       }
     }
   }
 
   const conditions = [];
-  if (preferredDiff) {
-    // Allow ±1 difficulty from preferred for variety
-    conditions.push(inArray(questionsTable.difficulty, [preferredDiff, preferredDiff + 1, Math.max(1, preferredDiff - 1)]));
+
+  // Handle categories (comma-separated list)
+  const categoriesList = rawCategories ? rawCategories.split(",").map((c) => c.trim()).filter(Boolean) : [];
+  if (category) categoriesList.push(category);
+  if (categoriesList.length > 0) {
+    conditions.push(inArray(questionsTable.category, categoriesList));
   }
-  if (category) conditions.push(eq(questionsTable.category, category));
+
+  // Handle difficulty range
+  if (minDiff !== undefined && maxDiff !== undefined) {
+    conditions.push(sql`${questionsTable.difficulty} BETWEEN ${minDiff} AND ${maxDiff}`);
+  } else if (minDiff !== undefined) {
+    conditions.push(sql`${questionsTable.difficulty} >= ${minDiff}`);
+  } else if (maxDiff !== undefined) {
+    conditions.push(sql`${questionsTable.difficulty} <= ${maxDiff}`);
+  }
 
   const questions = await db.select().from(questionsTable)
     .where(conditions.length > 0 ? and(...conditions) : undefined)

@@ -18,6 +18,9 @@ const NAV_ITEMS = [
   { path: "/shop", label: "SHOP" },
   { path: "/world-events", label: "EVENTS" },
   { path: "/team-ops", label: "TEAM OPS" },
+  { path: "/local-operation", label: "LOCAL" },
+  { path: "/stage", label: "STAGE" },
+  { path: "/host-control", label: "HOST" },
 ];
 
 export function NavBar() {
