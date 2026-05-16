@@ -1,5 +1,9 @@
+import { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { NavBar } from "@/components/NavBar";
+import { useAOSStore } from "@/stores/aosStore";
+import AOSLayout from "@/components/aos/AOSLayout";
+import AOSBoot from "@/components/aos/AOSBoot";
 import {
   useGetAchievements,
   useGetUserAchievements,
@@ -10,7 +14,26 @@ import {
 type Achievement = { id: number; name: string; description: string; rewardXp: number; iconUrl: string | null };
 type UserAchievement = { achievement: Achievement; unlockedAt: string };
 
+const BOOT_STEPS = [
+  { text: "INITIALIZING COMMENDATIONS DATABASE...", delay: 400, speed: 25 },
+  { text: "LOADING ACHIEVEMENTS... OK", delay: 500, speed: 20 },
+  { text: "SYNCING PROGRESS...", delay: 600, speed: 20 },
+  { text: "READY", delay: 800, speed: 15 },
+];
+
 export default function AchievementsPage() {
+  const [bootDone, setBootDone] = useState(false);
+  const { booted, setBooted } = useAOSStore();
+
+  const handleBootComplete = useCallback(() => {
+    setBootDone(true);
+    setBooted("achievements");
+  }, [setBooted]);
+
+  useEffect(() => {
+    if (booted["achievements"]) setBootDone(true);
+  }, [booted]);
+
   const { data: allAchievements, isLoading } = useGetAchievements({
     query: { queryKey: getGetAchievementsQueryKey() },
   });
@@ -28,10 +51,11 @@ export default function AchievementsPage() {
   const item = { hidden: { opacity: 0, scale: 0.95 }, show: { opacity: 1, scale: 1, transition: { duration: 0.3 } } };
 
   return (
-    <div className="min-h-screen bg-background">
-      <NavBar />
-      <div className="pt-14 min-h-screen">
-        <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
+    <>
+      <AOSBoot steps={BOOT_STEPS} onComplete={handleBootComplete} pageKey="achievements" alreadyBooted={bootDone} />
+      <AOSLayout>
+        <NavBar />
+        <div className="pt-14 min-h-screen">
 
         <div className="relative max-w-5xl mx-auto px-4 py-8">
           {/* Header */}
@@ -147,6 +171,7 @@ export default function AchievementsPage() {
           )}
         </div>
       </div>
-    </div>
+    </AOSLayout>
+    </>
   );
 }

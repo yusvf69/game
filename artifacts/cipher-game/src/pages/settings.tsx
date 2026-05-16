@@ -1,6 +1,9 @@
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import { NavBar } from "@/components/NavBar";
+import { useAOSStore } from "@/stores/aosStore";
+import AOSLayout from "@/components/aos/AOSLayout";
+import AOSBoot from "@/components/aos/AOSBoot";
 import { useGetCurrentUser, useUpdateAvatar, getGetCurrentUserQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -15,7 +18,26 @@ const AVATAR_PRESETS = [
   "https://api.dicebear.com/9.x/identicon/svg?seed=Wraith",
 ];
 
+const BOOT_STEPS = [
+  { text: "INITIALIZING OPERATIVE CONFIGURATION...", delay: 400, speed: 25 },
+  { text: "LOADING SETTINGS... OK", delay: 500, speed: 20 },
+  { text: "ESTABLISHING SECURE CHANNEL...", delay: 600, speed: 20 },
+  { text: "READY", delay: 800, speed: 15 },
+];
+
 export default function SettingsPage() {
+  const [bootDone, setBootDone] = useState(false);
+  const { booted, setBooted } = useAOSStore();
+
+  const handleBootComplete = useCallback(() => {
+    setBootDone(true);
+    setBooted("settings");
+  }, [setBooted]);
+
+  useEffect(() => {
+    if (booted["settings"]) setBootDone(true);
+  }, [booted]);
+
   const qc = useQueryClient();
   const { data: user } = useGetCurrentUser({ query: { queryKey: getGetCurrentUserQueryKey() } });
   const userProfile = user as UserProfile | undefined;
@@ -38,10 +60,11 @@ export default function SettingsPage() {
   const section = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.4 } } };
 
   return (
-    <div className="min-h-screen bg-background">
-      <NavBar />
-      <div className="pt-14 min-h-screen">
-        <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
+    <>
+      <AOSBoot steps={BOOT_STEPS} onComplete={handleBootComplete} pageKey="settings" alreadyBooted={bootDone} />
+      <AOSLayout>
+        <NavBar />
+        <div className="pt-14 min-h-screen">
 
         <div className="relative max-w-2xl mx-auto px-4 py-8">
           <motion.div
@@ -158,6 +181,7 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
-    </div>
+    </AOSLayout>
+    </>
   );
 }

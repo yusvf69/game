@@ -1,6 +1,10 @@
+import { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { NavBar } from "@/components/NavBar";
 import { RankBadge } from "@/components/RankBadge";
+import { useAOSStore } from "@/stores/aosStore";
+import AOSLayout from "@/components/aos/AOSLayout";
+import AOSBoot from "@/components/aos/AOSBoot";
 import {
   useGetCurrentUser,
   useGetUserStats,
@@ -18,7 +22,7 @@ const XP_PER_LEVEL = 500;
 
 type UserStats = { userId: number; xp: number; level: number; coins: number; rankPoints: number; streak: number; totalGames: number; wins: number; losses: number; prestigeLevel: number; rankTier: string; accuracyRate: number };
 type UserProfile = { id: number; username: string; email: string | null; avatarUrl: string | null; isGuest: boolean; createdAt: string };
-type AiProfile = { userId: number; strengths: string[]; weaknesses: string[]; behaviorType: string; intelligenceScore: number; learningCurve: string; recommendedDifficulty: number };
+type AiProfile = { userId: number; strengths: string[]; weaknesses: string[]; behaviorType: string; intelligenceScore: number; learningCurve: string; recommendedDifficulty: number; tacticalIQ?: number; riskIndex?: number; loyaltyScore?: number };
 type PlayerRanking = { userId: number; mmr: number; rankTier: string; rankPoints: number; seasonId: number; position: number };
 type Match = { id: number; type: string; status: string; players: Array<{ userId: number; username: string; score: number; rankChange: number; isWinner: boolean }>; createdAt: string };
 
@@ -32,7 +36,26 @@ function StatCard({ label, value, sub }: { label: string; value: string | number
   );
 }
 
+const BOOT_STEPS = [
+  { text: "INITIALIZING OPERATIVE FILE...", delay: 400, speed: 25 },
+  { text: "LOADING AGENT DATA... OK", delay: 500, speed: 20 },
+  { text: "COMPILING STATISTICS...", delay: 600, speed: 20 },
+  { text: "READY", delay: 800, speed: 15 },
+];
+
 export default function ProfilePage() {
+  const [bootDone, setBootDone] = useState(false);
+  const { booted, setBooted } = useAOSStore();
+
+  const handleBootComplete = useCallback(() => {
+    setBootDone(true);
+    setBooted("profile");
+  }, [setBooted]);
+
+  useEffect(() => {
+    if (booted["profile"]) setBootDone(true);
+  }, [booted]);
+
   const { data: user } = useGetCurrentUser({ query: { queryKey: getGetCurrentUserQueryKey() } });
   const userProfile = user as UserProfile | undefined;
 
@@ -58,10 +81,11 @@ export default function ProfilePage() {
   const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.4 } } };
 
   return (
-    <div className="min-h-screen bg-background">
-      <NavBar />
-      <div className="pt-14 min-h-screen">
-        <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
+    <>
+      <AOSBoot steps={BOOT_STEPS} onComplete={handleBootComplete} pageKey="profile" alreadyBooted={bootDone} />
+      <AOSLayout>
+        <NavBar />
+        <div className="pt-14 min-h-screen">
 
         <div className="relative max-w-5xl mx-auto px-4 py-8">
           {/* Agent Card */}
@@ -164,24 +188,94 @@ export default function ProfilePage() {
                   <div>
                     <p className="font-mono text-xs text-zinc-600 mb-3">STRENGTHS</p>
                     <div className="space-y-1">
-                      {ai.strengths.map((s, i) => (
+                      {ai.strengths.length > 0 ? ai.strengths.map((s, i) => (
                         <div key={i} className="flex items-center gap-2">
                           <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
                           <span className="font-mono text-xs text-zinc-300 capitalize">{s}</span>
                         </div>
-                      ))}
+                      )) : (
+                        <p className="font-mono text-xs text-zinc-700 italic">Insufficient data</p>
+                      )}
                     </div>
                   </div>
 
                   <div>
                     <p className="font-mono text-xs text-zinc-600 mb-3">VULNERABILITIES</p>
                     <div className="space-y-1">
-                      {ai.weaknesses.map((w, i) => (
+                      {ai.weaknesses.length > 0 ? ai.weaknesses.map((w, i) => (
                         <div key={i} className="flex items-center gap-2">
                           <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
                           <span className="font-mono text-xs text-zinc-300 capitalize">{w}</span>
                         </div>
-                      ))}
+                      )) : (
+                        <p className="font-mono text-xs text-zinc-700 italic">Insufficient data</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Psychological Profiling */}
+                <div className="mt-6 pt-6 border-t border-zinc-800/40">
+                  <p className="font-mono text-xs text-cyan-400 tracking-widest mb-4">PSYCHOLOGICAL PROFILING</p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="glass rounded-lg p-4">
+                      <p className="font-mono text-[10px] text-zinc-600 tracking-widest mb-2">TACTICAL IQ</p>
+                      <div className="flex items-end gap-2 mb-2">
+                        <span className="font-mono text-2xl font-black text-cyan-400">{ai.tacticalIQ ?? "—"}</span>
+                        {ai.tacticalIQ != null && <span className="font-mono text-xs text-zinc-600">/100</span>}
+                      </div>
+                      <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${ai.tacticalIQ || 0}%` }}
+                          transition={{ duration: 1.5, ease: "easeOut" }}
+                          className="h-full rounded-full"
+                          style={{ background: "linear-gradient(90deg, #06b6d4, #22d3ee)" }}
+                        />
+                      </div>
+                      <p className="font-mono text-[10px] text-zinc-700 mt-2">
+                        {ai.tacticalIQ != null ? (ai.tacticalIQ > 70 ? "Sharp tactical reasoning" : ai.tacticalIQ > 40 ? "Developing field instincts" : "Needs operational exposure") : "Pending evaluation"}
+                      </p>
+                    </div>
+
+                    <div className="glass rounded-lg p-4">
+                      <p className="font-mono text-[10px] text-zinc-600 tracking-widest mb-2">RISK INDEX</p>
+                      <div className="flex items-end gap-2 mb-2">
+                        <span className="font-mono text-2xl font-black text-orange-400">{ai.riskIndex ?? "—"}</span>
+                        {ai.riskIndex != null && <span className="font-mono text-xs text-zinc-600">/100</span>}
+                      </div>
+                      <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${ai.riskIndex || 0}%` }}
+                          transition={{ duration: 1.5, ease: "easeOut" }}
+                          className="h-full rounded-full"
+                          style={{ background: "linear-gradient(90deg, #f97316, #ef4444)" }}
+                        />
+                      </div>
+                      <p className="font-mono text-[10px] text-zinc-700 mt-2">
+                        {ai.riskIndex != null ? (ai.riskIndex > 70 ? "High risk tolerance" : ai.riskIndex > 40 ? "Balanced risk profile" : "Cautious operator") : "Pending evaluation"}
+                      </p>
+                    </div>
+
+                    <div className="glass rounded-lg p-4">
+                      <p className="font-mono text-[10px] text-zinc-600 tracking-widest mb-2">LOYALTY SCORE</p>
+                      <div className="flex items-end gap-2 mb-2">
+                        <span className="font-mono text-2xl font-black text-green-400">{ai.loyaltyScore ?? "—"}</span>
+                        {ai.loyaltyScore != null && <span className="font-mono text-xs text-zinc-600">/100</span>}
+                      </div>
+                      <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${ai.loyaltyScore || 0}%` }}
+                          transition={{ duration: 1.5, ease: "easeOut" }}
+                          className="h-full rounded-full"
+                          style={{ background: "linear-gradient(90deg, #22c55e, #4ade80)" }}
+                        />
+                      </div>
+                      <p className="font-mono text-[10px] text-zinc-700 mt-2">
+                        {ai.loyaltyScore != null ? (ai.loyaltyScore > 70 ? "Highly reliable" : ai.loyaltyScore > 40 ? "Standard adherence" : "Autonomous tendencies") : "Pending evaluation"}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -225,6 +319,7 @@ export default function ProfilePage() {
           </motion.div>
         </div>
       </div>
-    </div>
+    </AOSLayout>
+    </>
   );
 }

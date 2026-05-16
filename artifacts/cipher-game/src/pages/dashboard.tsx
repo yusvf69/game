@@ -1,7 +1,16 @@
+import { useCallback, useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { NavBar } from "@/components/NavBar";
 import { RankBadge } from "@/components/RankBadge";
+import { useSound } from "@/hooks/useSound";
+import { useAOSStore } from "@/stores/aosStore";
+import AOSLayout from "@/components/aos/AOSLayout";
+import AOSBoot from "@/components/aos/AOSBoot";
+import {
+  LiveSignalBar, PacketFlowMonitor, ThreatMeter,
+  NodeStatusGrid, DataThroughputGauge,
+} from "@/components/aos/AOSMonitor";
 import {
   useGetCurrentUser,
   useGetGameSummary,
@@ -12,6 +21,13 @@ import {
   getGetCurrentSeasonQueryKey,
   getGetDailyChallengeQueryKey,
 } from "@workspace/api-client-react";
+
+const BOOT_STEPS = [
+  { text: "INITIALIZING COMMAND CENTER...", delay: 400, speed: 25 },
+  { text: "LOADING USER DATA... OK", delay: 500, speed: 20 },
+  { text: "SYNCING INTELLIGENCE FEEDS...", delay: 600, speed: 20 },
+  { text: "READY", delay: 800, speed: 15 },
+];
 
 const XP_PER_LEVEL = 500;
 
@@ -54,7 +70,20 @@ const item = {
 };
 
 export default function DashboardPage() {
+  const [bootDone, setBootDone] = useState(false);
+  const { booted, setBooted } = useAOSStore();
+
+  const handleBootComplete = useCallback(() => {
+    setBootDone(true);
+    setBooted("dashboard");
+  }, [setBooted]);
+
+  useEffect(() => {
+    if (booted["dashboard"]) setBootDone(true);
+  }, [booted]);
+
   const [, setLocation] = useLocation();
+  const { play: playSound } = useSound();
 
   const { data: user, isLoading: userLoading } = useGetCurrentUser({
     query: { queryKey: getGetCurrentUserQueryKey() },
@@ -75,10 +104,11 @@ export default function DashboardPage() {
   const isLoading = userLoading || summaryLoading;
 
   return (
-    <div className="min-h-screen bg-background">
-      <NavBar />
-      <div className="pt-14 min-h-screen">
-        <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
+    <>
+      <AOSBoot steps={BOOT_STEPS} onComplete={handleBootComplete} pageKey="dashboard" alreadyBooted={bootDone} />
+      <AOSLayout>
+        <NavBar />
+        <div className="pt-14 min-h-screen">
 
         <div className="relative max-w-7xl mx-auto px-4 py-8">
           {/* Header */}
@@ -130,7 +160,7 @@ export default function DashboardPage() {
                 {/* Quick Play */}
                 <motion.div variants={item} className="md:col-span-1">
                   <button
-                    onClick={() => setLocation("/play")}
+                    onClick={() => { playSound("click"); setLocation("/play"); }}
                     className="w-full glass-strong cipher-border rounded-lg p-8 flex flex-col items-center gap-4 hover:bg-blue-500/5 transition-all duration-300 group neon-blue"
                     data-testid="quick-play-btn"
                   >
@@ -147,7 +177,7 @@ export default function DashboardPage() {
                 {/* Daily Challenge */}
                 <motion.div variants={item} className="md:col-span-1">
                   <button
-                    onClick={() => setLocation("/play?mode=daily")}
+                    onClick={() => { playSound("click"); setLocation("/play?mode=daily"); }}
                     className="w-full h-full glass rounded-lg p-6 flex flex-col justify-between hover:bg-yellow-500/5 transition-all duration-300 border border-yellow-500/20 hover:border-yellow-500/40"
                   >
                     <div>
@@ -198,10 +228,55 @@ export default function DashboardPage() {
                   <p className="font-mono text-xs text-zinc-600 text-center py-4">NO RECENT ACTIVITY — BEGIN AN OPERATION</p>
                 )}
               </motion.div>
+
+              {/* Live Monitoring */}
+              <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="glass rounded-lg p-5 border border-blue-500/10">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                    <p className="font-mono text-[10px] text-zinc-500 tracking-widest">SIGNAL MONITOR</p>
+                  </div>
+                  <LiveSignalBar />
+                </div>
+
+                <div className="glass rounded-lg p-5 border border-blue-500/10">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                    <p className="font-mono text-[10px] text-zinc-500 tracking-widest">THREAT ANALYSIS</p>
+                  </div>
+                  <ThreatMeter />
+                </div>
+
+                <div className="glass rounded-lg p-5 border border-blue-500/10">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                    <p className="font-mono text-[10px] text-zinc-500 tracking-widest">NODE STATUS</p>
+                  </div>
+                  <NodeStatusGrid />
+                </div>
+
+                <div className="glass rounded-lg p-5 border border-blue-500/10">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
+                    <p className="font-mono text-[10px] text-zinc-500 tracking-widest">DATA THROUGHPUT</p>
+                  </div>
+                  <DataThroughputGauge />
+                </div>
+              </motion.div>
+
+              {/* Packet Flow */}
+              <motion.div variants={item} className="glass rounded-lg p-5 border border-blue-500/10">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
+                  <p className="font-mono text-[10px] text-zinc-500 tracking-widest">PACKET FLOW / LIVE</p>
+                </div>
+                <PacketFlowMonitor />
+              </motion.div>
             </motion.div>
           )}
         </div>
       </div>
-    </div>
+    </AOSLayout>
+    </>
   );
 }

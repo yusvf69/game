@@ -2,6 +2,7 @@ import { Link, useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { clearToken } from "@/lib/auth";
 import { useQueryClient } from "@tanstack/react-query";
+import { SoundToggle } from "./SoundToggle";
 
 const NAV_ITEMS = [
   { path: "/dashboard", label: "COMMAND" },
@@ -11,6 +12,12 @@ const NAV_ITEMS = [
   { path: "/leaderboard", label: "RANKS" },
   { path: "/achievements", label: "INTEL" },
   { path: "/profile", label: "AGENT" },
+  { path: "/multiplayer", label: "ARENA" },
+  { path: "/tournaments", label: "TOURNEY" },
+  { path: "/skill-tree", label: "SKILLS" },
+  { path: "/shop", label: "SHOP" },
+  { path: "/world-events", label: "EVENTS" },
+  { path: "/team-ops", label: "TEAM OPS" },
 ];
 
 export function NavBar() {
@@ -62,13 +69,16 @@ export function NavBar() {
           })}
         </div>
 
-        <button
-          onClick={handleLogout}
-          className="text-xs font-mono tracking-widest text-zinc-600 hover:text-red-400 transition-colors px-3 py-1.5"
-          data-testid="logout-btn"
-        >
-          DISCONNECT
-        </button>
+        <div className="flex items-center gap-3">
+          <SoundToggle />
+          <button
+            onClick={handleLogout}
+            className="text-xs font-mono tracking-widest text-zinc-600 hover:text-red-400 transition-colors px-3 py-1.5"
+            data-testid="logout-btn"
+          >
+            DISCONNECT
+          </button>
+        </div>
       </div>
     </motion.nav>
   );

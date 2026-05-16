@@ -15,6 +15,13 @@ import LeaderboardPage from "@/pages/leaderboard";
 import ProfilePage from "@/pages/profile";
 import AchievementsPage from "@/pages/achievements";
 import SettingsPage from "@/pages/settings";
+import MultiplayerPage from "@/pages/multiplayer";
+import TournamentsPage from "@/pages/tournaments";
+import SkillTreePage from "@/pages/skillTree";
+import ShopPage from "@/pages/shop";
+import WorldEventsPage from "@/pages/worldEvents";
+import TeamOpsPage from "@/pages/TeamOpsPage";
+import BuzzerPage from "@/pages/BuzzerPage";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -62,6 +69,25 @@ function Router() {
       <Route path="/settings">
         {() => <ProtectedRoute component={SettingsPage} />}
       </Route>
+      <Route path="/multiplayer">
+        {() => <ProtectedRoute component={MultiplayerPage} />}
+      </Route>
+      <Route path="/tournaments">
+        {() => <ProtectedRoute component={TournamentsPage} />}
+      </Route>
+      <Route path="/skill-tree">
+        {() => <ProtectedRoute component={SkillTreePage} />}
+      </Route>
+      <Route path="/shop">
+        {() => <ProtectedRoute component={ShopPage} />}
+      </Route>
+      <Route path="/world-events">
+        {() => <ProtectedRoute component={WorldEventsPage} />}
+      </Route>
+      <Route path="/team-ops">
+        {() => <ProtectedRoute component={TeamOpsPage} />}
+      </Route>
+      <Route path="/buzzer" component={BuzzerPage} />
       <Route component={NotFound} />
     </Switch>
   );

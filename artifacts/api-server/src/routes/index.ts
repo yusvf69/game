@@ -7,6 +7,18 @@ import storyRouter from "./story";
 import rankingRouter from "./ranking";
 import socialRouter from "./social";
 import aiRouter from "./ai";
+import aiQuestionsRouter from "./aiQuestions";
+import aiCharactersRouter from "./aiCharacters";
+import prestigeRouter from "./prestige";
+import skillTreeRouter from "./skillTree";
+import tournamentsRouter from "./tournaments";
+import shopRouter from "./shop";
+import worldEventsRouter from "./worldEvents";
+import analyticsRouter from "./analytics";
+import antiCheatRouter from "./antiCheat";
+import missionRouter from "./mission";
+import tacticalRouter from "./tactical";
+import teamOpsRouter from "./teamOps";
 
 const router: IRouter = Router();
 
@@ -18,5 +30,17 @@ router.use(storyRouter);
 router.use(rankingRouter);
 router.use(socialRouter);
 router.use(aiRouter);
+router.use(aiQuestionsRouter);
+router.use(aiCharactersRouter);
+router.use(prestigeRouter);
+router.use(skillTreeRouter);
+router.use(tournamentsRouter);
+router.use(shopRouter);
+router.use(worldEventsRouter);
+router.use(analyticsRouter);
+router.use(antiCheatRouter);
+router.use(missionRouter);
+router.use(tacticalRouter);
+router.use(teamOpsRouter);
 
 export default router;

@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { NavBar } from "@/components/NavBar";
 import { RankBadge } from "@/components/RankBadge";
+import { useAOSStore } from "@/stores/aosStore";
+import AOSLayout from "@/components/aos/AOSLayout";
+import AOSBoot from "@/components/aos/AOSBoot";
 import {
   useGetGlobalLeaderboard,
   useGetDailyLeaderboard,
@@ -23,7 +26,26 @@ function PositionIcon({ rank }: { rank: number }) {
   return <span className="font-mono text-zinc-500 text-sm">#{rank}</span>;
 }
 
+const BOOT_STEPS = [
+  { text: "INITIALIZING RANKING SYSTEM...", delay: 400, speed: 25 },
+  { text: "FETCHING AGENT DATA... OK", delay: 500, speed: 20 },
+  { text: "CALCULATING STANDINGS...", delay: 600, speed: 20 },
+  { text: "READY", delay: 800, speed: 15 },
+];
+
 export default function LeaderboardPage() {
+  const [bootDone, setBootDone] = useState(false);
+  const { booted, setBooted } = useAOSStore();
+
+  const handleBootComplete = useCallback(() => {
+    setBootDone(true);
+    setBooted("leaderboard");
+  }, [setBooted]);
+
+  useEffect(() => {
+    if (booted["leaderboard"]) setBootDone(true);
+  }, [booted]);
+
   const [tab, setTab] = useState<"global" | "daily">("global");
 
   const { data: globalLb, isLoading: globalLoading } = useGetGlobalLeaderboard(
@@ -48,10 +70,11 @@ export default function LeaderboardPage() {
   const myRank = myRanking as PlayerRanking | undefined;
 
   return (
-    <div className="min-h-screen bg-background">
-      <NavBar />
-      <div className="pt-14 min-h-screen">
-        <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
+    <>
+      <AOSBoot steps={BOOT_STEPS} onComplete={handleBootComplete} pageKey="leaderboard" alreadyBooted={bootDone} />
+      <AOSLayout>
+        <NavBar />
+        <div className="pt-14 min-h-screen">
 
         <div className="relative max-w-4xl mx-auto px-4 py-8">
           {/* Header */}
@@ -184,6 +207,7 @@ export default function LeaderboardPage() {
           </motion.div>
         </div>
       </div>
-    </div>
+    </AOSLayout>
+    </>
   );
 }

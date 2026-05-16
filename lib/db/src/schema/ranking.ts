@@ -64,6 +64,9 @@ export const aiPlayerProfilesTable = pgTable("ai_player_profiles", {
   intelligenceScore: integer("intelligence_score").notNull().default(50),
   learningCurve: text("learning_curve").notNull().default("steady"),
   recommendedDifficulty: integer("recommended_difficulty").notNull().default(3),
+  tacticalIQ: integer("tactical_iq").notNull().default(50),
+  riskIndex: integer("risk_index").notNull().default(50),
+  loyaltyScore: integer("loyalty_score").notNull().default(50),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });
 

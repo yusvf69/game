@@ -15,4 +15,11 @@ export const QuestionType = {
   video: 'video',
   audio: 'audio',
   logic: 'logic',
+  signal_decode: 'signal_decode',
+  pattern_analysis: 'pattern_analysis',
+  audio_intel: 'audio_intel',
+  visual_recognition: 'visual_recognition',
+  threat_assessment: 'threat_assessment',
+  logic_grid: 'logic_grid',
+  multi_step: 'multi_step',
 } as const;

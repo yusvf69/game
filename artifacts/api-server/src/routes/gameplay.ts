@@ -11,8 +11,10 @@ import {
   xpLogTable,
   achievementsTable,
   userAchievementsTable,
+  answerLogsTable,
+  aiPlayerProfilesTable,
 } from "@workspace/db";
-import { eq, ne, and, desc, sql } from "drizzle-orm";
+import { eq, ne, and, desc, sql, inArray } from "drizzle-orm";
 
 const router = Router();
 
@@ -45,10 +47,31 @@ router.get("/questions", async (req, res) => {
   const difficulty = req.query.difficulty ? parseInt(req.query.difficulty as string) : undefined;
   const category = req.query.category as string | undefined;
   const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+  const user = await getUserFromToken(req.headers.authorization);
 
-  let query = db.select().from(questionsTable);
+  // Check AI profile for dynamic difficulty adjustment
+  let timeScale = 1.0;
+  let preferredDiff = difficulty;
+  if (user) {
+    const [profile] = await db.select().from(aiPlayerProfilesTable).where(eq(aiPlayerProfilesTable.userId, user.id)).limit(1);
+    if (profile && profile.recommendedDifficulty) {
+      preferredDiff = preferredDiff || profile.recommendedDifficulty;
+      // Scale timer based on behavior type
+      if (profile.behaviorType === "strategic") {
+        timeScale = 0.7; // 30% less time — they're fast
+      } else if (profile.behaviorType === "explorer") {
+        timeScale = 1.0; // normal time
+      } else if (profile.behaviorType === "learner") {
+        timeScale = 1.4; // 40% more time
+      }
+    }
+  }
+
   const conditions = [];
-  if (difficulty) conditions.push(eq(questionsTable.difficulty, difficulty));
+  if (preferredDiff) {
+    // Allow ±1 difficulty from preferred for variety
+    conditions.push(inArray(questionsTable.difficulty, [preferredDiff, preferredDiff + 1, Math.max(1, preferredDiff - 1)]));
+  }
   if (category) conditions.push(eq(questionsTable.category, category));
 
   const questions = await db.select().from(questionsTable)
@@ -60,6 +83,10 @@ router.get("/questions", async (req, res) => {
     const options = await db.select({ id: questionOptionsTable.id, text: questionOptionsTable.optionText })
       .from(questionOptionsTable)
       .where(eq(questionOptionsTable.questionId, q.id));
+    let adjustedTime = q.timeLimitSeconds;
+    if (q.timeLimitSeconds) {
+      adjustedTime = Math.max(5, Math.round(q.timeLimitSeconds * timeScale));
+    }
     return {
       id: q.id,
       type: q.type,
@@ -68,7 +95,8 @@ router.get("/questions", async (req, res) => {
       category: q.category,
       mediaUrl: q.mediaUrl,
       options,
-      timeLimit: q.timeLimitSeconds,
+      timeLimit: adjustedTime,
+      directorAdjusted: timeScale !== 1.0,
     };
   }));
 
@@ -126,6 +154,15 @@ router.post("/questions/:questionId/answer", async (req, res) => {
       await db.update(userStatsTable).set({ streak: 0 }).where(eq(userStatsTable.userId, user.id));
     }
   }
+
+  await db.insert(answerLogsTable).values({
+    userId: user?.id || 0,
+    questionId,
+    category: question.category,
+    difficulty: question.difficulty,
+    correct: isCorrect ? 1 : 0,
+    timeSpentMs,
+  });
 
   res.json({
     correct: isCorrect,
