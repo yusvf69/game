@@ -1,5 +1,5 @@
 import { createServer } from "http";
-import app from "./app";
+import app from "./main";
 import { createSocketServer } from "./socket";
 import { logger } from "./lib/logger";
 

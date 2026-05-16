@@ -118,7 +118,7 @@ globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);
 
   // Serverless build (api/)
   await esbuild({
-    entryPoints: [path.resolve(artifactDir, "src/app.ts")],
+    entryPoints: [path.resolve(artifactDir, "src/main.ts")],
     platform: "node",
     bundle: true,
     format: "esm",
