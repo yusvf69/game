@@ -12,23 +12,22 @@ async function buildAll() {
   const distDir = path.resolve(artifactDir, "dist");
   await rm(distDir, { recursive: true, force: true   });
 
-  const apiDir = path.resolve(artifactDir, "api");
-  await rm(path.resolve(apiDir, "main.mjs"), { force: true });
-  const bundleDir = path.resolve(artifactDir, "app-bundle");
-  await rm(bundleDir, { recursive: true, force: true });
+  await rm(path.resolve(artifactDir, "app-bundle"), { recursive: true, force: true });
+  await rm(path.resolve(artifactDir, "api", "main.mjs"), { force: true });
   await esbuild({
     entryPoints: [path.resolve(artifactDir, "src/main.ts")],
     platform: "node",
     bundle: true,
     format: "esm",
-    outdir: bundleDir,
-    outExtension: { ".js": ".mjs" },
+    outfile: path.resolve(artifactDir, "src/app.js"),
     logLevel: "info",
     external: ["*.node", "sharp", "pg-native", "drizzle-orm", "pg"],
     sourcemap: false,
     plugins: [],
     banner: {
-      js: `import { createRequire as __bannerCrReq } from 'node:module';
+      js: `import express from "express";
+import cors from "cors";
+import { createRequire as __bannerCrReq } from 'node:module';
 import __bannerPath from 'node:path';
 import __bannerUrl from 'node:url';
 
