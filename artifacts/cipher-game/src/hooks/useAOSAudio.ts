@@ -17,9 +17,24 @@ function getCtx(): AudioContext | null {
     try { sharedCtx = new AudioContext(); } catch { return null; }
   }
   if (sharedCtx.state === "suspended") {
-    sharedCtx.resume();
+    sharedCtx.resume().catch(() => {});
   }
   return sharedCtx;
+}
+
+// Resume AudioContext on first user interaction (browser autoplay policy)
+let resumeListener = false;
+function ensureResumeOnGesture() {
+  if (resumeListener) return;
+  resumeListener = true;
+  const handler = () => {
+    if (sharedCtx && sharedCtx.state === "suspended") {
+      sharedCtx.resume().catch(() => {});
+    }
+  };
+  document.addEventListener("click", handler, { once: true });
+  document.addEventListener("keydown", handler, { once: true });
+  document.addEventListener("touchstart", handler, { once: true });
 }
 
 function createNoiseBuffer(ctx: AudioContext, duration: number): AudioBuffer {
@@ -132,6 +147,7 @@ export function useAOSAudio() {
 
   const start = useCallback(() => {
     if (!enabledRef.current) return;
+    ensureResumeOnGesture();
     startAudio();
   }, []);
 

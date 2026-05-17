@@ -862,8 +862,8 @@ var require_depd = __commonJS({
       return typeName && callSite.getMethodName() ? typeName + "." + funcName : funcName;
     }
     function formatPlain(msg, caller, stack) {
-      var timestamp17 = (/* @__PURE__ */ new Date()).toUTCString();
-      var formatted = timestamp17 + " " + this._namespace + " deprecated " + msg;
+      var timestamp18 = (/* @__PURE__ */ new Date()).toUTCString();
+      var formatted = timestamp18 + " " + this._namespace + " deprecated " + msg;
       if (this._traced) {
         for (var i = 0; i < stack.length; i++) {
           formatted += "\n    at " + stack[i].toString();
@@ -21784,8 +21784,8 @@ var require_fresh = __commonJS({
       return true;
     }
     function parseHttpDate(date5) {
-      var timestamp17 = date5 && Date.parse(date5);
-      return typeof timestamp17 === "number" ? timestamp17 : NaN;
+      var timestamp18 = date5 && Date.parse(date5);
+      return typeof timestamp18 === "number" ? timestamp18 : NaN;
     }
     function parseTokenList(str) {
       var end = 0;
@@ -22878,8 +22878,8 @@ var require_send = __commonJS({
       return list;
     }
     function parseHttpDate(date5) {
-      var timestamp17 = date5 && Date.parse(date5);
-      return typeof timestamp17 === "number" ? timestamp17 : NaN;
+      var timestamp18 = date5 && Date.parse(date5);
+      return typeof timestamp18 === "number" ? timestamp18 : NaN;
     }
     function parseTokenList(str) {
       var end = 0;
@@ -35563,11 +35563,11 @@ function numberColumnToSchema(column, z, coerce2) {
   let unsigned = column.getSQLType().includes("unsigned");
   let min;
   let max;
-  let integer18 = false;
+  let integer19 = false;
   if (isColumnType(column, ["MySqlTinyInt", "SingleStoreTinyInt"])) {
     min = unsigned ? 0 : CONSTANTS.INT8_MIN;
     max = unsigned ? CONSTANTS.INT8_UNSIGNED_MAX : CONSTANTS.INT8_MAX;
-    integer18 = true;
+    integer19 = true;
   } else if (isColumnType(column, [
     "PgSmallInt",
     "PgSmallSerial",
@@ -35576,7 +35576,7 @@ function numberColumnToSchema(column, z, coerce2) {
   ])) {
     min = unsigned ? 0 : CONSTANTS.INT16_MIN;
     max = unsigned ? CONSTANTS.INT16_UNSIGNED_MAX : CONSTANTS.INT16_MAX;
-    integer18 = true;
+    integer19 = true;
   } else if (isColumnType(column, [
     "PgReal",
     "MySqlFloat",
@@ -35586,7 +35586,7 @@ function numberColumnToSchema(column, z, coerce2) {
   ])) {
     min = unsigned ? 0 : CONSTANTS.INT24_MIN;
     max = unsigned ? CONSTANTS.INT24_UNSIGNED_MAX : CONSTANTS.INT24_MAX;
-    integer18 = isColumnType(column, ["MySqlMediumInt", "SingleStoreMediumInt"]);
+    integer19 = isColumnType(column, ["MySqlMediumInt", "SingleStoreMediumInt"]);
   } else if (isColumnType(column, [
     "PgInteger",
     "PgSerial",
@@ -35595,7 +35595,7 @@ function numberColumnToSchema(column, z, coerce2) {
   ])) {
     min = unsigned ? 0 : CONSTANTS.INT32_MIN;
     max = unsigned ? CONSTANTS.INT32_UNSIGNED_MAX : CONSTANTS.INT32_MAX;
-    integer18 = true;
+    integer19 = true;
   } else if (isColumnType(column, [
     "PgDoublePrecision",
     "MySqlReal",
@@ -35618,16 +35618,16 @@ function numberColumnToSchema(column, z, coerce2) {
     unsigned = unsigned || isColumnType(column, ["MySqlSerial", "SingleStoreSerial"]);
     min = unsigned ? 0 : Number.MIN_SAFE_INTEGER;
     max = Number.MAX_SAFE_INTEGER;
-    integer18 = true;
+    integer19 = true;
   } else if (isColumnType(column, ["MySqlYear", "SingleStoreYear"])) {
     min = 1901;
     max = 2155;
-    integer18 = true;
+    integer19 = true;
   } else {
     min = Number.MIN_SAFE_INTEGER;
     max = Number.MAX_SAFE_INTEGER;
   }
-  let schema = coerce2 === true || coerce2?.number ? integer18 ? z.coerce.number() : z.coerce.number().int() : integer18 ? z.int() : z.number();
+  let schema = coerce2 === true || coerce2?.number ? integer19 ? z.coerce.number() : z.coerce.number().int() : integer19 ? z.int() : z.number();
   schema = schema.gte(min).lte(max);
   return schema;
 }
@@ -36381,6 +36381,24 @@ var init_team_ops = __esm({
   }
 });
 
+// ../../lib/db/src/schema/stage_matches.ts
+import { pgTable as pgTable17, serial as serial17, integer as integer18, jsonb as jsonb12, timestamp as timestamp17, varchar } from "drizzle-orm/pg-core";
+var stageMatchesTable;
+var init_stage_matches = __esm({
+  "../../lib/db/src/schema/stage_matches.ts"() {
+    "use strict";
+    stageMatchesTable = pgTable17("stage_matches", {
+      id: serial17("id").primaryKey(),
+      matchId: integer18("match_id").notNull().unique(),
+      hostId: integer18("host_id").notNull(),
+      roomCode: varchar("room_code", { length: 10 }).notNull(),
+      state: jsonb12("state").notNull(),
+      createdAt: timestamp17("created_at").defaultNow().notNull(),
+      updatedAt: timestamp17("updated_at").defaultNow().notNull()
+    });
+  }
+});
+
 // ../../lib/db/src/schema/index.ts
 var schema_exports = {};
 __export(schema_exports, {
@@ -36412,6 +36430,7 @@ __export(schema_exports, {
   sessionsTable: () => sessionsTable,
   shopItemsTable: () => shopItemsTable,
   skillTreesTable: () => skillTreesTable,
+  stageMatchesTable: () => stageMatchesTable,
   storyChoicesTable: () => storyChoicesTable,
   storyNodesTable: () => storyNodesTable,
   tacticalModulesTable: () => tacticalModulesTable,
@@ -36455,6 +36474,7 @@ var init_schema = __esm({
     init_missions();
     init_tactical();
     init_team_ops();
+    init_stage_matches();
   }
 });
 
@@ -36492,6 +36512,7 @@ __export(src_exports, {
   sessionsTable: () => sessionsTable,
   shopItemsTable: () => shopItemsTable,
   skillTreesTable: () => skillTreesTable,
+  stageMatchesTable: () => stageMatchesTable,
   storyChoicesTable: () => storyChoicesTable,
   storyNodesTable: () => storyNodesTable,
   tacticalModulesTable: () => tacticalModulesTable,
@@ -40746,7 +40767,7 @@ var require_pino = __commonJS({
         redact,
         crlf,
         serializers: serializers2,
-        timestamp: timestamp17,
+        timestamp: timestamp18,
         messageKey,
         errorKey,
         nestedKey,
@@ -40796,7 +40817,7 @@ var require_pino = __commonJS({
           chindings = coreChindings(Object.assign({}, base, { name }));
         }
       }
-      const time4 = timestamp17 instanceof Function ? timestamp17 : timestamp17 ? epochTime : nullTime;
+      const time4 = timestamp18 instanceof Function ? timestamp18 : timestamp18 ? epochTime : nullTime;
       const timeSliceIndex = time4().indexOf(":") + 1;
       if (useOnlyCustomLevels && !customLevels) throw Error("customLevels is required if useOnlyCustomLevels is set true");
       if (mixin && typeof mixin !== "function") throw Error(`Unknown mixin type "${typeof mixin}" - expected "function"`);
@@ -69591,7 +69612,57 @@ function generateCode(length = 5) {
   for (let i = 0; i < length; i++) code += chars[Math.floor(Math.random() * chars.length)];
   return code;
 }
-var stageMatches = /* @__PURE__ */ new Map();
+var stageMatchCache = /* @__PURE__ */ new Map();
+var tableEnsured = false;
+async function ensureTable() {
+  if (tableEnsured) return;
+  tableEnsured = true;
+  try {
+    await db.execute(sql14`
+      CREATE TABLE IF NOT EXISTS stage_matches (
+        id SERIAL PRIMARY KEY,
+        match_id INTEGER NOT NULL UNIQUE,
+        host_id INTEGER NOT NULL,
+        room_code VARCHAR(10) NOT NULL,
+        state JSONB NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW() NOT NULL,
+        updated_at TIMESTAMP DEFAULT NOW() NOT NULL
+      )
+    `);
+  } catch (e) {
+    console.warn("[stage] could not ensure table:", e?.message);
+  }
+}
+async function ensureMatch(matchId) {
+  const cached2 = stageMatchCache.get(matchId);
+  if (cached2) return cached2;
+  try {
+    const [row] = await db.select().from(stageMatchesTable).where(eq21(stageMatchesTable.matchId, matchId)).limit(1);
+    if (!row) return void 0;
+    const state = { ...row.state, timer: null };
+    stageMatchCache.set(matchId, state);
+    return state;
+  } catch {
+    return void 0;
+  }
+}
+function cacheMatch(state) {
+  stageMatchCache.set(state.id, state);
+}
+async function persistMatch(state) {
+  await ensureTable();
+  const { timer: __timer, ...rest } = state;
+  try {
+    await db.insert(stageMatchesTable).values({
+      matchId: state.id,
+      hostId: state.hostId,
+      roomCode: state.roomCode,
+      state: rest
+    }).onConflictDoUpdate({ target: stageMatchesTable.matchId, set: { state: rest, updatedAt: /* @__PURE__ */ new Date() } });
+  } catch (e) {
+    console.warn("[stage] persist failed:", e?.message);
+  }
+}
 var DOMAIN_CATEGORIES2 = {
   cyber_systems: ["technology", "security"],
   cognitive_analysis: ["logic", "intelligence"],
@@ -69658,7 +69729,8 @@ router21.post("/stage/create", async (req, res) => {
     totalQuestions: questionCount || 10,
     buzzedOptionId: null
   };
-  stageMatches.set(matchId, stageMatch);
+  cacheMatch(stageMatch);
+  await persistMatch(stageMatch);
   res.json({
     matchId,
     roomCode,
@@ -69671,9 +69743,20 @@ router21.post("/stage/buzzer-connect", async (req, res) => {
     res.status(400).json({ error: "Team code required" });
     return;
   }
-  const match = Array.from(stageMatches.values()).find(
+  let match = Array.from(stageMatchCache.values()).find(
     (m) => m.teams.some((t) => t.code === teamCode.toUpperCase())
   );
+  if (!match) {
+    const rows = await db.select().from(stageMatchesTable).limit(50);
+    for (const row of rows) {
+      const m = { ...row.state, timer: null };
+      if (m.teams.some((t) => t.code === teamCode.toUpperCase())) {
+        match = m;
+        cacheMatch(m);
+        break;
+      }
+    }
+  }
   if (!match) {
     res.status(404).json({ error: "Invalid team code" });
     return;
@@ -69700,7 +69783,7 @@ router21.post("/stage/team-config", async (req, res) => {
     return;
   }
   const { matchId, teamIndex, name, color, emblem } = req.body;
-  const match = stageMatches.get(matchId);
+  const match = await ensureMatch(matchId);
   if (!match) {
     res.status(404).json({ error: "Match not found" });
     return;
@@ -69717,6 +69800,7 @@ router21.post("/stage/team-config", async (req, res) => {
   if (name) team.name = name;
   if (color) team.color = color;
   if (emblem) team.emblem = emblem;
+  await persistMatch(match);
   res.json({ team });
 });
 router21.post("/stage/batch-config", async (req, res) => {
@@ -69726,7 +69810,7 @@ router21.post("/stage/batch-config", async (req, res) => {
     return;
   }
   const { matchId, teams } = req.body;
-  const match = stageMatches.get(matchId);
+  const match = await ensureMatch(matchId);
   if (!match) {
     res.status(404).json({ error: "Match not found" });
     return;
@@ -69743,6 +69827,7 @@ router21.post("/stage/batch-config", async (req, res) => {
     if (t.emblem) team.emblem = t.emblem;
     if (t.tacticalLoadout) team.tacticalLoadout = t.tacticalLoadout;
   }
+  await persistMatch(match);
   res.json({ success: true });
 });
 router21.post("/stage/start", async (req, res) => {
@@ -69752,7 +69837,7 @@ router21.post("/stage/start", async (req, res) => {
     return;
   }
   const { matchId } = req.body;
-  const match = stageMatches.get(matchId);
+  const match = await ensureMatch(matchId);
   if (!match) {
     res.status(404).json({ error: "Match not found" });
     return;
@@ -69782,9 +69867,7 @@ router21.post("/stage/start", async (req, res) => {
       options,
       timeLimit: q.timeLimitSeconds || match.timerSeconds,
       type: q.type,
-      // Include correct option ID for server-side validation
       correctOptionId: options.find((o) => o.id)?.id
-      // Will be set below
     };
   }));
   const fullQs = await Promise.all(questions.map(async (q) => {
@@ -69807,6 +69890,7 @@ router21.post("/stage/start", async (req, res) => {
   match.phase = "intro";
   match.currentDomain = match.domainOrder[0] || "general";
   match.buzzedOptionId = null;
+  await persistMatch(match);
   try {
     const io2 = getIO();
     io2.to(`stage:${matchId}`).emit("stage:match-started", {
@@ -69816,7 +69900,7 @@ router21.post("/stage/start", async (req, res) => {
     });
     if (fullQs.length > 0) {
       setTimeout(() => {
-        if (!stageMatches.has(matchId)) return;
+        if (!stageMatchCache.has(matchId)) return;
         match.phase = "question";
         const q = stripAnswer(fullQs[0]);
         io2.to(`stage:${matchId}`).emit("stage:question", {
@@ -69839,7 +69923,7 @@ function stripAnswer(q) {
 }
 router21.post("/stage/buzz", async (req, res) => {
   const { matchId, teamId } = req.body;
-  const match = stageMatches.get(matchId);
+  const match = await ensureMatch(matchId);
   if (!match) {
     res.status(404).json({ error: "Match not found" });
     return;
@@ -69855,6 +69939,7 @@ router21.post("/stage/buzz", async (req, res) => {
   match.buzzerTeamId = teamId;
   match.phase = "buzzed";
   stopTimer(match);
+  await persistMatch(match);
   try {
     const q = match.questions[match.currentQuestionIndex];
     const qWithoutAnswer = q ? stripAnswer(q) : null;
@@ -69876,7 +69961,7 @@ router21.post("/stage/answer", async (req, res) => {
     return;
   }
   const { matchId, optionId } = req.body;
-  const match = stageMatches.get(matchId);
+  const match = await ensureMatch(matchId);
   if (!match) {
     res.status(404).json({ error: "Match not found" });
     return;
@@ -69908,6 +69993,7 @@ router21.post("/stage/answer", async (req, res) => {
     match.phase = "answered";
     match.wrongAttempts = 0;
     match.buzzedOptionId = optionId;
+    await persistMatch(match);
     try {
       getIO().to(`stage:${matchId}`).emit("stage:answer-result", {
         teamId: team.id,
@@ -69930,6 +70016,7 @@ router21.post("/stage/answer", async (req, res) => {
     match.phase = "rebuzz";
     const rebuzzTime = Math.max(5, Math.floor(match.originalTimerSeconds / 2));
     match.timerSeconds = rebuzzTime;
+    await persistMatch(match);
     try {
       const io2 = getIO();
       io2.to(`stage:${matchId}`).emit("stage:answer-result", {
@@ -69945,16 +70032,20 @@ router21.post("/stage/answer", async (req, res) => {
       });
     } catch {
     }
-    setTimeout(() => {
-      if (!stageMatches.has(matchId)) return;
+    setTimeout(async () => {
+      if (!stageMatchCache.has(matchId)) return;
       if (match.phase === "rebuzz") {
         match.phase = "question";
         match.timerStartedAt = Date.now();
-        match.timer = setTimeout(() => {
-          if (!stageMatches.has(matchId)) return;
+        await persistMatch(match).catch(() => {
+        });
+        match.timer = setTimeout(async () => {
+          if (!stageMatchCache.has(matchId)) return;
           if (match.phase === "question" || match.phase === "rebuzz") {
             match.phase = "answered";
             match.wrongAttempts = 0;
+            await persistMatch(match).catch(() => {
+            });
             try {
               getIO().to(`stage:${matchId}`).emit("stage:timeout", { questionIndex: match.currentQuestionIndex });
             } catch {
@@ -69973,6 +70064,7 @@ router21.post("/stage/answer", async (req, res) => {
   match.phase = "answered";
   match.wrongAttempts = 0;
   match.buzzedOptionId = optionId;
+  await persistMatch(match);
   try {
     getIO().to(`stage:${matchId}`).emit("stage:answer-result", {
       teamId: team.id,
@@ -69993,7 +70085,7 @@ router21.post("/stage/next", async (req, res) => {
     return;
   }
   const { matchId } = req.body;
-  const match = stageMatches.get(matchId);
+  const match = await ensureMatch(matchId);
   if (!match) {
     res.status(404).json({ error: "Match not found" });
     return;
@@ -70010,6 +70102,7 @@ router21.post("/stage/next", async (req, res) => {
   if (match.currentQuestionIndex >= match.questions.length) {
     match.phase = "ended";
     stopTimer(match);
+    await persistMatch(match);
     try {
       getIO().to(`stage:${matchId}`).emit("stage:match-ended", {
         matchId,
@@ -70030,6 +70123,7 @@ router21.post("/stage/next", async (req, res) => {
   }
   const q = match.questions[match.currentQuestionIndex];
   match.phase = "question";
+  await persistMatch(match);
   try {
     const io2 = getIO();
     const qStrip = stripAnswer(q);
@@ -70051,7 +70145,7 @@ router21.post("/stage/skip", async (req, res) => {
     return;
   }
   const { matchId } = req.body;
-  const match = stageMatches.get(matchId);
+  const match = await ensureMatch(matchId);
   if (!match) {
     res.status(404).json({ error: "Match not found" });
     return;
@@ -70062,6 +70156,7 @@ router21.post("/stage/skip", async (req, res) => {
   }
   stopTimer(match);
   match.buzzerTeamId = null;
+  await persistMatch(match);
   try {
     getIO().to(`stage:${matchId}`).emit("stage:question-skipped", { questionIndex: match.currentQuestionIndex });
   } catch {
@@ -70070,7 +70165,7 @@ router21.post("/stage/skip", async (req, res) => {
 });
 router21.get("/stage/:id", async (req, res) => {
   const matchId = parseInt(req.params.id);
-  const match = stageMatches.get(matchId);
+  const match = await ensureMatch(matchId);
   if (!match) {
     res.status(404).json({ error: "Match not found" });
     return;
@@ -70110,10 +70205,12 @@ function startTimer(match, io2) {
   const duration3 = match.timerSeconds * 1e3;
   match.timerStartedAt = Date.now();
   match.timerDuration = match.timerSeconds;
-  match.timer = setTimeout(() => {
-    if (!stageMatches.has(match.id)) return;
+  match.timer = setTimeout(async () => {
+    if (!stageMatchCache.has(match.id)) return;
     if (match.phase === "question") {
       match.phase = "answered";
+      await persistMatch(match).catch(() => {
+      });
       io2.to(`stage:${match.id}`).emit("stage:timeout", { questionIndex: match.currentQuestionIndex });
     }
   }, duration3);
