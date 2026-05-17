@@ -545,7 +545,51 @@ export default function HostControl() {
         </div>
 
         <div className="relative z-10 min-h-screen flex flex-col items-center justify-center p-6 md:p-12">
-          {question && (
+          {step === "ended" ? (
+            <motion.div key="results" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-3xl text-center">
+              <div className="font-mono text-[10px] text-zinc-700 tracking-widest mb-4">OPERATION COMPLETE</div>
+              <div className="font-mono text-4xl font-black text-zinc-100 mb-8">MISSION <span className="text-yellow-400">COMPLETE</span></div>
+
+              {scores.length > 0 && (() => {
+                const sorted = [...scores].sort((a, b) => b.score - a.score);
+                const winner = sorted[0];
+                return (
+                  <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.3, type: "spring" }}
+                    className="inline-block glass-strong border-2 border-yellow-500/50 rounded-2xl px-10 py-6 mb-8">
+                    <div className="font-mono text-4xl mb-2">👑</div>
+                    <div className="font-mono text-xs text-yellow-400 tracking-widest mb-1">WINNER</div>
+                    <div className="font-mono text-3xl font-black text-white" style={{ color: winner.color }}>{winner.name}</div>
+                    <div className="font-mono text-5xl font-black text-yellow-400 mt-2">{winner.score}</div>
+                    <div className="font-mono text-[10px] text-zinc-600 mt-1">{winner.correct}/{winner.total} CORRECT</div>
+                  </motion.div>
+                );
+              })()}
+
+              <div className="max-w-lg mx-auto space-y-2 mb-8">
+                {[...scores].sort((a, b) => b.score - a.score).map((t, i) => (
+                  <motion.div key={t.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 + i * 0.1 }}
+                    className="glass rounded-lg px-5 py-3 flex items-center justify-between border border-zinc-800">
+                    <div className="flex items-center gap-3">
+                      <span className={`font-mono text-sm ${i === 0 ? "text-yellow-400" : i === 1 ? "text-zinc-400" : i === 2 ? "text-amber-700" : "text-zinc-700"}`}>
+                        #{i + 1}
+                      </span>
+                      <span className="font-mono text-sm font-bold" style={{ color: t.color }}>{t.name}</span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className="font-mono text-xs text-zinc-600">{t.correct}/{t.total}</span>
+                      <span className="font-mono text-lg font-black" style={{ color: t.color }}>{t.score}</span>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              <motion.button onClick={() => { setStep("create"); setMatchId(null); setAnswerResult(null); setSelectedOptionId(null); setRebuzzOpen(false); setWrongAttempts(0); }}
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}
+                className="px-8 py-3 font-mono text-sm bg-blue-600/20 text-blue-400 border border-blue-500/40 rounded-lg hover:bg-blue-600/40 transition-all">
+                ◈ PLAY AGAIN ◈
+              </motion.button>
+            </motion.div>
+          ) : question && (
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-5xl">
               <div className="font-mono text-[10px] text-zinc-700 tracking-widest mb-3 text-center">
                 QUESTION {questionIndex + 1}

@@ -69617,9 +69617,11 @@ var stageMatchCache = /* @__PURE__ */ new Map();
 function pool() {
   return getPool();
 }
-async function ensureMatch(matchId) {
-  const cached2 = stageMatchCache.get(matchId);
-  if (cached2) return cached2;
+async function ensureMatch(matchId, force = false) {
+  if (!force) {
+    const cached2 = stageMatchCache.get(matchId);
+    if (cached2) return cached2;
+  }
   try {
     const { rows } = await pool().query(`SELECT state FROM stage_matches WHERE match_id = $1`, [matchId]);
     if (rows.length === 0) return void 0;
@@ -69796,7 +69798,7 @@ router21.post("/stage/team-config", async (req, res) => {
     return;
   }
   const { matchId, teamIndex, name, color, emblem } = req.body;
-  const match = await ensureMatch(matchId);
+  const match = await ensureMatch(matchId, true);
   if (!match) {
     res.status(404).json({ error: "Match not found" });
     return;
@@ -69823,7 +69825,7 @@ router21.post("/stage/batch-config", async (req, res) => {
     return;
   }
   const { matchId, teams } = req.body;
-  const match = await ensureMatch(matchId);
+  const match = await ensureMatch(matchId, true);
   if (!match) {
     res.status(404).json({ error: "Match not found" });
     return;
@@ -69850,7 +69852,7 @@ router21.post("/stage/start", async (req, res) => {
     return;
   }
   const { matchId } = req.body;
-  const match = await ensureMatch(matchId);
+  const match = await ensureMatch(matchId, true);
   if (!match) {
     res.status(404).json({ error: "Match not found" });
     return;
@@ -69914,7 +69916,7 @@ function stripAnswer(q) {
 }
 router21.post("/stage/buzz", async (req, res) => {
   const { matchId, teamId } = req.body;
-  const match = await ensureMatch(matchId);
+  const match = await ensureMatch(matchId, true);
   if (!match) {
     res.status(404).json({ error: "Match not found" });
     return;
@@ -69952,7 +69954,7 @@ router21.post("/stage/answer", async (req, res) => {
     return;
   }
   const { matchId, optionId } = req.body;
-  const match = await ensureMatch(matchId);
+  const match = await ensureMatch(matchId, true);
   if (!match) {
     res.status(404).json({ error: "Match not found" });
     return;
@@ -70076,7 +70078,7 @@ router21.post("/stage/next", async (req, res) => {
     return;
   }
   const { matchId } = req.body;
-  const match = await ensureMatch(matchId);
+  const match = await ensureMatch(matchId, true);
   if (!match) {
     res.status(404).json({ error: "Match not found" });
     return;
@@ -70136,7 +70138,7 @@ router21.post("/stage/skip", async (req, res) => {
     return;
   }
   const { matchId } = req.body;
-  const match = await ensureMatch(matchId);
+  const match = await ensureMatch(matchId, true);
   if (!match) {
     res.status(404).json({ error: "Match not found" });
     return;
@@ -70199,7 +70201,7 @@ router21.get("/stage/:id", async (req, res) => {
 });
 router21.post("/stage/timeout", async (req, res) => {
   const { matchId } = req.body;
-  const match = await ensureMatch(matchId);
+  const match = await ensureMatch(matchId, true);
   if (!match) {
     res.status(404).json({ error: "Match not found" });
     return;

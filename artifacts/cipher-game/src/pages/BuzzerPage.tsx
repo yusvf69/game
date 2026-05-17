@@ -36,6 +36,7 @@ export default function BuzzerPage() {
   const [error, setError] = useState<string | null>(null);
   const [connecting, setConnecting] = useState(false);
   const [answerResult, setAnswerResult] = useState<{ correct: boolean; points: number } | null>(null);
+  const [finalScores, setFinalScores] = useState<{ id: number; name: string; color: string; score: number; correct: number; total: number }[]>([]);
 
   // Poll for match state
   useEffect(() => {
@@ -63,6 +64,9 @@ export default function BuzzerPage() {
         if (d.phase === "ended") {
           setLocked(true);
           setPhase("ended");
+          if (d.teams) {
+            setFinalScores(d.teams.map((t: any) => ({ id: t.id, name: t.name, color: t.color, score: t.score, correct: t.correct, total: t.total })));
+          }
         }
       } catch {}
     };
@@ -138,65 +142,124 @@ export default function BuzzerPage() {
   return (
     <AOSLayout>
       <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="text-center max-w-sm w-full">
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-            <div className="font-mono text-2xl mb-1">{EMBLEM_MAP[teamEmblem] || "◈"}</div>
-            <div className="font-mono text-[10px] text-zinc-700 tracking-widest mb-1">CONNECTED AS</div>
-            <div className="font-mono text-lg font-bold" style={{ color: teamColor }}>{teamName}</div>
-            <div className="font-mono text-[10px] text-zinc-700">CODE: <span className="text-yellow-400 tracking-wider">{teamCode}</span></div>
+        {phase === "ended" && finalScores.length > 0 ? (
+          <motion.div key="results" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center w-full max-w-md">
+            <div className="font-mono text-[10px] text-zinc-700 tracking-widest mb-4">OPERATION COMPLETE</div>
+            <div className="font-mono text-3xl font-black text-zinc-100 mb-6">MISSION <span className="text-yellow-400">COMPLETE</span></div>
+
+            {(() => {
+              const sorted = [...finalScores].sort((a, b) => b.score - a.score);
+              const winner = sorted[0];
+              const myRank = sorted.findIndex(t => t.id === teamId) + 1;
+              const isWinner = winner.id === teamId;
+              return (
+                <>
+                  <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.3, type: "spring" }}
+                    className="inline-block glass-strong border-2 border-yellow-500/50 rounded-2xl px-8 py-5 mb-6">
+                    <div className="font-mono text-3xl mb-1">👑</div>
+                    <div className="font-mono text-[10px] text-yellow-400 tracking-widest mb-1">WINNER</div>
+                    <div className="font-mono text-2xl font-black" style={{ color: winner.color }}>{winner.name}</div>
+                    <div className="font-mono text-4xl font-black text-yellow-400 mt-1">{winner.score}</div>
+                    <div className="font-mono text-[10px] text-zinc-600 mt-1">{winner.correct}/{winner.total} CORRECT</div>
+                  </motion.div>
+
+                  {isWinner && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
+                      className="font-mono text-sm text-green-400 border border-green-500/30 bg-green-500/10 rounded-lg px-4 py-2 mb-6">YOU ARE THE WINNER</motion.div>
+                  )}
+
+                  <div className="space-y-1.5 mb-6">
+                    {sorted.map((t, i) => {
+                      const isMe = t.id === teamId;
+                      return (
+                        <motion.div key={t.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 + i * 0.1 }}
+                          className={`glass rounded-lg px-4 py-2.5 flex items-center justify-between border ${isMe ? "border-blue-500/40 bg-blue-500/5" : "border-zinc-800"}`}>
+                          <div className="flex items-center gap-2">
+                            <span className={`font-mono text-xs ${i === 0 ? "text-yellow-400" : i === 1 ? "text-zinc-400" : i === 2 ? "text-amber-700" : "text-zinc-700"}`}>
+                              #{i + 1}
+                            </span>
+                            <span className="font-mono text-sm font-bold" style={{ color: isMe ? "#60a5fa" : t.color }}>
+                              {t.name}{isMe ? " (YOU)" : ""}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="font-mono text-[10px] text-zinc-600">{t.correct}/{t.total}</span>
+                            <span className="font-mono text-base font-black" style={{ color: t.color }}>{t.score}</span>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }}
+                    className="font-mono text-[10px] text-zinc-700">
+                    YOUR RANK: <span className={`${myRank === 1 ? "text-yellow-400" : "text-zinc-400"} tracking-wider`}>#{myRank}</span>
+                  </motion.div>
+                </>
+              );
+            })()}
           </motion.div>
-
-          <motion.button onClick={handleBuzz} disabled={locked}
-            whileTap={!locked ? { scale: 0.9 } : {}}
-            animate={locked ? {} : { boxShadow: ["0 0 20px rgba(239,68,68,0.3)", "0 0 60px rgba(239,68,68,0.6)", "0 0 20px rgba(239,68,68,0.3)"] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-            className={`w-48 h-48 rounded-full font-mono text-2xl font-black tracking-widest transition-all ${
-              locked ? "bg-zinc-900 text-zinc-700 cursor-not-allowed border-4 border-zinc-800"
-                : buzzed ? "bg-red-600 text-white border-4 border-red-400 cursor-pointer"
-                  : "bg-red-900/30 text-red-400 border-4 border-red-500/50 cursor-pointer hover:bg-red-800/30"
-            }`}>
-            <AnimatePresence mode="wait">
-              {locked ? (
-                <motion.span key="locked" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
-                  className="block text-sm">LOCKED</motion.span>
-              ) : buzzed ? (
-                <motion.span key="buzzed" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
-                  className="block">BUZZED!</motion.span>
-              ) : (
-                <motion.span key="buzz" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
-                  className="block">◈ BUZZ ◈</motion.span>
-              )}
-            </AnimatePresence>
-          </motion.button>
-
-          <motion.div animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 2, repeat: Infinity }}
-            className="mt-6 font-mono text-[10px] text-zinc-700 tracking-widest">
-            {phase === "ended" ? "OPERATION COMPLETE"
-              : locked && buzzed ? "◈ AWAITING VERDICT ◈"
-                : locked ? "◈ ANOTHER TEAM IS ANSWERING ◈"
-                  : phase === "question" || phase === "rebuzz" ? "◈ QUESTION LIVE ◈"
-                    : "◈ STANDBY ◈"}
-          </motion.div>
-
-          {tacticalLoadout.length > 0 && (
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-8">
-              <div className="font-mono text-[10px] text-zinc-700 tracking-widest mb-3">TACTICAL LOADOUT</div>
-              <div className="flex flex-wrap justify-center gap-2">
-                {tacticalLoadout.map(modId => {
-                  const mod = MODULE_INFO[modId];
-                  if (!mod) return null;
-                  return (
-                    <div key={modId} className="px-3 py-2 font-mono text-[10px] tracking-wider rounded-lg border"
-                      style={{ backgroundColor: `${mod.color}15`, borderColor: `${mod.color}40`, color: mod.color }}>
-                      <div>{mod.icon} {mod.label}</div>
-                      <div className="text-[8px] opacity-50 mt-0.5">{mod.desc}</div>
-                    </div>
-                  );
-                })}
-              </div>
+        ) : (
+          <div className="text-center max-w-sm w-full">
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+              <div className="font-mono text-2xl mb-1">{EMBLEM_MAP[teamEmblem] || "◈"}</div>
+              <div className="font-mono text-[10px] text-zinc-700 tracking-widest mb-1">CONNECTED AS</div>
+              <div className="font-mono text-lg font-bold" style={{ color: teamColor }}>{teamName}</div>
+              <div className="font-mono text-[10px] text-zinc-700">CODE: <span className="text-yellow-400 tracking-wider">{teamCode}</span></div>
             </motion.div>
-          )}
-        </div>
+
+            <motion.button onClick={handleBuzz} disabled={locked}
+              whileTap={!locked ? { scale: 0.9 } : {}}
+              animate={locked ? {} : { boxShadow: ["0 0 20px rgba(239,68,68,0.3)", "0 0 60px rgba(239,68,68,0.6)", "0 0 20px rgba(239,68,68,0.3)"] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+              className={`w-48 h-48 rounded-full font-mono text-2xl font-black tracking-widest transition-all ${
+                locked ? "bg-zinc-900 text-zinc-700 cursor-not-allowed border-4 border-zinc-800"
+                  : buzzed ? "bg-red-600 text-white border-4 border-red-400 cursor-pointer"
+                    : "bg-red-900/30 text-red-400 border-4 border-red-500/50 cursor-pointer hover:bg-red-800/30"
+              }`}>
+              <AnimatePresence mode="wait">
+                {locked ? (
+                  <motion.span key="locked" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
+                    className="block text-sm">LOCKED</motion.span>
+                ) : buzzed ? (
+                  <motion.span key="buzzed" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
+                    className="block">BUZZED!</motion.span>
+                ) : (
+                  <motion.span key="buzz" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
+                    className="block">◈ BUZZ ◈</motion.span>
+                )}
+              </AnimatePresence>
+            </motion.button>
+
+            <motion.div animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 2, repeat: Infinity }}
+              className="mt-6 font-mono text-[10px] text-zinc-700 tracking-widest">
+              {phase === "ended" ? "OPERATION COMPLETE"
+                : locked && buzzed ? "◈ AWAITING VERDICT ◈"
+                  : locked ? "◈ ANOTHER TEAM IS ANSWERING ◈"
+                    : phase === "question" || phase === "rebuzz" ? "◈ QUESTION LIVE ◈"
+                      : "◈ STANDBY ◈"}
+            </motion.div>
+
+            {tacticalLoadout.length > 0 && (
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-8">
+                <div className="font-mono text-[10px] text-zinc-700 tracking-widest mb-3">TACTICAL LOADOUT</div>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {tacticalLoadout.map(modId => {
+                    const mod = MODULE_INFO[modId];
+                    if (!mod) return null;
+                    return (
+                      <div key={modId} className="px-3 py-2 font-mono text-[10px] tracking-wider rounded-lg border"
+                        style={{ backgroundColor: `${mod.color}15`, borderColor: `${mod.color}40`, color: mod.color }}>
+                        <div>{mod.icon} {mod.label}</div>
+                        <div className="text-[8px] opacity-50 mt-0.5">{mod.desc}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+          </div>
+        )}
       </div>
     </AOSLayout>
   );

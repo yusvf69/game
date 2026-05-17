@@ -68,9 +68,11 @@ const stageMatchCache = new Map<number, StageMatchState>();
 
 function pool() { return getPool(); }
 
-async function ensureMatch(matchId: number): Promise<StageMatchState | undefined> {
-  const cached = stageMatchCache.get(matchId);
-  if (cached) return cached;
+async function ensureMatch(matchId: number, force = false): Promise<StageMatchState | undefined> {
+  if (!force) {
+    const cached = stageMatchCache.get(matchId);
+    if (cached) return cached;
+  }
   try {
     const { rows } = await pool().query(`SELECT state FROM stage_matches WHERE match_id = $1`, [matchId]);
     if (rows.length === 0) return undefined;
@@ -255,7 +257,7 @@ router.post("/stage/team-config", async (req, res) => {
   if (!user) { res.status(401).json({ error: "Not authenticated" }); return; }
 
   const { matchId, teamIndex, name, color, emblem } = req.body;
-  const match = await ensureMatch(matchId);
+  const match = await ensureMatch(matchId, true);
   if (!match) { res.status(404).json({ error: "Match not found" }); return; }
   if (match.hostId !== user.id) { res.status(403).json({ error: "Only host can configure" }); return; }
 
@@ -276,7 +278,7 @@ router.post("/stage/batch-config", async (req, res) => {
   if (!user) { res.status(401).json({ error: "Not authenticated" }); return; }
 
   const { matchId, teams } = req.body;
-  const match = await ensureMatch(matchId);
+  const match = await ensureMatch(matchId, true);
   if (!match) { res.status(404).json({ error: "Match not found" }); return; }
   if (match.hostId !== user.id) { res.status(403).json({ error: "Only host can configure" }); return; }
 
@@ -299,7 +301,7 @@ router.post("/stage/start", async (req, res) => {
   if (!user) { res.status(401).json({ error: "Not authenticated" }); return; }
 
   const { matchId } = req.body;
-  const match = await ensureMatch(matchId);
+  const match = await ensureMatch(matchId, true);
   if (!match) { res.status(404).json({ error: "Match not found" }); return; }
   if (match.hostId !== user.id) { res.status(403).json({ error: "Only host can start" }); return; }
 
@@ -372,7 +374,7 @@ function stripAnswer(q: any) {
 // POST /stage/buzz — team buzzes (no auth, supports rebuzz)
 router.post("/stage/buzz", async (req, res) => {
   const { matchId, teamId } = req.body;
-  const match = await ensureMatch(matchId);
+  const match = await ensureMatch(matchId, true);
   if (!match) { res.status(404).json({ error: "Match not found" }); return; }
   if (match.phase !== "question" && match.phase !== "rebuzz") { res.status(400).json({ error: "Not accepting buzzes" }); return; }
   if (match.buzzerTeamId !== null) { res.json({ success: false, reason: "already_buzzed" }); return; }
@@ -403,7 +405,7 @@ router.post("/stage/answer", async (req, res) => {
   if (!user) { res.status(401).json({ error: "Not authenticated" }); return; }
 
   const { matchId, optionId } = req.body;
-  const match = await ensureMatch(matchId);
+  const match = await ensureMatch(matchId, true);
   if (!match) { res.status(404).json({ error: "Match not found" }); return; }
   if (match.hostId !== user.id) { res.status(403).json({ error: "Only host can mark answers" }); return; }
   if (match.buzzerTeamId === null) { res.status(400).json({ error: "No team has buzzed" }); return; }
@@ -530,7 +532,7 @@ router.post("/stage/next", async (req, res) => {
   if (!user) { res.status(401).json({ error: "Not authenticated" }); return; }
 
   const { matchId } = req.body;
-  const match = await ensureMatch(matchId);
+  const match = await ensureMatch(matchId, true);
   if (!match) { res.status(404).json({ error: "Match not found" }); return; }
   if (match.hostId !== user.id) { res.status(403).json({ error: "Only host can advance" }); return; }
 
@@ -581,7 +583,7 @@ router.post("/stage/skip", async (req, res) => {
   if (!user) { res.status(401).json({ error: "Not authenticated" }); return; }
 
   const { matchId } = req.body;
-  const match = await ensureMatch(matchId);
+  const match = await ensureMatch(matchId, true);
   if (!match) { res.status(404).json({ error: "Match not found" }); return; }
   if (match.hostId !== user.id) { res.status(403).json({ error: "Only host can skip" }); return; }
 
@@ -637,7 +639,7 @@ router.get("/stage/:id", async (req, res) => {
 // POST /stage/timeout — handle timer expiry from frontend polling
 router.post("/stage/timeout", async (req, res) => {
   const { matchId } = req.body;
-  const match = await ensureMatch(matchId);
+  const match = await ensureMatch(matchId, true);
   if (!match) { res.status(404).json({ error: "Match not found" }); return; }
   if (match.phase === "question") {
     match.phase = "answered";
