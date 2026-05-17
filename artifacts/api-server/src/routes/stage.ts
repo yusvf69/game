@@ -9,6 +9,7 @@ import {
 } from "@workspace/db";
 import { getPool } from "@workspace/db";
 import { eq, sql } from "drizzle-orm";
+import { eventBus } from "@workspace/game-engine";
 
 const router = Router();
 
@@ -379,6 +380,11 @@ router.post("/stage/start", async (req, res) => {
   recordEvent(match, "match_started", null, { totalQuestions: fullQs.length });
   await persistMatch(match);
 
+  eventBus.emitSync("MATCH_STARTED", {
+    matchId: match.id,
+    data: { totalQuestions: fullQs.length, teams: match.teams },
+  });
+
   res.json({ success: true, totalQuestions: fullQs.length });
 });
 
@@ -439,12 +445,26 @@ router.post("/stage/answer", async (req, res) => {
     recordEvent(match, "answer_correct", team.id, { pointsGained, newScore: team.score });
     await persistMatch(match);
 
+    eventBus.emitSync("ANSWER_CORRECT", {
+      matchId: match.id,
+      teamId: team.id,
+      userId: match.hostId,
+      data: { xpAmount: pointsGained, questionIndex: match.currentQuestionIndex },
+    });
+
     res.json({ success: true, correct: true, pointsGained, newScore: team.score });
     return;
   }
 
   // Wrong answer
   team.streak = 0;
+
+  eventBus.emitSync("ANSWER_INCORRECT", {
+    matchId: match.id,
+    teamId: team.id,
+    userId: match.hostId,
+    data: { wrongAttempts: match.wrongAttempts },
+  });
 
   if (match.wrongAttempts === 0) {
     // First wrong → give other teams a chance (rebuzz)
@@ -488,6 +508,13 @@ router.post("/stage/next", async (req, res) => {
   if (match.currentQuestionIndex >= match.questions.length) {
     match.phase = "ended";
     recordEvent(match, "match_ended", null, { reason: "all_questions_answered" });
+
+    const winner = match.teams.reduce((best, t) => !best || t.score > best.score ? t : best, match.teams[0]);
+    eventBus.emitSync("MATCH_ENDED", {
+      matchId: match.id,
+      data: { teams: match.teams, winnerTeamId: winner?.id },
+    });
+
     await persistMatch(match);
     res.json({ finished: true });
     return;

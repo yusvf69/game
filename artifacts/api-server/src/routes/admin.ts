@@ -21,9 +21,21 @@ import {
   skillTreesTable,
   analyticsEventsTable,
   stageMatchesTable,
+  teamOperationsTable,
+  teamMembersTable,
+  teamMatchesTable,
+  teamMatchScoresTable,
 } from "@workspace/db";
 import { authenticate, requirePermission, requireRole } from "../middleware/auth";
 import { eq, sql, desc, and } from "drizzle-orm";
+import { configureOpenAI, generateQuestionsWithAI } from "@workspace/game-engine";
+
+// Configure OpenAI if API key is available
+const OPENAI_KEY = process.env["OPENAI_API_KEY"];
+if (OPENAI_KEY) {
+  configureOpenAI({ apiKey: OPENAI_KEY, model: "gpt-4o-mini" });
+  console.log("[admin] OpenAI configured for question generation");
+}
 
 const router = Router();
 
@@ -286,8 +298,42 @@ router.delete("/admin/questions/:id", requirePermission("manage_questions"), asy
 });
 
 router.post("/admin/questions/generate", requirePermission("manage_questions"), async (req, res) => {
-  const { count, category, difficulty } = req.body;
+  const { count, category, difficulty, useAI } = req.body;
   const sampleCount = Math.min(count || 5, 20);
+
+  if (useAI !== false) {
+    const generated = await generateQuestionsWithAI(sampleCount, category, difficulty);
+    const inserted = [];
+    for (const q of generated) {
+      try {
+        const [question] = await db.insert(questionsTable).values({
+          type: q.type || "multiple_choice",
+          questionText: q.questionText,
+          difficulty: q.difficulty,
+          category: q.category || category || "general",
+          correctAnswer: q.correctAnswer,
+          timeLimitSeconds: q.timeLimitSeconds || 30,
+          explanation: q.explanation,
+        }).returning();
+
+        for (let i = 0; i < q.options.length; i++) {
+          await db.insert(questionOptionsTable).values({
+            questionId: question.id,
+            optionText: q.options[i],
+            isCorrect: i === q.correctIndex ? 1 : 0,
+          });
+        }
+        inserted.push(question.id);
+      } catch (e: any) {
+        console.error("[admin] Failed to insert AI question:", e.message);
+      }
+    }
+    logAdmin(req.user!.id, "ADMIN_AI_GENERATED_QUESTIONS", "question", null, { count: inserted.length, useAI: true });
+    res.json({ success: true, questionsGenerated: inserted.length, method: "ai" });
+    return;
+  }
+
+  // Fallback: pick random existing questions
   const where = [];
   if (category) where.push(sql`category = ${category}`);
   if (difficulty) where.push(sql`difficulty = ${difficulty}`);
@@ -302,6 +348,7 @@ router.post("/admin/questions/generate", requirePermission("manage_questions"), 
     return { ...q, options: opts };
   }));
 
+  logAdmin(req.user!.id, "ADMIN_COPIED_QUESTIONS", "question", null, { count: questionsWithOptions.length });
   res.json({ questions: questionsWithOptions });
 });
 
@@ -693,6 +740,75 @@ router.post("/admin/settings", requirePermission("manage_settings"), async (req,
     [key, JSON.stringify(value)]
   );
   logAdmin(req.user!.id, "ADMIN_UPDATED_SETTINGS", "settings", key, { value });
+  res.json({ success: true });
+});
+
+// ─── Team Management ────────────────────────────────────────────────
+
+router.get("/admin/teams", requirePermission("manage_teams"), async (_req, res) => {
+  const { rows } = await getPool().query(
+    `SELECT t.*, tm.user_id, u.username,
+            (SELECT count(*) FROM team_members WHERE team_id = t.id) as member_count,
+            (SELECT count(*) FROM team_matches WHERE team_id = t.id) as match_count
+     FROM team_operations t
+     LEFT JOIN team_members tm ON tm.team_id = t.id AND tm.role = 'leader'
+     LEFT JOIN users u ON u.id = tm.user_id
+     ORDER BY t.created_at DESC LIMIT 100`
+  );
+  res.json({ teams: rows });
+});
+
+router.get("/admin/teams/:id", requirePermission("manage_teams"), async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { rows } = await getPool().query(`SELECT * FROM team_operations WHERE id = $1`, [id]);
+  if (rows.length === 0) return res.status(404).json({ error: "Team not found" });
+  const members = await getPool().query(
+    `SELECT tm.*, u.username FROM team_members tm JOIN users u ON u.id = tm.user_id WHERE tm.team_id = $1`,
+    [id]
+  );
+  const matches = await getPool().query(
+    `SELECT tm.*, tm2.score FROM team_matches tm
+     LEFT JOIN team_match_scores tm2 ON tm2.match_id = tm.match_id AND tm2.team_id = $1
+     WHERE tm.team_id = $1 ORDER BY tm.created_at DESC LIMIT 10`,
+    [id]
+  );
+  res.json({ team: rows[0], members: members.rows, matches: matches.rows });
+});
+
+router.post("/admin/teams/:id/rename", requirePermission("manage_teams"), async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { name } = req.body;
+  if (!name) return res.status(400).json({ error: "Name required" });
+  await getPool().query(`UPDATE team_operations SET name = $1 WHERE id = $2`, [name, id]);
+  logAdmin(req.user!.id, "ADMIN_RENAMED_TEAM", "team", String(id), { name });
+  res.json({ success: true });
+});
+
+router.post("/admin/teams/:id/transfer", requirePermission("manage_teams"), async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { newLeaderUserId } = req.body;
+  if (!newLeaderUserId) return res.status(400).json({ error: "newLeaderUserId required" });
+  // Demote current leader
+  await getPool().query(
+    `UPDATE team_members SET role = 'member' WHERE team_id = $1 AND role = 'leader'`,
+    [id]
+  );
+  // Promote new leader
+  await getPool().query(
+    `UPDATE team_members SET role = 'leader' WHERE team_id = $1 AND user_id = $2`,
+    [id, newLeaderUserId]
+  );
+  logAdmin(req.user!.id, "ADMIN_TRANSFERRED_TEAM", "team", String(id), { newLeaderUserId });
+  res.json({ success: true });
+});
+
+router.delete("/admin/teams/:id", requirePermission("manage_teams"), async (req, res) => {
+  const id = parseInt(req.params.id);
+  await getPool().query(`DELETE FROM team_members WHERE team_id = $1`, [id]);
+  await getPool().query(`DELETE FROM team_match_scores WHERE team_id = $1`, [id]);
+  await getPool().query(`DELETE FROM team_matches WHERE team_id = $1`, [id]);
+  await getPool().query(`DELETE FROM team_operations WHERE id = $1`, [id]);
+  logAdmin(req.user!.id, "ADMIN_DELETED_TEAM", "team", String(id));
   res.json({ success: true });
 });
 

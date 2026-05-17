@@ -40949,21 +40949,343 @@ var require_pino = __commonJS({
   }
 });
 
+// ../../lib/game-engine/dist/events.js
+var EventBus, eventBus;
+var init_events = __esm({
+  "../../lib/game-engine/dist/events.js"() {
+    "use strict";
+    init_src();
+    init_src();
+    EventBus = class {
+      listeners = /* @__PURE__ */ new Map();
+      on(type, listener) {
+        const list = this.listeners.get(type) || [];
+        list.push(listener);
+        this.listeners.set(type, list);
+      }
+      off(type, listener) {
+        const list = this.listeners.get(type) || [];
+        this.listeners.set(type, list.filter((l) => l !== listener));
+      }
+      async emit(type, event) {
+        const fullEvent = {
+          type,
+          timestamp: Date.now(),
+          ...event
+        };
+        const list = this.listeners.get(type) || [];
+        const globalList = this.listeners.get("*") || [];
+        for (const listener of [...list, ...globalList]) {
+          try {
+            await Promise.resolve(listener(fullEvent));
+          } catch (e) {
+            console.error(`[events] Listener error for ${type}:`, e);
+          }
+        }
+      }
+      emitSync(type, event) {
+        this.emit(type, event).catch(() => {
+        });
+      }
+    };
+    eventBus = new EventBus();
+    eventBus.on("*", async (event) => {
+      try {
+        await db.insert(analyticsEventsTable).values({
+          eventType: event.type,
+          userId: event.userId || null,
+          payload: {
+            matchId: event.matchId,
+            teamId: event.teamId,
+            data: event.data
+          }
+        }).catch(() => {
+        });
+      } catch {
+      }
+    });
+    eventBus.on("ANSWER_CORRECT", async (event) => {
+      if (!event.userId || !event.data)
+        return;
+      const { xpAmount, questionDifficulty } = event.data;
+      if (!xpAmount)
+        return;
+      try {
+        await db.insert(xpLogTable).values({
+          userId: event.userId,
+          action: "correct_answer",
+          amount: xpAmount
+        });
+        await getPool().query(`UPDATE user_stats
+       SET xp = xp + $1, level = GREATEST(1, floor((xp + $1) / 500) + 1)
+       WHERE user_id = $2`, [xpAmount, event.userId]);
+      } catch {
+      }
+    });
+    eventBus.on("ANSWER_INCORRECT", async (event) => {
+      if (!event.userId)
+        return;
+      try {
+        await getPool().query(`UPDATE user_stats SET streak = 0 WHERE user_id = $1`, [event.userId]);
+      } catch {
+      }
+    });
+    eventBus.on("MATCH_ENDED", async (event) => {
+      if (!event.matchId)
+        return;
+      const data = event.data;
+      if (!data?.teams)
+        return;
+      for (const team of data.teams) {
+        if (!team.userId)
+          continue;
+        try {
+          const isWinner = team.id === data.winnerTeamId;
+          const xpReward = isWinner ? 50 : 10;
+          await getPool().query(`UPDATE user_stats
+         SET total_games = total_games + 1,
+             wins = wins + $1,
+             losses = losses + $2,
+             xp = xp + $3
+         WHERE user_id = $4`, [isWinner ? 1 : 0, isWinner ? 0 : 1, xpReward, team.userId]);
+        } catch {
+        }
+      }
+    });
+  }
+});
+
+// ../../lib/game-engine/dist/scoring.js
+var init_scoring = __esm({
+  "../../lib/game-engine/dist/scoring.js"() {
+    "use strict";
+  }
+});
+
+// ../../lib/game-engine/dist/stage.js
+import { eq as eq20, sql as sql13 } from "drizzle-orm";
+var init_stage = __esm({
+  "../../lib/game-engine/dist/stage.js"() {
+    "use strict";
+    init_src();
+    init_src();
+    init_events();
+    init_scoring();
+  }
+});
+
+// ../../lib/game-engine/dist/validation.js
+import { eq as eq21, and as and9 } from "drizzle-orm";
+var init_validation = __esm({
+  "../../lib/game-engine/dist/validation.js"() {
+    "use strict";
+    init_src();
+    init_src();
+    init_events();
+  }
+});
+
+// ../../lib/game-engine/dist/ai.js
+function pickRandom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+function generateAITemplateQuestion(category, difficulty) {
+  let pool2 = QUESTION_TEMPLATES;
+  if (category) {
+    const filtered = pool2.filter((q) => q.category === category);
+    if (filtered.length > 0)
+      pool2 = filtered;
+  }
+  if (difficulty) {
+    const filtered = pool2.filter((q) => q.difficulty === difficulty);
+    if (filtered.length > 0)
+      pool2 = filtered;
+    else {
+      const close = pool2.sort((a, b) => Math.abs(a.difficulty - difficulty) - Math.abs(b.difficulty - difficulty));
+      pool2 = [close[0]];
+    }
+  }
+  const template = pickRandom(pool2);
+  const correctIndex = template.options.indexOf(template.correctAnswer);
+  return {
+    questionText: template.text,
+    options: template.options,
+    correctIndex: correctIndex >= 0 ? correctIndex : 0,
+    explanation: template.explanation,
+    category: template.category,
+    difficulty: template.difficulty
+  };
+}
+function configureOpenAI(config2) {
+  openAIConfig = config2;
+}
+async function callOpenAI(prompt) {
+  if (!openAIConfig.apiKey)
+    return null;
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${openAIConfig.apiKey}`
+      },
+      body: JSON.stringify({
+        model: openAIConfig.model || "gpt-4o-mini",
+        messages: [
+          { role: "system", content: "You are a trivia question generator for a spy/agent themed game called World-Weaver. Generate questions in JSON format." },
+          { role: "user", content: prompt }
+        ],
+        temperature: 0.8,
+        max_tokens: 800
+      })
+    });
+    if (!response.ok)
+      return null;
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content || null;
+  } catch {
+    return null;
+  }
+}
+async function generateQuestionsWithAI(count = 5, category, difficulty) {
+  if (!openAIConfig.apiKey) {
+    return Array.from({ length: count }, () => {
+      const tpl = generateAITemplateQuestion(category, difficulty);
+      return {
+        questionText: tpl.questionText,
+        type: "multiple_choice",
+        difficulty: tpl.difficulty,
+        category: tpl.category,
+        correctAnswer: tpl.options[tpl.correctIndex],
+        timeLimitSeconds: 30,
+        explanation: tpl.explanation,
+        options: tpl.options,
+        correctIndex: tpl.correctIndex
+      };
+    });
+  }
+  const prompt = `Generate ${count} multiple-choice trivia questions${category ? ` in category "${category}"` : ""}${difficulty ? ` at difficulty level ${difficulty}/10` : ""} for a spy/agent themed game.
+
+Return ONLY valid JSON array:
+[
+  {
+    "questionText": "The question text",
+    "category": "technology|security|history|logic|intelligence",
+    "difficulty": <1-10>,
+    "options": ["option1", "option2", "option3", "option4"],
+    "correctIndex": <0-3>,
+    "explanation": "Brief explanation of the correct answer",
+    "timeLimitSeconds": 30
+  }
+]`;
+  const result = await callOpenAI(prompt);
+  if (!result) {
+    return generateQuestionsWithAI(count, category, difficulty);
+  }
+  try {
+    const parsed = JSON.parse(result);
+    if (Array.isArray(parsed)) {
+      return parsed.slice(0, count).map((q) => ({
+        questionText: q.questionText,
+        type: "multiple_choice",
+        difficulty: q.difficulty || difficulty || 3,
+        category: q.category || category || "general",
+        correctAnswer: q.options?.[q.correctIndex] || "",
+        timeLimitSeconds: q.timeLimitSeconds || 30,
+        explanation: q.explanation || "",
+        options: q.options || [],
+        correctIndex: q.correctIndex || 0
+      }));
+    }
+  } catch {
+  }
+  return generateQuestionsWithAI(count, category, difficulty);
+}
+var QUESTION_TEMPLATES, openAIConfig;
+var init_ai = __esm({
+  "../../lib/game-engine/dist/ai.js"() {
+    "use strict";
+    QUESTION_TEMPLATES = [
+      {
+        category: "technology",
+        difficulty: 4,
+        text: "Which data structure uses LIFO (Last In, First Out) principle?",
+        correctAnswer: "Stack",
+        options: ["Queue", "Stack", "Tree", "Graph"],
+        explanation: "A stack follows LIFO \u2014 the last element added is the first removed."
+      },
+      {
+        category: "technology",
+        difficulty: 6,
+        text: "What is the primary advantage of using a NoSQL database over a relational database?",
+        correctAnswer: "Flexible schema for unstructured data",
+        options: ["ACID compliance", "Flexible schema for unstructured data", "Standardized query language", "Built-in referential integrity"],
+        explanation: "NoSQL databases allow flexible schemas, making them ideal for unstructured or rapidly changing data."
+      },
+      {
+        category: "security",
+        difficulty: 5,
+        text: "What type of attack involves injecting malicious SQL statements into an entry field?",
+        correctAnswer: "SQL Injection",
+        options: ["Cross-Site Scripting", "Man-in-the-Middle", "SQL Injection", "Denial of Service"],
+        explanation: "SQL Injection occurs when user input is improperly sanitized and interpreted as SQL code."
+      },
+      {
+        category: "logic",
+        difficulty: 3,
+        text: "If all A are B, and all B are C, what can we conclude?",
+        correctAnswer: "All A are C",
+        options: ["All C are A", "All A are C", "Some B are not A", "No conclusion possible"],
+        explanation: "This is the transitive property: if A \u2286 B and B \u2286 C, then A \u2286 C."
+      },
+      {
+        category: "intelligence",
+        difficulty: 4,
+        text: "What does HUMINT stand for in intelligence gathering?",
+        correctAnswer: "Human Intelligence",
+        options: ["Human Intelligence", "Humane Intelligence", "Humble Intelligence", "Hidden Intelligence"],
+        explanation: "HUMINT is intelligence gathered from human sources."
+      },
+      {
+        category: "history",
+        difficulty: 5,
+        text: "The Zimmermann Telegram was a key factor in which country's entry into World War I?",
+        correctAnswer: "United States",
+        options: ["France", "United Kingdom", "United States", "Russia"],
+        explanation: "The Zimmermann Telegram was a secret diplomatic communication that helped bring the US into WWI."
+      }
+    ];
+    openAIConfig = {};
+  }
+});
+
+// ../../lib/game-engine/dist/index.js
+var init_dist = __esm({
+  "../../lib/game-engine/dist/index.js"() {
+    "use strict";
+    init_events();
+    init_stage();
+    init_scoring();
+    init_validation();
+    init_ai();
+  }
+});
+
 // src/routes/stage.ts
 var stage_exports = {};
 __export(stage_exports, {
-  cacheMatch: () => cacheMatch,
+  cacheMatch: () => cacheMatch2,
   default: () => stage_default,
-  getStageMatch: () => getStageMatch,
-  persistMatch: () => persistMatch
+  getStageMatch: () => getStageMatch2,
+  persistMatch: () => persistMatch2
 });
-import { eq as eq20, sql as sql13 } from "drizzle-orm";
-async function getUserFromToken18(token) {
+import { eq as eq22, sql as sql14 } from "drizzle-orm";
+async function getUserFromToken19(token) {
   if (!token) return null;
   const bearerToken = token.replace("Bearer ", "");
-  const [session] = await db.select().from(sessionsTable).where(eq20(sessionsTable.token, bearerToken)).limit(1);
+  const [session] = await db.select().from(sessionsTable).where(eq22(sessionsTable.token, bearerToken)).limit(1);
   if (!session || session.expiresAt < /* @__PURE__ */ new Date()) return null;
-  const [user] = await db.select().from(usersTable).where(eq20(usersTable.id, session.userId)).limit(1);
+  const [user] = await db.select().from(usersTable).where(eq22(usersTable.id, session.userId)).limit(1);
   return user || null;
 }
 function generateCode(length = 5) {
@@ -40975,7 +41297,7 @@ function generateCode(length = 5) {
 function pool() {
   return getPool();
 }
-async function ensureMatch(matchId, force = false) {
+async function ensureMatch2(matchId, force = false) {
   if (!force) {
     const cached2 = stageMatchCache.get(matchId);
     if (cached2) return cached2;
@@ -40991,7 +41313,7 @@ async function ensureMatch(matchId, force = false) {
     return void 0;
   }
 }
-function cacheMatch(state) {
+function cacheMatch2(state) {
   stageMatchCache.set(state.id, state);
 }
 function recordEvent(state, type, teamId, data) {
@@ -41002,7 +41324,7 @@ function recordEvent(state, type, teamId, data) {
     timestamp: Date.now()
   });
 }
-async function persistMatch(state) {
+async function persistMatch2(state) {
   const insert = () => pool().query(
     `INSERT INTO stage_matches (match_id, host_id, room_code, state) VALUES ($1, $2, $3, $4)
      ON CONFLICT (match_id) DO UPDATE SET state = $4, updated_at = NOW()`,
@@ -41043,25 +41365,26 @@ async function persistMatch(state) {
     }
   }
 }
-async function getStageMatch(matchId) {
-  return ensureMatch(matchId);
+async function getStageMatch2(matchId) {
+  return ensureMatch2(matchId);
 }
 function stripAnswer(q) {
   if (!q) return q;
   const { correctOptionId, ...rest } = q;
   return rest;
 }
-var import_express21, router21, stageMatchCache, DOMAIN_CATEGORIES2, TEAM_COLORS, TEAM_EMBLEMS, stage_default;
-var init_stage = __esm({
+var import_express21, router21, stageMatchCache, DOMAIN_CATEGORIES3, TEAM_COLORS, TEAM_EMBLEMS, stage_default;
+var init_stage2 = __esm({
   "src/routes/stage.ts"() {
     "use strict";
     import_express21 = __toESM(require_express2(), 1);
     init_src();
     init_src();
     init_src();
+    init_dist();
     router21 = (0, import_express21.Router)();
     stageMatchCache = /* @__PURE__ */ new Map();
-    DOMAIN_CATEGORIES2 = {
+    DOMAIN_CATEGORIES3 = {
       cyber_systems: ["technology", "security"],
       cognitive_analysis: ["logic", "intelligence"],
       historical_archives: ["history"],
@@ -41074,7 +41397,7 @@ var init_stage = __esm({
     TEAM_COLORS = ["#3b82f6", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#14b8a6", "#f97316"];
     TEAM_EMBLEMS = ["raven", "wolf", "phoenix", "viper", "titan", "shadow", "ghost", "cipher"];
     router21.post("/stage/create", async (req, res) => {
-      const user = await getUserFromToken18(req.headers.authorization);
+      const user = await getUserFromToken19(req.headers.authorization);
       if (!user) {
         res.status(401).json({ error: "Not authenticated" });
         return;
@@ -41128,8 +41451,8 @@ var init_stage = __esm({
         log: []
       };
       recordEvent(stageMatch, "match_created", null, { teamCount: teams.length, domains, difficulty });
-      cacheMatch(stageMatch);
-      await persistMatch(stageMatch);
+      cacheMatch2(stageMatch);
+      await persistMatch2(stageMatch);
       res.json({
         matchId,
         roomCode,
@@ -41151,7 +41474,7 @@ var init_stage = __esm({
           const m = { ...row.state, timer: null };
           if (m.teams.some((t) => t.code === teamCode.toUpperCase())) {
             match = m;
-            cacheMatch(m);
+            cacheMatch2(m);
             break;
           }
         }
@@ -41172,13 +41495,13 @@ var init_stage = __esm({
       res.json({ matchId: match.id, teamId: team.id, teamName: team.name, teamColor: team.color, teamEmblem: team.emblem, roomCode: match.roomCode, tacticalLoadout: team.tacticalLoadout });
     });
     router21.post("/stage/team-config", async (req, res) => {
-      const user = await getUserFromToken18(req.headers.authorization);
+      const user = await getUserFromToken19(req.headers.authorization);
       if (!user) {
         res.status(401).json({ error: "Not authenticated" });
         return;
       }
       const { matchId, teamIndex, name, color, emblem } = req.body;
-      const match = await ensureMatch(matchId, true);
+      const match = await ensureMatch2(matchId, true);
       if (!match) {
         res.status(404).json({ error: "Match not found" });
         return;
@@ -41196,17 +41519,17 @@ var init_stage = __esm({
       if (color) team.color = color;
       if (emblem) team.emblem = emblem;
       recordEvent(match, "team_configured", team.id, { name, color, emblem });
-      await persistMatch(match);
+      await persistMatch2(match);
       res.json({ team });
     });
     router21.post("/stage/batch-config", async (req, res) => {
-      const user = await getUserFromToken18(req.headers.authorization);
+      const user = await getUserFromToken19(req.headers.authorization);
       if (!user) {
         res.status(401).json({ error: "Not authenticated" });
         return;
       }
       const { matchId, teams } = req.body;
-      const match = await ensureMatch(matchId, true);
+      const match = await ensureMatch2(matchId, true);
       if (!match) {
         res.status(404).json({ error: "Match not found" });
         return;
@@ -41224,17 +41547,17 @@ var init_stage = __esm({
         if (t.tacticalLoadout) team.tacticalLoadout = t.tacticalLoadout;
         recordEvent(match, "team_configured", team.id, { name: team.name, color: team.color, emblem: team.emblem });
       }
-      await persistMatch(match);
+      await persistMatch2(match);
       res.json({ success: true });
     });
     router21.post("/stage/start", async (req, res) => {
-      const user = await getUserFromToken18(req.headers.authorization);
+      const user = await getUserFromToken19(req.headers.authorization);
       if (!user) {
         res.status(401).json({ error: "Not authenticated" });
         return;
       }
       const { matchId } = req.body;
-      const match = await ensureMatch(matchId, true);
+      const match = await ensureMatch2(matchId, true);
       if (!match) {
         res.status(404).json({ error: "Match not found" });
         return;
@@ -41250,12 +41573,12 @@ var init_stage = __esm({
       }
       const selectedCategories = [];
       for (const d of match.domains) {
-        const cats = DOMAIN_CATEGORIES2[d];
+        const cats = DOMAIN_CATEGORIES3[d];
         if (cats) selectedCategories.push(...cats);
       }
-      const questions = await db.select().from(questionsTable).where(selectedCategories.length > 0 ? sql13`${questionsTable.category} IN (${sql13.join(selectedCategories.map((c) => sql13`${c}`), sql13`, `)})` : void 0).orderBy(sql13`RANDOM()`).limit(match.totalQuestions);
+      const questions = await db.select().from(questionsTable).where(selectedCategories.length > 0 ? sql14`${questionsTable.category} IN (${sql14.join(selectedCategories.map((c) => sql14`${c}`), sql14`, `)})` : void 0).orderBy(sql14`RANDOM()`).limit(match.totalQuestions);
       const qs = await Promise.all(questions.map(async (q) => {
-        const options = await db.select({ id: questionOptionsTable.id, text: questionOptionsTable.optionText }).from(questionOptionsTable).where(eq20(questionOptionsTable.questionId, q.id));
+        const options = await db.select({ id: questionOptionsTable.id, text: questionOptionsTable.optionText }).from(questionOptionsTable).where(eq22(questionOptionsTable.questionId, q.id));
         return {
           id: q.id,
           questionText: q.questionText,
@@ -41268,7 +41591,7 @@ var init_stage = __esm({
         };
       }));
       const fullQs = await Promise.all(questions.map(async (q) => {
-        const options = await db.select({ id: questionOptionsTable.id, text: questionOptionsTable.optionText, isCorrect: questionOptionsTable.isCorrect }).from(questionOptionsTable).where(eq20(questionOptionsTable.questionId, q.id));
+        const options = await db.select({ id: questionOptionsTable.id, text: questionOptionsTable.optionText, isCorrect: questionOptionsTable.isCorrect }).from(questionOptionsTable).where(eq22(questionOptionsTable.questionId, q.id));
         const correctOpt = options.find((o) => o.isCorrect === 1);
         return {
           id: q.id,
@@ -41289,12 +41612,16 @@ var init_stage = __esm({
       match.currentDomain = match.domainOrder[0] || "general";
       match.buzzedOptionId = null;
       recordEvent(match, "match_started", null, { totalQuestions: fullQs.length });
-      await persistMatch(match);
+      await persistMatch2(match);
+      eventBus.emitSync("MATCH_STARTED", {
+        matchId: match.id,
+        data: { totalQuestions: fullQs.length, teams: match.teams }
+      });
       res.json({ success: true, totalQuestions: fullQs.length });
     });
     router21.post("/stage/buzz", async (req, res) => {
       const { matchId, teamId } = req.body;
-      const match = await ensureMatch(matchId, true);
+      const match = await ensureMatch2(matchId, true);
       if (!match) {
         res.status(404).json({ error: "Match not found" });
         return;
@@ -41310,17 +41637,17 @@ var init_stage = __esm({
       match.buzzerTeamId = teamId;
       match.phase = "buzzed";
       recordEvent(match, "buzzer_pressed", teamId);
-      await persistMatch(match);
+      await persistMatch2(match);
       res.json({ success: true, teamId });
     });
     router21.post("/stage/answer", async (req, res) => {
-      const user = await getUserFromToken18(req.headers.authorization);
+      const user = await getUserFromToken19(req.headers.authorization);
       if (!user) {
         res.status(401).json({ error: "Not authenticated" });
         return;
       }
       const { matchId, optionId } = req.body;
-      const match = await ensureMatch(matchId, true);
+      const match = await ensureMatch2(matchId, true);
       if (!match) {
         res.status(404).json({ error: "Match not found" });
         return;
@@ -41353,18 +41680,30 @@ var init_stage = __esm({
         match.wrongAttempts = 0;
         match.buzzedOptionId = optionId;
         recordEvent(match, "answer_correct", team.id, { pointsGained, newScore: team.score });
-        await persistMatch(match);
+        await persistMatch2(match);
+        eventBus.emitSync("ANSWER_CORRECT", {
+          matchId: match.id,
+          teamId: team.id,
+          userId: match.hostId,
+          data: { xpAmount: pointsGained, questionIndex: match.currentQuestionIndex }
+        });
         res.json({ success: true, correct: true, pointsGained, newScore: team.score });
         return;
       }
       team.streak = 0;
+      eventBus.emitSync("ANSWER_INCORRECT", {
+        matchId: match.id,
+        teamId: team.id,
+        userId: match.hostId,
+        data: { wrongAttempts: match.wrongAttempts }
+      });
       if (match.wrongAttempts === 0) {
         match.wrongAttempts = 1;
         match.buzzerTeamId = null;
         match.buzzedOptionId = optionId;
         match.phase = "rebuzz";
         recordEvent(match, "answer_incorrect", team.id, { rebuzz: true });
-        await persistMatch(match);
+        await persistMatch2(match);
         res.json({ success: true, correct: false, pointsGained: 0, rebuzz: true });
         return;
       }
@@ -41372,17 +41711,17 @@ var init_stage = __esm({
       match.wrongAttempts = 0;
       match.buzzedOptionId = optionId;
       recordEvent(match, "answer_incorrect", team.id, { final: true });
-      await persistMatch(match);
+      await persistMatch2(match);
       res.json({ success: true, correct: false, pointsGained: 0, newScore: team.score });
     });
     router21.post("/stage/next", async (req, res) => {
-      const user = await getUserFromToken18(req.headers.authorization);
+      const user = await getUserFromToken19(req.headers.authorization);
       if (!user) {
         res.status(401).json({ error: "Not authenticated" });
         return;
       }
       const { matchId } = req.body;
-      const match = await ensureMatch(matchId, true);
+      const match = await ensureMatch2(matchId, true);
       if (!match) {
         res.status(404).json({ error: "Match not found" });
         return;
@@ -41399,24 +41738,29 @@ var init_stage = __esm({
       if (match.currentQuestionIndex >= match.questions.length) {
         match.phase = "ended";
         recordEvent(match, "match_ended", null, { reason: "all_questions_answered" });
-        await persistMatch(match);
+        const winner = match.teams.reduce((best, t) => !best || t.score > best.score ? t : best, match.teams[0]);
+        eventBus.emitSync("MATCH_ENDED", {
+          matchId: match.id,
+          data: { teams: match.teams, winnerTeamId: winner?.id }
+        });
+        await persistMatch2(match);
         res.json({ finished: true });
         return;
       }
       match.phase = "question";
       match.timerStartedAt = Date.now();
       recordEvent(match, "next_question", null, { questionIndex: match.currentQuestionIndex });
-      await persistMatch(match);
+      await persistMatch2(match);
       res.json({ success: true, currentQuestion: match.currentQuestionIndex });
     });
     router21.post("/stage/skip", async (req, res) => {
-      const user = await getUserFromToken18(req.headers.authorization);
+      const user = await getUserFromToken19(req.headers.authorization);
       if (!user) {
         res.status(401).json({ error: "Not authenticated" });
         return;
       }
       const { matchId } = req.body;
-      const match = await ensureMatch(matchId, true);
+      const match = await ensureMatch2(matchId, true);
       if (!match) {
         res.status(404).json({ error: "Match not found" });
         return;
@@ -41427,12 +41771,12 @@ var init_stage = __esm({
       }
       match.buzzerTeamId = null;
       recordEvent(match, "question_skipped", null, { questionIndex: match.currentQuestionIndex });
-      await persistMatch(match);
+      await persistMatch2(match);
       res.json({ success: true });
     });
     router21.get("/stage/:id", async (req, res) => {
       const matchId = parseInt(req.params.id);
-      const match = await ensureMatch(matchId);
+      const match = await ensureMatch2(matchId);
       if (!match) {
         res.status(404).json({ error: "Match not found" });
         return;
@@ -41440,7 +41784,7 @@ var init_stage = __esm({
       if (match.phase === "rebuzz" && match.buzzerTeamId === null) {
         match.phase = "question";
         match.timerStartedAt = Date.now();
-        await persistMatch(match).catch(() => {
+        await persistMatch2(match).catch(() => {
         });
       }
       const q = match.questions[match.currentQuestionIndex];
@@ -41475,7 +41819,7 @@ var init_stage = __esm({
     });
     router21.post("/stage/timeout", async (req, res) => {
       const { matchId } = req.body;
-      const match = await ensureMatch(matchId, true);
+      const match = await ensureMatch2(matchId, true);
       if (!match) {
         res.status(404).json({ error: "Match not found" });
         return;
@@ -41483,7 +41827,7 @@ var init_stage = __esm({
       if (match.phase === "question") {
         match.phase = "answered";
         recordEvent(match, "timer_expired", null, { questionIndex: match.currentQuestionIndex });
-        await persistMatch(match).catch(() => {
+        await persistMatch2(match).catch(() => {
         });
       }
       res.json({ success: true });
@@ -41509,7 +41853,7 @@ var init_stage = __esm({
       ];
       let added = 0;
       for (const q of questionData) {
-        const [existing] = await db.select({ id: questionsTable.id }).from(questionsTable).where(sql13`${questionsTable.questionText} = ${q.questionText}`).limit(1);
+        const [existing] = await db.select({ id: questionsTable.id }).from(questionsTable).where(sql14`${questionsTable.questionText} = ${q.questionText}`).limit(1);
         if (existing) continue;
         const [question] = await db.insert(questionsTable).values({
           type: q.type,
@@ -49032,7 +49376,7 @@ router20.get("/team/list", async (req, res) => {
 var teamOps_default = router20;
 
 // src/routes/index.ts
-init_stage();
+init_stage2();
 
 // src/routes/admin.ts
 var import_express22 = __toESM(require_express2(), 1);
@@ -49041,7 +49385,7 @@ init_src();
 
 // src/middleware/auth.ts
 init_src();
-import { eq as eq21 } from "drizzle-orm";
+import { eq as eq23 } from "drizzle-orm";
 async function authenticate(req, _res, next) {
   const token = req.headers.authorization?.replace("Bearer ", "");
   if (!token) {
@@ -49050,13 +49394,13 @@ async function authenticate(req, _res, next) {
     return;
   }
   try {
-    const [session] = await db.select().from(sessionsTable).where(eq21(sessionsTable.token, token)).limit(1);
+    const [session] = await db.select().from(sessionsTable).where(eq23(sessionsTable.token, token)).limit(1);
     if (!session || session.expiresAt < /* @__PURE__ */ new Date()) {
       req.user = void 0;
       next();
       return;
     }
-    const [user] = await db.select().from(usersTable).where(eq21(usersTable.id, session.userId)).limit(1);
+    const [user] = await db.select().from(usersTable).where(eq23(usersTable.id, session.userId)).limit(1);
     if (!user) {
       req.user = void 0;
       next();
@@ -49065,7 +49409,7 @@ async function authenticate(req, _res, next) {
     const role = user.role || "player";
     let permissions = [];
     try {
-      const perms = await db.select({ key: permissionsTable.key }).from(rolePermissionsTable).innerJoin(rolesTable, eq21(rolePermissionsTable.roleId, rolesTable.id)).innerJoin(permissionsTable, eq21(rolePermissionsTable.permissionId, permissionsTable.id)).where(eq21(rolesTable.name, role));
+      const perms = await db.select({ key: permissionsTable.key }).from(rolePermissionsTable).innerJoin(rolesTable, eq23(rolePermissionsTable.roleId, rolesTable.id)).innerJoin(permissionsTable, eq23(rolePermissionsTable.permissionId, permissionsTable.id)).where(eq23(rolesTable.name, role));
       permissions = perms.map((p) => p.key);
     } catch {
     }
@@ -49097,7 +49441,13 @@ function requirePermission(...permissions) {
 }
 
 // src/routes/admin.ts
-import { eq as eq22, sql as sql15, desc as desc8, and as and9 } from "drizzle-orm";
+init_dist();
+import { eq as eq24, sql as sql16, desc as desc8, and as and10 } from "drizzle-orm";
+var OPENAI_KEY = process.env["OPENAI_API_KEY"];
+if (OPENAI_KEY) {
+  configureOpenAI({ apiKey: OPENAI_KEY, model: "gpt-4o-mini" });
+  console.log("[admin] OpenAI configured for question generation");
+}
 var router22 = (0, import_express22.Router)();
 (async () => {
   try {
@@ -49149,17 +49499,17 @@ router22.post("/admin/bootstrap", async (req, res) => {
   }
 });
 router22.get("/admin/dashboard", requirePermission("manage_analytics"), async (_req, res) => {
-  const totalUsers = (await db.select({ count: sql15`count(*)` }).from(usersTable))[0]?.count || 0;
-  const onlineNow = (await db.select({ count: sql15`count(*)` }).from(sessionsTable).where(sql15`expires_at > now()`))[0]?.count || 0;
-  const totalMatches = (await db.select({ count: sql15`count(*)` }).from(stageMatchesTable))[0]?.count || 0;
+  const totalUsers = (await db.select({ count: sql16`count(*)` }).from(usersTable))[0]?.count || 0;
+  const onlineNow = (await db.select({ count: sql16`count(*)` }).from(sessionsTable).where(sql16`expires_at > now()`))[0]?.count || 0;
+  const totalMatches = (await db.select({ count: sql16`count(*)` }).from(stageMatchesTable))[0]?.count || 0;
   let xpToday = 0;
   try {
     const { rows } = await getPool().query(`SELECT coalesce(sum(amount),0) as sum FROM xp_log WHERE created_at > now() - interval '24 hours'`);
     xpToday = Number(rows[0]?.sum || 0);
   } catch {
   }
-  const activeMatches = (await db.select({ count: sql15`count(*)` }).from(stageMatchesTable).where(sql15`state->>'phase' != 'ended'`))[0]?.count || 0;
-  const questionsCount = (await db.select({ count: sql15`count(*)` }).from(questionsTable))[0]?.count || 0;
+  const activeMatches = (await db.select({ count: sql16`count(*)` }).from(stageMatchesTable).where(sql16`state->>'phase' != 'ended'`))[0]?.count || 0;
+  const questionsCount = (await db.select({ count: sql16`count(*)` }).from(questionsTable))[0]?.count || 0;
   res.json({
     stats: { totalUsers, onlineNow, totalMatches, xpToday, activeMatches, questionsCount }
   });
@@ -49247,22 +49597,22 @@ router22.get("/admin/questions", requirePermission("manage_questions"), async (r
   const limit = parseInt(req.query.limit) || 50;
   const offset = (page - 1) * limit;
   const category = req.query.category;
-  const where = category ? sql15`WHERE category = ${category}` : sql15``;
+  const where = category ? sql16`WHERE category = ${category}` : sql16``;
   const total = (await getPool().query(`SELECT count(*) FROM questions ${where}`)).rows[0]?.count || 0;
   const { rows } = await getPool().query(
     `SELECT * FROM questions ${where} ORDER BY id DESC LIMIT $1 OFFSET $2`,
     [limit, offset]
   );
   const questionsWithOptions = await Promise.all(rows.map(async (q) => {
-    const opts = await db.select().from(questionOptionsTable).where(eq22(questionOptionsTable.questionId, q.id));
+    const opts = await db.select().from(questionOptionsTable).where(eq24(questionOptionsTable.questionId, q.id));
     return { ...q, options: opts };
   }));
   res.json({ questions: questionsWithOptions, total, page, limit });
 });
 router22.get("/admin/questions/:id", requirePermission("manage_questions"), async (req, res) => {
-  const [q] = await db.select().from(questionsTable).where(eq22(questionsTable.id, parseInt(req.params.id))).limit(1);
+  const [q] = await db.select().from(questionsTable).where(eq24(questionsTable.id, parseInt(req.params.id))).limit(1);
   if (!q) return res.status(404).json({ error: "Question not found" });
-  const opts = await db.select().from(questionOptionsTable).where(eq22(questionOptionsTable.questionId, q.id));
+  const opts = await db.select().from(questionOptionsTable).where(eq24(questionOptionsTable.questionId, q.id));
   res.json({ ...q, options: opts });
 });
 router22.post("/admin/questions", requirePermission("manage_questions"), async (req, res) => {
@@ -49291,7 +49641,7 @@ router22.post("/admin/questions", requirePermission("manage_questions"), async (
 });
 router22.put("/admin/questions/:id", requirePermission("manage_questions"), async (req, res) => {
   const id = parseInt(req.params.id);
-  const [existing] = await db.select().from(questionsTable).where(eq22(questionsTable.id, id)).limit(1);
+  const [existing] = await db.select().from(questionsTable).where(eq24(questionsTable.id, id)).limit(1);
   if (!existing) return res.status(404).json({ error: "Question not found" });
   const { type, questionText, difficulty, category, correctAnswer, timeLimitSeconds, explanation } = req.body;
   await db.update(questionsTable).set({
@@ -49302,9 +49652,9 @@ router22.put("/admin/questions/:id", requirePermission("manage_questions"), asyn
     ...correctAnswer && { correctAnswer },
     ...timeLimitSeconds && { timeLimitSeconds },
     ...explanation && { explanation }
-  }).where(eq22(questionsTable.id, id));
+  }).where(eq24(questionsTable.id, id));
   if (req.body.options) {
-    await db.delete(questionOptionsTable).where(eq22(questionOptionsTable.questionId, id));
+    await db.delete(questionOptionsTable).where(eq24(questionOptionsTable.questionId, id));
     for (let i = 0; i < req.body.options.length; i++) {
       await db.insert(questionOptionsTable).values({
         questionId: id,
@@ -49318,25 +49668,56 @@ router22.put("/admin/questions/:id", requirePermission("manage_questions"), asyn
 });
 router22.delete("/admin/questions/:id", requirePermission("manage_questions"), async (req, res) => {
   const id = parseInt(req.params.id);
-  await db.delete(questionOptionsTable).where(eq22(questionOptionsTable.questionId, id));
-  await db.delete(questionsTable).where(eq22(questionsTable.id, id));
+  await db.delete(questionOptionsTable).where(eq24(questionOptionsTable.questionId, id));
+  await db.delete(questionsTable).where(eq24(questionsTable.id, id));
   logAdmin(req.user.id, "ADMIN_DELETED_QUESTION", "question", String(id));
   res.json({ success: true });
 });
 router22.post("/admin/questions/generate", requirePermission("manage_questions"), async (req, res) => {
-  const { count, category, difficulty } = req.body;
+  const { count, category, difficulty, useAI } = req.body;
   const sampleCount = Math.min(count || 5, 20);
+  if (useAI !== false) {
+    const generated = await generateQuestionsWithAI(sampleCount, category, difficulty);
+    const inserted = [];
+    for (const q of generated) {
+      try {
+        const [question] = await db.insert(questionsTable).values({
+          type: q.type || "multiple_choice",
+          questionText: q.questionText,
+          difficulty: q.difficulty,
+          category: q.category || category || "general",
+          correctAnswer: q.correctAnswer,
+          timeLimitSeconds: q.timeLimitSeconds || 30,
+          explanation: q.explanation
+        }).returning();
+        for (let i = 0; i < q.options.length; i++) {
+          await db.insert(questionOptionsTable).values({
+            questionId: question.id,
+            optionText: q.options[i],
+            isCorrect: i === q.correctIndex ? 1 : 0
+          });
+        }
+        inserted.push(question.id);
+      } catch (e) {
+        console.error("[admin] Failed to insert AI question:", e.message);
+      }
+    }
+    logAdmin(req.user.id, "ADMIN_AI_GENERATED_QUESTIONS", "question", null, { count: inserted.length, useAI: true });
+    res.json({ success: true, questionsGenerated: inserted.length, method: "ai" });
+    return;
+  }
   const where = [];
-  if (category) where.push(sql15`category = ${category}`);
-  if (difficulty) where.push(sql15`difficulty = ${difficulty}`);
+  if (category) where.push(sql16`category = ${category}`);
+  if (difficulty) where.push(sql16`difficulty = ${difficulty}`);
   const { rows } = await getPool().query(
     `SELECT * FROM questions ${where.length > 0 ? `WHERE ${where.map((w) => w.text).join(" AND ")}` : ""} ORDER BY RANDOM() LIMIT $1`,
     [sampleCount]
   );
   const questionsWithOptions = await Promise.all(rows.map(async (q) => {
-    const opts = await db.select().from(questionOptionsTable).where(eq22(questionOptionsTable.questionId, q.id));
+    const opts = await db.select().from(questionOptionsTable).where(eq24(questionOptionsTable.questionId, q.id));
     return { ...q, options: opts };
   }));
+  logAdmin(req.user.id, "ADMIN_COPIED_QUESTIONS", "question", null, { count: questionsWithOptions.length });
   res.json({ questions: questionsWithOptions });
 });
 router22.get("/admin/users", requirePermission("manage_users"), async (req, res) => {
@@ -49344,28 +49725,28 @@ router22.get("/admin/users", requirePermission("manage_users"), async (req, res)
   const limit = parseInt(req.query.limit) || 50;
   const offset = (page - 1) * limit;
   const search = req.query.search;
-  let where = sql15`1=1`;
-  if (search) where = sql15`(username ILIKE ${"%" + search + "%"} OR email ILIKE ${"%" + search + "%"})`;
-  const [{ count }] = await db.select({ count: sql15`count(*)` }).from(usersTable).where(where);
+  let where = sql16`1=1`;
+  if (search) where = sql16`(username ILIKE ${"%" + search + "%"} OR email ILIKE ${"%" + search + "%"})`;
+  const [{ count }] = await db.select({ count: sql16`count(*)` }).from(usersTable).where(where);
   const users = await db.select().from(usersTable).where(where).orderBy(desc8(usersTable.id)).limit(limit).offset(offset);
   const usersWithStats = await Promise.all(users.map(async (u) => {
-    const [stats] = await db.select().from(userStatsTable).where(eq22(userStatsTable.userId, u.id)).limit(1);
-    const [ban] = await db.select().from(bansTable).where(and9(
-      eq22(bansTable.userId, u.id),
-      sql15`(expires_at IS NULL OR expires_at > now())`
+    const [stats] = await db.select().from(userStatsTable).where(eq24(userStatsTable.userId, u.id)).limit(1);
+    const [ban] = await db.select().from(bansTable).where(and10(
+      eq24(bansTable.userId, u.id),
+      sql16`(expires_at IS NULL OR expires_at > now())`
     )).limit(1);
     return { ...u, stats, banned: !!ban, banReason: ban?.reason, banExpiresAt: ban?.expiresAt };
   }));
   res.json({ users: usersWithStats, total: Number(count), page, limit });
 });
 router22.get("/admin/users/:id", requirePermission("manage_users"), async (req, res) => {
-  const [user] = await db.select().from(usersTable).where(eq22(usersTable.id, parseInt(req.params.id))).limit(1);
+  const [user] = await db.select().from(usersTable).where(eq24(usersTable.id, parseInt(req.params.id))).limit(1);
   if (!user) return res.status(404).json({ error: "User not found" });
-  const [stats] = await db.select().from(userStatsTable).where(eq22(userStatsTable.userId, user.id)).limit(1);
-  const sessions = await db.select().from(sessionsTable).where(eq22(sessionsTable.userId, user.id)).orderBy(desc8(sessionsTable.createdAt)).limit(10);
-  const [ban] = await db.select().from(bansTable).where(and9(
-    eq22(bansTable.userId, user.id),
-    sql15`(expires_at IS NULL OR expires_at > now())`
+  const [stats] = await db.select().from(userStatsTable).where(eq24(userStatsTable.userId, user.id)).limit(1);
+  const sessions = await db.select().from(sessionsTable).where(eq24(sessionsTable.userId, user.id)).orderBy(desc8(sessionsTable.createdAt)).limit(10);
+  const [ban] = await db.select().from(bansTable).where(and10(
+    eq24(bansTable.userId, user.id),
+    sql16`(expires_at IS NULL OR expires_at > now())`
   )).limit(1);
   res.json({ ...user, stats, sessions, ban });
 });
@@ -49378,13 +49759,13 @@ router22.post("/admin/users/:id/ban", requirePermission("manage_users"), async (
     bannedBy: req.user.id,
     expiresAt: expiresInHours ? new Date(Date.now() + expiresInHours * 60 * 60 * 1e3) : void 0
   });
-  await db.delete(sessionsTable).where(eq22(sessionsTable.userId, userId));
+  await db.delete(sessionsTable).where(eq24(sessionsTable.userId, userId));
   logAdmin(req.user.id, "ADMIN_BANNED_USER", "user", String(userId), { reason, expiresInHours });
   res.json({ success: true });
 });
 router22.post("/admin/users/:id/unban", requirePermission("manage_users"), async (req, res) => {
   const userId = parseInt(req.params.id);
-  await db.delete(bansTable).where(eq22(bansTable.userId, userId));
+  await db.delete(bansTable).where(eq24(bansTable.userId, userId));
   logAdmin(req.user.id, "ADMIN_UNBANNED_USER", "user", String(userId));
   res.json({ success: true });
 });
@@ -49392,13 +49773,13 @@ router22.post("/admin/users/:id/role", requirePermission("manage_users"), async 
   const userId = parseInt(req.params.id);
   const { role } = req.body;
   if (!role) return res.status(400).json({ error: "Role required" });
-  await db.update(usersTable).set({ role }).where(eq22(usersTable.id, userId));
+  await db.update(usersTable).set({ role }).where(eq24(usersTable.id, userId));
   logAdmin(req.user.id, "ADMIN_CHANGED_ROLE", "user", String(userId), { role });
   res.json({ success: true });
 });
 router22.post("/admin/users/:id/reset-xp", requirePermission("manage_users"), async (req, res) => {
   const userId = parseInt(req.params.id);
-  await db.update(userStatsTable).set({ xp: 0, level: 1 }).where(eq22(userStatsTable.userId, userId));
+  await db.update(userStatsTable).set({ xp: 0, level: 1 }).where(eq24(userStatsTable.userId, userId));
   logAdmin(req.user.id, "ADMIN_RESET_XP", "user", String(userId));
   res.json({ success: true });
 });
@@ -49407,8 +49788,8 @@ router22.post("/admin/users/:id/give-coins", requirePermission("manage_users"), 
   const { amount } = req.body;
   if (!amount || amount < 0) return res.status(400).json({ error: "Valid amount required" });
   await db.update(userStatsTable).set({
-    coins: sql15`coins + ${amount}`
-  }).where(eq22(userStatsTable.userId, userId));
+    coins: sql16`coins + ${amount}`
+  }).where(eq24(userStatsTable.userId, userId));
   logAdmin(req.user.id, "ADMIN_GAVE_COINS", "user", String(userId), { amount });
   res.json({ success: true });
 });
@@ -49437,20 +49818,20 @@ router22.put("/admin/story/chapters/:id", requirePermission("manage_story"), asy
     ...orderIndex && { orderIndex },
     ...unlockLevel && { unlockLevel },
     ...coverImageUrl && { coverImageUrl }
-  }).where(eq22(chaptersTable.id, id));
+  }).where(eq24(chaptersTable.id, id));
   logAdmin(req.user.id, "ADMIN_EDITED_CHAPTER", "story", String(id));
   res.json({ success: true });
 });
 router22.delete("/admin/story/chapters/:id", requirePermission("manage_story"), async (req, res) => {
   const id = parseInt(req.params.id);
-  await db.delete(chaptersTable).where(eq22(chaptersTable.id, id));
-  await db.delete(storyNodesTable).where(eq22(storyNodesTable.chapterId, id));
+  await db.delete(chaptersTable).where(eq24(chaptersTable.id, id));
+  await db.delete(storyNodesTable).where(eq24(storyNodesTable.chapterId, id));
   logAdmin(req.user.id, "ADMIN_DELETED_CHAPTER", "story", String(id));
   res.json({ success: true });
 });
 router22.get("/admin/story/nodes", requirePermission("manage_story"), async (req, res) => {
   const chapterId = req.query.chapterId ? parseInt(req.query.chapterId) : void 0;
-  const where = chapterId ? eq22(storyNodesTable.chapterId, chapterId) : void 0;
+  const where = chapterId ? eq24(storyNodesTable.chapterId, chapterId) : void 0;
   const nodes = await db.select().from(storyNodesTable).where(where).orderBy(storyNodesTable.orderIndex);
   res.json({ nodes });
 });
@@ -49490,12 +49871,12 @@ router22.put("/admin/shop/items/:id", requirePermission("manage_shop"), async (r
     ...iconUrl && { iconUrl },
     ...isLimited !== void 0 && { isLimited },
     ...availableUntil && { availableUntil }
-  }).where(eq22(shopItemsTable.id, id));
+  }).where(eq24(shopItemsTable.id, id));
   logAdmin(req.user.id, "ADMIN_EDITED_SHOP_ITEM", "shop", String(id));
   res.json({ success: true });
 });
 router22.delete("/admin/shop/items/:id", requirePermission("manage_shop"), async (req, res) => {
-  await db.delete(shopItemsTable).where(eq22(shopItemsTable.id, parseInt(req.params.id)));
+  await db.delete(shopItemsTable).where(eq24(shopItemsTable.id, parseInt(req.params.id)));
   logAdmin(req.user.id, "ADMIN_DELETED_SHOP_ITEM", "shop", req.params.id);
   res.json({ success: true });
 });
@@ -49667,7 +50048,7 @@ router22.post("/admin/seed/defaults", async (req, res) => {
     const [inserted] = await db.insert(rolesTable).values({ name: role.name }).onConflictDoNothing().returning();
     if (!inserted) continue;
     for (const permKey of role.permissions) {
-      const [perm] = await db.select().from(permissionsTable).where(eq22(permissionsTable.key, permKey)).limit(1);
+      const [perm] = await db.select().from(permissionsTable).where(eq24(permissionsTable.key, permKey)).limit(1);
       if (perm) {
         await db.insert(rolePermissionsTable).values({ roleId: inserted.id, permissionId: perm.id }).onConflictDoNothing();
       }
@@ -49697,11 +50078,71 @@ router22.post("/admin/settings", requirePermission("manage_settings"), async (re
   logAdmin(req.user.id, "ADMIN_UPDATED_SETTINGS", "settings", key, { value });
   res.json({ success: true });
 });
+router22.get("/admin/teams", requirePermission("manage_teams"), async (_req, res) => {
+  const { rows } = await getPool().query(
+    `SELECT t.*, tm.user_id, u.username,
+            (SELECT count(*) FROM team_members WHERE team_id = t.id) as member_count,
+            (SELECT count(*) FROM team_matches WHERE team_id = t.id) as match_count
+     FROM team_operations t
+     LEFT JOIN team_members tm ON tm.team_id = t.id AND tm.role = 'leader'
+     LEFT JOIN users u ON u.id = tm.user_id
+     ORDER BY t.created_at DESC LIMIT 100`
+  );
+  res.json({ teams: rows });
+});
+router22.get("/admin/teams/:id", requirePermission("manage_teams"), async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { rows } = await getPool().query(`SELECT * FROM team_operations WHERE id = $1`, [id]);
+  if (rows.length === 0) return res.status(404).json({ error: "Team not found" });
+  const members = await getPool().query(
+    `SELECT tm.*, u.username FROM team_members tm JOIN users u ON u.id = tm.user_id WHERE tm.team_id = $1`,
+    [id]
+  );
+  const matches = await getPool().query(
+    `SELECT tm.*, tm2.score FROM team_matches tm
+     LEFT JOIN team_match_scores tm2 ON tm2.match_id = tm.match_id AND tm2.team_id = $1
+     WHERE tm.team_id = $1 ORDER BY tm.created_at DESC LIMIT 10`,
+    [id]
+  );
+  res.json({ team: rows[0], members: members.rows, matches: matches.rows });
+});
+router22.post("/admin/teams/:id/rename", requirePermission("manage_teams"), async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { name } = req.body;
+  if (!name) return res.status(400).json({ error: "Name required" });
+  await getPool().query(`UPDATE team_operations SET name = $1 WHERE id = $2`, [name, id]);
+  logAdmin(req.user.id, "ADMIN_RENAMED_TEAM", "team", String(id), { name });
+  res.json({ success: true });
+});
+router22.post("/admin/teams/:id/transfer", requirePermission("manage_teams"), async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { newLeaderUserId } = req.body;
+  if (!newLeaderUserId) return res.status(400).json({ error: "newLeaderUserId required" });
+  await getPool().query(
+    `UPDATE team_members SET role = 'member' WHERE team_id = $1 AND role = 'leader'`,
+    [id]
+  );
+  await getPool().query(
+    `UPDATE team_members SET role = 'leader' WHERE team_id = $1 AND user_id = $2`,
+    [id, newLeaderUserId]
+  );
+  logAdmin(req.user.id, "ADMIN_TRANSFERRED_TEAM", "team", String(id), { newLeaderUserId });
+  res.json({ success: true });
+});
+router22.delete("/admin/teams/:id", requirePermission("manage_teams"), async (req, res) => {
+  const id = parseInt(req.params.id);
+  await getPool().query(`DELETE FROM team_members WHERE team_id = $1`, [id]);
+  await getPool().query(`DELETE FROM team_match_scores WHERE team_id = $1`, [id]);
+  await getPool().query(`DELETE FROM team_matches WHERE team_id = $1`, [id]);
+  await getPool().query(`DELETE FROM team_operations WHERE id = $1`, [id]);
+  logAdmin(req.user.id, "ADMIN_DELETED_TEAM", "team", String(id));
+  res.json({ success: true });
+});
 var admin_default = router22;
 
 // src/routes/aiOpponent.ts
 var import_express23 = __toESM(require_express2(), 1);
-init_stage();
+init_stage2();
 var router23 = (0, import_express23.Router)();
 var BOT_NAMES = [
   "Cipher-7",
@@ -49723,13 +50164,13 @@ var DIFFICULTY_SKILL = {
   elite: { accuracy: 0.78, avgBuzzMs: 4e3, buzzVariance: 2e3 },
   omega: { accuracy: 0.92, avgBuzzMs: 2500, buzzVariance: 1500 }
 };
-function pickRandom(arr) {
+function pickRandom2(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 router23.post("/stage/ai-opponent/add", async (req, res) => {
   const { matchId, botCount, difficulty } = req.body;
   const count = Math.min(botCount || 1, 5);
-  const match = await getStageMatch(matchId);
+  const match = await getStageMatch2(matchId);
   if (!match) {
     res.status(404).json({ error: "Match not found" });
     return;
@@ -49738,7 +50179,7 @@ router23.post("/stage/ai-opponent/add", async (req, res) => {
   for (let i = 0; i < count; i++) {
     const bot = {
       id: 1e3 + match.teams.length + i,
-      name: pickRandom(BOT_NAMES),
+      name: pickRandom2(BOT_NAMES),
       color: BOT_COLORS[i % BOT_COLORS.length],
       emblem: BOT_EMBLEMS[i % BOT_EMBLEMS.length],
       code: `AI-${match.teams.length + i + 1}`,
@@ -49753,14 +50194,14 @@ router23.post("/stage/ai-opponent/add", async (req, res) => {
     match.teams.push(bot);
     bots.push({ id: bot.id, name: bot.name, color: bot.color, emblem: bot.emblem });
   }
-  const { persistMatch: persistMatch2, cacheMatch: cacheMatch2 } = await Promise.resolve().then(() => (init_stage(), stage_exports));
-  cacheMatch2(match);
-  await persistMatch2(match);
+  const { persistMatch: persistMatch3, cacheMatch: cacheMatch3 } = await Promise.resolve().then(() => (init_stage2(), stage_exports));
+  cacheMatch3(match);
+  await persistMatch3(match);
   res.json({ success: true, bots });
 });
 router23.post("/stage/ai-opponent/tick", async (req, res) => {
   const { matchId } = req.body;
-  const match = await getStageMatch(matchId);
+  const match = await getStageMatch2(matchId);
   if (!match) {
     res.status(404).json({ error: "Match not found" });
     return;
@@ -49778,7 +50219,7 @@ router23.post("/stage/ai-opponent/tick", async (req, res) => {
     res.json({ action: "no_bots" });
     return;
   }
-  const { persistMatch: persistMatch2, cacheMatch: cacheMatch2 } = await Promise.resolve().then(() => (init_stage(), stage_exports));
+  const { persistMatch: persistMatch3, cacheMatch: cacheMatch3 } = await Promise.resolve().then(() => (init_stage2(), stage_exports));
   const elapsed = Date.now() - (match.timerStartedAt || Date.now());
   for (const bot of botTeams) {
     const skill = bot.skill || DIFFICULTY_SKILL.agent;
@@ -49810,8 +50251,8 @@ router23.post("/stage/ai-opponent/tick", async (req, res) => {
       }
       match.wrongAttempts = willBeCorrect ? 0 : 1;
       match.phase = willBeCorrect ? "answered" : "rebuzz";
-      cacheMatch2(match);
-      await persistMatch2(match);
+      cacheMatch3(match);
+      await persistMatch3(match);
       res.json({
         action: "buzzed",
         botId: bot.id,

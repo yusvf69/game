@@ -5,6 +5,7 @@ import { getToken } from "@/lib/auth";
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: "⊞", section: "general" },
   { href: "/admin/matches", label: "Live Matches", icon: "▶", section: "game" },
+  { href: "/admin/teams", label: "Teams", icon: "👥" },
   { href: "/admin/questions", label: "Questions", icon: "?" },
   { href: "/admin/users", label: "Users", icon: "👤" },
   { href: "/admin/replays", label: "Replays", icon: "🎬" },
@@ -147,6 +148,7 @@ export default function AdminLayout() {
   const pages: Record<string, { component: ReactNode; title: string }> = {
     "/admin": { component: <AdminDashboard />, title: "Dashboard" },
     "/admin/matches": { component: <AdminMatches />, title: "Live Match Center" },
+    "/admin/teams": { component: <AdminTeams />, title: "Team Management" },
     "/admin/questions": { component: <AdminQuestions />, title: "Question Management" },
     "/admin/users": { component: <AdminUsers />, title: "User Management" },
     "/admin/replays": { component: <AdminReplays />, title: "Match Replays" },
@@ -229,3 +231,4 @@ import AdminAnalytics from "./AdminAnalytics";
 import AdminLogs from "./AdminLogs";
 import AdminSettings from "./AdminSettings";
 import AdminReplays from "./AdminReplays";
+import AdminTeams from "./AdminTeams";

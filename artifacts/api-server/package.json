@@ -12,7 +12,9 @@
   "dependencies": {
     "@workspace/api-zod": "workspace:*",
     "@workspace/db": "workspace:*",
+    "@workspace/game-engine": "workspace:*",
     "cookie-parser": "^1.4.7",
+    "posthog-node": "^4.11.0",
     "cors": "^2.8.6",
     "drizzle-orm": "catalog:",
     "express": "^5.2.1",
