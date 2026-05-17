@@ -5,8 +5,8 @@ import {
   questionOptionsTable,
   usersTable,
   sessionsTable,
-  stageMatchesTable,
 } from "@workspace/db";
+import { getPool } from "@workspace/db";
 import { eq, sql } from "drizzle-orm";
 import { getIO } from "../socket";
 
@@ -65,35 +65,16 @@ interface StageMatchState {
 }
 
 const stageMatchCache = new Map<number, StageMatchState>();
-let tableEnsured = false;
 
-async function ensureTable() {
-  if (tableEnsured) return;
-  tableEnsured = true;
-  try {
-    await db.execute(sql`
-      CREATE TABLE IF NOT EXISTS stage_matches (
-        id SERIAL PRIMARY KEY,
-        match_id INTEGER NOT NULL UNIQUE,
-        host_id INTEGER NOT NULL,
-        room_code VARCHAR(10) NOT NULL,
-        state JSONB NOT NULL,
-        created_at TIMESTAMP DEFAULT NOW() NOT NULL,
-        updated_at TIMESTAMP DEFAULT NOW() NOT NULL
-      )
-    `);
-  } catch (e: any) {
-    console.warn("[stage] could not ensure table:", e?.message);
-  }
-}
+function pool() { return getPool(); }
 
 async function ensureMatch(matchId: number): Promise<StageMatchState | undefined> {
   const cached = stageMatchCache.get(matchId);
   if (cached) return cached;
   try {
-    const [row] = await db.select().from(stageMatchesTable).where(eq(stageMatchesTable.matchId, matchId)).limit(1);
-    if (!row) return undefined;
-    const state = { ...(row.state as any), timer: null } as StageMatchState;
+    const { rows } = await pool().query(`SELECT state FROM stage_matches WHERE match_id = $1`, [matchId]);
+    if (rows.length === 0) return undefined;
+    const state = { ...rows[0].state, timer: null } as StageMatchState;
     stageMatchCache.set(matchId, state);
     return state;
   } catch { return undefined; }
@@ -104,14 +85,39 @@ function cacheMatch(state: StageMatchState): void {
 }
 
 async function persistMatch(state: StageMatchState): Promise<void> {
-  await ensureTable();
   const { timer: __timer, ...rest } = state;
   try {
-    await db.insert(stageMatchesTable).values({
-      matchId: state.id, hostId: state.hostId, roomCode: state.roomCode, state: rest as any,
-    }).onConflictDoUpdate({ target: stageMatchesTable.matchId, set: { state: rest as any, updatedAt: new Date() } });
+    await pool().query(
+      `INSERT INTO stage_matches (match_id, host_id, room_code, state) VALUES ($1, $2, $3, $4)
+       ON CONFLICT (match_id) DO UPDATE SET state = $4, updated_at = NOW()`,
+      [state.id, state.hostId, state.roomCode, JSON.stringify(rest)],
+    );
   } catch (e: any) {
-    console.warn("[stage] persist failed:", e?.message);
+    // Table might not exist yet — create it and retry
+    if (e?.code === "42P01") {
+      try {
+        await pool().query(`
+          CREATE TABLE IF NOT EXISTS stage_matches (
+            id SERIAL PRIMARY KEY,
+            match_id INTEGER NOT NULL UNIQUE,
+            host_id INTEGER NOT NULL,
+            room_code VARCHAR(10) NOT NULL,
+            state JSONB NOT NULL,
+            created_at TIMESTAMP DEFAULT NOW() NOT NULL,
+            updated_at TIMESTAMP DEFAULT NOW() NOT NULL
+          )
+        `);
+        await pool().query(
+          `INSERT INTO stage_matches (match_id, host_id, room_code, state) VALUES ($1, $2, $3, $4)
+           ON CONFLICT (match_id) DO UPDATE SET state = $4, updated_at = NOW()`,
+          [state.id, state.hostId, state.roomCode, JSON.stringify(rest)],
+        );
+      } catch (e2: any) {
+        console.warn("[stage] persist failed after table creation:", e2?.message);
+      }
+    } else {
+      console.warn("[stage] persist failed:", e?.message);
+    }
   }
 }
 

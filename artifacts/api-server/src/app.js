@@ -36383,11 +36383,11 @@ var init_team_ops = __esm({
 
 // ../../lib/db/src/schema/stage_matches.ts
 import { pgTable as pgTable17, serial as serial17, integer as integer18, jsonb as jsonb12, timestamp as timestamp17, varchar } from "drizzle-orm/pg-core";
-var stageMatchesTable;
+var stageMatchesTable2;
 var init_stage_matches = __esm({
   "../../lib/db/src/schema/stage_matches.ts"() {
     "use strict";
-    stageMatchesTable = pgTable17("stage_matches", {
+    stageMatchesTable2 = pgTable17("stage_matches", {
       id: serial17("id").primaryKey(),
       matchId: integer18("match_id").notNull().unique(),
       hostId: integer18("host_id").notNull(),
@@ -36430,7 +36430,7 @@ __export(schema_exports, {
   sessionsTable: () => sessionsTable,
   shopItemsTable: () => shopItemsTable,
   skillTreesTable: () => skillTreesTable,
-  stageMatchesTable: () => stageMatchesTable,
+  stageMatchesTable: () => stageMatchesTable2,
   storyChoicesTable: () => storyChoicesTable,
   storyNodesTable: () => storyNodesTable,
   tacticalModulesTable: () => tacticalModulesTable,
@@ -36512,7 +36512,7 @@ __export(src_exports, {
   sessionsTable: () => sessionsTable,
   shopItemsTable: () => shopItemsTable,
   skillTreesTable: () => skillTreesTable,
-  stageMatchesTable: () => stageMatchesTable,
+  stageMatchesTable: () => stageMatchesTable2,
   storyChoicesTable: () => storyChoicesTable,
   storyNodesTable: () => storyNodesTable,
   tacticalModulesTable: () => tacticalModulesTable,
@@ -67288,8 +67288,8 @@ router5.post("/story/choose", async (req, res) => {
       };
       const matchedKey = Object.keys(directorContexts).find((k) => choice.consequenceFlag?.includes(k));
       if (matchedKey) {
-        const pool = directorContexts[matchedKey];
-        directorMessage = `[AI DIRECTOR]: ${pool[Math.floor(Math.random() * pool.length)]}`;
+        const pool2 = directorContexts[matchedKey];
+        directorMessage = `[AI DIRECTOR]: ${pool2[Math.floor(Math.random() * pool2.length)]}`;
       }
     }
     if (directorMessage) {
@@ -67562,8 +67562,8 @@ router8.post("/ai/explain", async (req, res) => {
     ]
   };
   const catKey = Object.keys(explanations).find((k) => category?.toLowerCase().includes(k)) || "default";
-  const pool = explanations[catKey];
-  const explanation = pool[Math.floor(Math.random() * pool.length)];
+  const pool2 = explanations[catKey];
+  const explanation = pool2[Math.floor(Math.random() * pool2.length)];
   res.json({
     explanation,
     additionalFacts: [
@@ -67813,8 +67813,8 @@ router9.get("/ai/generate-questions", async (req, res) => {
     });
   });
   const filtered = allQuestions.filter((q) => Math.abs(q.difficulty - difficulty) <= 2);
-  const pool = filtered.length > 0 ? filtered : allQuestions;
-  const shuffled = pool.sort(() => Math.random() - 0.5);
+  const pool2 = filtered.length > 0 ? filtered : allQuestions;
+  const shuffled = pool2.sort(() => Math.random() - 0.5);
   const selected = shuffled.slice(0, limit);
   const result = selected.map((q, idx) => ({
     id: -(idx + 1),
@@ -69596,6 +69596,7 @@ var teamOps_default = router20;
 var import_express21 = __toESM(require_express2(), 1);
 init_src();
 init_src();
+init_src();
 import { eq as eq21, sql as sql14 } from "drizzle-orm";
 var router21 = (0, import_express21.Router)();
 async function getUserFromToken18(token) {
@@ -69613,33 +69614,16 @@ function generateCode(length = 5) {
   return code;
 }
 var stageMatchCache = /* @__PURE__ */ new Map();
-var tableEnsured = false;
-async function ensureTable() {
-  if (tableEnsured) return;
-  tableEnsured = true;
-  try {
-    await db.execute(sql14`
-      CREATE TABLE IF NOT EXISTS stage_matches (
-        id SERIAL PRIMARY KEY,
-        match_id INTEGER NOT NULL UNIQUE,
-        host_id INTEGER NOT NULL,
-        room_code VARCHAR(10) NOT NULL,
-        state JSONB NOT NULL,
-        created_at TIMESTAMP DEFAULT NOW() NOT NULL,
-        updated_at TIMESTAMP DEFAULT NOW() NOT NULL
-      )
-    `);
-  } catch (e) {
-    console.warn("[stage] could not ensure table:", e?.message);
-  }
+function pool() {
+  return getPool();
 }
 async function ensureMatch(matchId) {
   const cached2 = stageMatchCache.get(matchId);
   if (cached2) return cached2;
   try {
-    const [row] = await db.select().from(stageMatchesTable).where(eq21(stageMatchesTable.matchId, matchId)).limit(1);
-    if (!row) return void 0;
-    const state = { ...row.state, timer: null };
+    const { rows } = await pool().query(`SELECT state FROM stage_matches WHERE match_id = $1`, [matchId]);
+    if (rows.length === 0) return void 0;
+    const state = { ...rows[0].state, timer: null };
     stageMatchCache.set(matchId, state);
     return state;
   } catch {
@@ -69650,17 +69634,38 @@ function cacheMatch(state) {
   stageMatchCache.set(state.id, state);
 }
 async function persistMatch(state) {
-  await ensureTable();
   const { timer: __timer, ...rest } = state;
   try {
-    await db.insert(stageMatchesTable).values({
-      matchId: state.id,
-      hostId: state.hostId,
-      roomCode: state.roomCode,
-      state: rest
-    }).onConflictDoUpdate({ target: stageMatchesTable.matchId, set: { state: rest, updatedAt: /* @__PURE__ */ new Date() } });
+    await pool().query(
+      `INSERT INTO stage_matches (match_id, host_id, room_code, state) VALUES ($1, $2, $3, $4)
+       ON CONFLICT (match_id) DO UPDATE SET state = $4, updated_at = NOW()`,
+      [state.id, state.hostId, state.roomCode, JSON.stringify(rest)]
+    );
   } catch (e) {
-    console.warn("[stage] persist failed:", e?.message);
+    if (e?.code === "42P01") {
+      try {
+        await pool().query(`
+          CREATE TABLE IF NOT EXISTS stage_matches (
+            id SERIAL PRIMARY KEY,
+            match_id INTEGER NOT NULL UNIQUE,
+            host_id INTEGER NOT NULL,
+            room_code VARCHAR(10) NOT NULL,
+            state JSONB NOT NULL,
+            created_at TIMESTAMP DEFAULT NOW() NOT NULL,
+            updated_at TIMESTAMP DEFAULT NOW() NOT NULL
+          )
+        `);
+        await pool().query(
+          `INSERT INTO stage_matches (match_id, host_id, room_code, state) VALUES ($1, $2, $3, $4)
+           ON CONFLICT (match_id) DO UPDATE SET state = $4, updated_at = NOW()`,
+          [state.id, state.hostId, state.roomCode, JSON.stringify(rest)]
+        );
+      } catch (e2) {
+        console.warn("[stage] persist failed after table creation:", e2?.message);
+      }
+    } else {
+      console.warn("[stage] persist failed:", e?.message);
+    }
   }
 }
 var DOMAIN_CATEGORIES2 = {
