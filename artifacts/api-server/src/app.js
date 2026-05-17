@@ -514,7 +514,7 @@ var require_node = __commonJS({
   "../../node_modules/.pnpm/debug@4.4.3/node_modules/debug/src/node.js"(exports, module) {
     var tty = __require("tty");
     var util2 = __require("util");
-    exports.init = init;
+    exports.init = init2;
     exports.log = log;
     exports.formatArgs = formatArgs;
     exports.save = save;
@@ -663,7 +663,7 @@ var require_node = __commonJS({
     function load() {
       return process.env.DEBUG;
     }
-    function init(debug) {
+    function init2(debug) {
       debug.inspectOpts = {};
       const keys = Object.keys(exports.inspectOpts);
       for (let i = 0; i < keys.length; i++) {
@@ -20905,7 +20905,7 @@ var require_application = __commonJS({
     var flatten = Array.prototype.flat;
     var app2 = exports = module.exports = {};
     var trustProxyDefaultSymbol = "@@symbol:trust_proxy_default";
-    app2.init = function init() {
+    app2.init = function init2() {
       var router23 = null;
       this.cache = /* @__PURE__ */ Object.create(null);
       this.engines = /* @__PURE__ */ Object.create(null);
@@ -23894,7 +23894,7 @@ var require_lib3 = __commonJS({
 // ../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v4/core/core.js
 // @__NO_SIDE_EFFECTS__
 function $constructor(name, initializer3, params) {
-  function init(inst, def) {
+  function init2(inst, def) {
     var _a;
     Object.defineProperty(inst, "_zod", {
       value: inst._zod ?? {},
@@ -23917,14 +23917,14 @@ function $constructor(name, initializer3, params) {
   function _(def) {
     var _a;
     const inst = params?.Parent ? new Definition() : this;
-    init(inst, def);
+    init2(inst, def);
     (_a = inst._zod).deferred ?? (_a.deferred = []);
     for (const fn of inst._zod.deferred) {
       fn();
     }
     return inst;
   }
-  Object.defineProperty(_, "init", { value: init });
+  Object.defineProperty(_, "init", { value: init2 });
   Object.defineProperty(_, Symbol.hasInstance, {
     value: (inst) => {
       if (params?.Parent && inst instanceof params.Parent)
@@ -36472,6 +36472,8 @@ __export(src_exports, {
   characterMemoryTable: () => characterMemoryTable,
   db: () => db,
   friendsTable: () => friendsTable,
+  getDb: () => getDb,
+  getPool: () => getPool,
   insertQuestionSchema: () => insertQuestionSchema,
   insertUserSchema: () => insertUserSchema,
   insertUserStatsSchema: () => insertUserStatsSchema,
@@ -36482,7 +36484,6 @@ __export(src_exports, {
   missionLogsTable: () => missionLogsTable,
   playerProgressTable: () => playerProgressTable,
   playerSkillsTable: () => playerSkillsTable,
-  pool: () => pool,
   questionOptionsTable: () => questionOptionsTable,
   questionsTable: () => questionsTable,
   rankingsTable: () => rankingsTable,
@@ -36517,20 +36518,41 @@ __export(src_exports, {
 });
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
-var Pool, pool, db;
+function init() {
+  if (_db) return;
+  if (!process.env.DATABASE_URL) {
+    throw new Error(
+      "DATABASE_URL must be set. Did you forget to provision a database?"
+    );
+  }
+  _pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  _db = drizzle(_pool, { schema: schema_exports });
+}
+function getPool() {
+  init();
+  return _pool;
+}
+function getDb() {
+  init();
+  return _db;
+}
+var Pool, _pool, _db, db;
 var init_src = __esm({
   "../../lib/db/src/index.ts"() {
     "use strict";
     init_schema();
     init_schema();
     ({ Pool } = pg);
-    if (!process.env.DATABASE_URL) {
-      throw new Error(
-        "DATABASE_URL must be set. Did you forget to provision a database?"
-      );
-    }
-    pool = new Pool({ connectionString: process.env.DATABASE_URL });
-    db = drizzle(pool, { schema: schema_exports });
+    _pool = null;
+    _db = null;
+    db = new Proxy({}, {
+      get(_, prop) {
+        return Reflect.get(getDb(), prop, getDb());
+      },
+      apply(_, _this, args) {
+        return Reflect.apply(getDb(), null, args);
+      }
+    });
   }
 });
 
@@ -67231,8 +67253,8 @@ router5.post("/story/choose", async (req, res) => {
       };
       const matchedKey = Object.keys(directorContexts).find((k) => choice.consequenceFlag?.includes(k));
       if (matchedKey) {
-        const pool2 = directorContexts[matchedKey];
-        directorMessage = `[AI DIRECTOR]: ${pool2[Math.floor(Math.random() * pool2.length)]}`;
+        const pool = directorContexts[matchedKey];
+        directorMessage = `[AI DIRECTOR]: ${pool[Math.floor(Math.random() * pool.length)]}`;
       }
     }
     if (directorMessage) {
@@ -67505,8 +67527,8 @@ router8.post("/ai/explain", async (req, res) => {
     ]
   };
   const catKey = Object.keys(explanations).find((k) => category?.toLowerCase().includes(k)) || "default";
-  const pool2 = explanations[catKey];
-  const explanation = pool2[Math.floor(Math.random() * pool2.length)];
+  const pool = explanations[catKey];
+  const explanation = pool[Math.floor(Math.random() * pool.length)];
   res.json({
     explanation,
     additionalFacts: [
@@ -67756,8 +67778,8 @@ router9.get("/ai/generate-questions", async (req, res) => {
     });
   });
   const filtered = allQuestions.filter((q) => Math.abs(q.difficulty - difficulty) <= 2);
-  const pool2 = filtered.length > 0 ? filtered : allQuestions;
-  const shuffled = pool2.sort(() => Math.random() - 0.5);
+  const pool = filtered.length > 0 ? filtered : allQuestions;
+  const shuffled = pool.sort(() => Math.random() - 0.5);
   const selected = shuffled.slice(0, limit);
   const result = selected.map((q, idx) => ({
     id: -(idx + 1),
