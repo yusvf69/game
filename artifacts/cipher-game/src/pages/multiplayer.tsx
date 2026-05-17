@@ -50,6 +50,8 @@ export default function MultiplayerPage() {
   useEffect(() => {
     const token = getToken();
     if (!token) return;
+    // Socket.IO not supported on Vercel serverless
+    if (import.meta.env.PROD) return;
     const socket = io(BASE_URL, {
       path: "/socket.io",
       auth: { token },
