@@ -1,3 +1,4 @@
 dist/
 app-bundle/
 api/*.mjs
+.vercel

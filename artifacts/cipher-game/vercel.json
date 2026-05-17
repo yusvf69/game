@@ -1,7 +1,7 @@
 {
-  "buildCommand": "npx vite build",
+  "buildCommand": "cd ../.. && pnpm --filter cipher-game build",
   "outputDirectory": "dist",
-  "installCommand": "pnpm install --no-frozen-lockfile --ignore-scripts",
+  "installCommand": "cd ../.. && pnpm install --no-frozen-lockfile --ignore-scripts",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "https://game-api-server-zeta.vercel.app/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
