@@ -48938,13 +48938,18 @@ async function authenticate(req, _res, next) {
       return;
     }
     const role = user.role || "player";
-    const perms = await db.select({ key: permissionsTable.key }).from(rolePermissionsTable).innerJoin(rolesTable, eq21(rolePermissionsTable.roleId, rolesTable.id)).innerJoin(permissionsTable, eq21(rolePermissionsTable.permissionId, permissionsTable.id)).where(eq21(rolesTable.name, role));
+    let permissions = [];
+    try {
+      const perms = await db.select({ key: permissionsTable.key }).from(rolePermissionsTable).innerJoin(rolesTable, eq21(rolePermissionsTable.roleId, rolesTable.id)).innerJoin(permissionsTable, eq21(rolePermissionsTable.permissionId, permissionsTable.id)).where(eq21(rolesTable.name, role));
+      permissions = perms.map((p) => p.key);
+    } catch {
+    }
     req.user = {
       id: user.id,
       username: user.username,
       email: user.email,
       role,
-      permissions: perms.map((p) => p.key)
+      permissions
     };
   } catch {
     req.user = void 0;

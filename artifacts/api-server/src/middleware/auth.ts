@@ -41,18 +41,24 @@ export async function authenticate(req: Request, _res: Response, next: NextFunct
 
     const role = (user as any).role || "player";
 
-    const perms = await db.select({ key: permissionsTable.key })
-      .from(rolePermissionsTable)
-      .innerJoin(rolesTable, eq(rolePermissionsTable.roleId, rolesTable.id))
-      .innerJoin(permissionsTable, eq(rolePermissionsTable.permissionId, permissionsTable.id))
-      .where(eq(rolesTable.name, role));
+    let permissions: string[] = [];
+    try {
+      const perms = await db.select({ key: permissionsTable.key })
+        .from(rolePermissionsTable)
+        .innerJoin(rolesTable, eq(rolePermissionsTable.roleId, rolesTable.id))
+        .innerJoin(permissionsTable, eq(rolePermissionsTable.permissionId, permissionsTable.id))
+        .where(eq(rolesTable.name, role));
+      permissions = perms.map(p => p.key);
+    } catch {
+      // permissions tables might not exist yet (pre-seed)
+    }
 
     req.user = {
       id: user.id,
       username: user.username,
       email: user.email,
       role,
-      permissions: perms.map(p => p.key),
+      permissions,
     };
   } catch {
     req.user = undefined;
