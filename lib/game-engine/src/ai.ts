@@ -74,11 +74,12 @@ export function decideBotBuzz(match: StageMatchState, difficulty: string = "agen
       const willBeCorrect = Math.random() < skill.accuracy;
       let selectedOptionId: number | null = null;
 
-      if (q && q.correctOptionId) {
+      if (q && q.correctOptionIds?.length > 0) {
+        const firstCorrect = q.correctOptionIds[0];
         if (willBeCorrect) {
-          selectedOptionId = q.correctOptionId;
+          selectedOptionId = firstCorrect;
         } else {
-          const wrongOptions = q.options.filter(o => o.id !== q.correctOptionId);
+          const wrongOptions = q.options.filter(o => !q.correctOptionIds.includes(o.id));
           selectedOptionId = wrongOptions[Math.floor(Math.random() * wrongOptions.length)]?.id || null;
         }
       }

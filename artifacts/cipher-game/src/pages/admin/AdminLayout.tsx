@@ -1,23 +1,37 @@
 import { useState, ReactNode } from "react";
-import { useLocation, Link } from "wouter";
+import { useLocation } from "wouter";
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 import { getToken } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
+
+import {
+  LayoutDashboard, Play, Users, BookOpen, ShoppingCart, Globe,
+  Trophy, Zap, ArrowUp, BarChart3, ClipboardList, Settings, Film, Swords,
+  Menu, X, LogOut,
+} from "lucide-react";
 
 const NAV_ITEMS = [
-  { href: "/admin", label: "Dashboard", icon: "⊞", section: "general" },
-  { href: "/admin/matches", label: "Live Matches", icon: "▶", section: "game" },
-  { href: "/admin/teams", label: "Teams", icon: "👥" },
-  { href: "/admin/questions", label: "Questions", icon: "?" },
-  { href: "/admin/users", label: "Users", icon: "👤" },
-  { href: "/admin/replays", label: "Replays", icon: "🎬" },
-  { href: "/admin/story", label: "Story", icon: "📖" },
-  { href: "/admin/shop", label: "Shop", icon: "🛒" },
-  { href: "/admin/events", label: "Events", icon: "🌍" },
-  { href: "/admin/battle-pass", label: "Battle Pass", icon: "🎖" },
-  { href: "/admin/skills", label: "Skill Tree", icon: "⚡" },
-  { href: "/admin/prestige", label: "Prestige", icon: "⬆" },
-  { href: "/admin/analytics", label: "Analytics", icon: "📊" },
-  { href: "/admin/logs", label: "Audit Logs", icon: "📝" },
-  { href: "/admin/settings", label: "Settings", icon: "⚙" },
+  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/matches", label: "Live Matches", icon: Play },
+  { href: "/admin/teams", label: "Teams", icon: Swords },
+  { href: "/admin/questions", label: "Questions", icon: BookOpen },
+  { href: "/admin/users", label: "Users", icon: Users },
+  { href: "/admin/replays", label: "Replays", icon: Film },
+  { href: "/admin/story", label: "Story", icon: ClipboardList },
+  { href: "/admin/shop", label: "Shop", icon: ShoppingCart },
+  { href: "/admin/events", label: "Events", icon: Globe },
+  { href: "/admin/battle-pass", label: "Battle Pass", icon: Trophy },
+  { href: "/admin/skills", label: "Skill Tree", icon: Zap },
+  { href: "/admin/prestige", label: "Prestige", icon: ArrowUp },
+  { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/admin/logs", label: "Audit Logs", icon: ClipboardList },
+  { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
 export function adminFetch(path: string, options: RequestInit = {}) {
@@ -33,109 +47,132 @@ export function adminFetch(path: string, options: RequestInit = {}) {
   });
 }
 
-export function AdminPage({ children, title }: { children: ReactNode; title: string }) {
+export function AdminPage({ children, title, description }: { children: ReactNode; title: string; description?: string }) {
   return (
-    <div style={{ padding: "24px", maxWidth: "1200px", margin: "0 auto" }}>
-      <h1 style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "24px", color: "#00e5ff" }}>{title}</h1>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="p-6 max-w-7xl mx-auto"
+    >
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-foreground neon-text-blue">{title}</h1>
+        {description && <p className="text-sm text-muted-foreground mt-1">{description}</p>}
+      </div>
       {children}
-    </div>
+    </motion.div>
   );
 }
 
-export function AdminTable({ headers, rows }: { headers: string[]; rows: (string | number | ReactNode)[][] }) {
+export function AdminCard({ title, value, subtitle, icon: Icon, color = "primary" }: {
+  title: string; value: string | number; subtitle?: string;
+  icon?: React.ComponentType<{ className?: string }>; color?: string;
+}) {
+  const colors: Record<string, string> = {
+    primary: "from-primary/20 to-primary/5 border-primary/30",
+    purple: "from-secondary/20 to-secondary/5 border-secondary/30",
+    green: "from-green-500/20 to-green-500/5 border-green-500/30",
+    orange: "from-orange-500/20 to-orange-500/5 border-orange-500/30",
+    red: "from-red-500/20 to-red-500/5 border-red-500/30",
+    cyan: "from-cyan-500/20 to-cyan-500/5 border-cyan-500/30",
+  };
+  const iconColors: Record<string, string> = {
+    primary: "text-primary", purple: "text-secondary", green: "text-green-400",
+    orange: "text-orange-400", red: "text-red-400", cyan: "text-cyan-400",
+  };
+
   return (
-    <div style={{ overflowX: "auto", border: "1px solid #1a3a4a", borderRadius: "8px" }}>
-      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.875rem" }}>
-        <thead>
-          <tr style={{ background: "#0a1628", borderBottom: "1px solid #1a3a4a" }}>
-            {headers.map((h, i) => (
-              <th key={i} style={{ padding: "10px 16px", textAlign: "left", color: "#00e5ff", fontWeight: 600 }}>
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, ri) => (
-            <tr key={ri} style={{ borderBottom: "1px solid #0f1e2e", background: ri % 2 === 0 ? "#0d1a2a" : "#0a1628" }}>
-              {row.map((cell, ci) => (
-                <td key={ci} style={{ padding: "8px 16px", color: "#b8d4e3" }}>{cell}</td>
+    <motion.div
+      whileHover={{ scale: 1.02, y: -2 }}
+      className={cn(
+        "rounded-xl border bg-gradient-to-br p-5 flex flex-col gap-2",
+        colors[color] || colors.primary
+      )}
+    >
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</span>
+        {Icon && <Icon className={cn("w-5 h-5", iconColors[color] || iconColors.primary)} />}
+      </div>
+      <span className="text-3xl font-bold text-foreground">{value}</span>
+      {subtitle && <span className="text-xs text-muted-foreground">{subtitle}</span>}
+    </motion.div>
+  );
+}
+
+export function AdminTable({ headers, rows }: { headers: string[]; rows: (ReactNode)[][] }) {
+  return (
+    <div className="rounded-xl border border-border overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="bg-sidebar border-b border-border">
+              {headers.map((h, i) => (
+                <th key={i} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-primary">
+                  {h}
+                </th>
               ))}
             </tr>
-          ))}
-          {rows.length === 0 && (
-            <tr><td colSpan={headers.length} style={{ padding: "24px", textAlign: "center", color: "#5a7a8a" }}>No data</td></tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            <AnimatePresence>
+              {rows.map((row, ri) => (
+                <motion.tr
+                  key={ri}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: ri * 0.03 }}
+                  className={cn(
+                    "border-b border-border/50 transition-colors hover:bg-sidebar/50",
+                    ri % 2 === 0 ? "bg-card/30" : "bg-transparent"
+                  )}
+                >
+                  {row.map((cell, ci) => (
+                    <td key={ci} className="px-4 py-2.5 text-sm text-foreground/80">{cell}</td>
+                  ))}
+                </motion.tr>
+              ))}
+            </AnimatePresence>
+            {rows.length === 0 && (
+              <tr><td colSpan={headers.length} className="px-4 py-8 text-center text-sm text-muted-foreground">No data</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
 
-export function AdminCard({ title, value, subtitle }: { title: string; value: string | number; subtitle?: string }) {
-  return (
-    <div style={{
-      background: "linear-gradient(135deg, #0d1a2a, #0a1628)", border: "1px solid #1a3a4a",
-      borderRadius: "12px", padding: "20px", minWidth: "180px",
-    }}>
-      <div style={{ fontSize: "0.75rem", color: "#5a7a8a", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>{title}</div>
-      <div style={{ fontSize: "2rem", fontWeight: 700, color: "#00e5ff" }}>{value}</div>
-      {subtitle && <div style={{ fontSize: "0.75rem", color: "#5a7a8a", marginTop: "4px" }}>{subtitle}</div>}
-    </div>
-  );
+export function AdminBadge({ variant = "default", children }: { variant?: "default" | "success" | "warning" | "danger" | "info"; children: ReactNode }) {
+  const variants: Record<string, string> = {
+    default: "bg-muted text-muted-foreground border-border",
+    success: "bg-green-500/10 text-green-400 border-green-500/30",
+    warning: "bg-orange-500/10 text-orange-400 border-orange-500/30",
+    danger: "bg-red-500/10 text-red-400 border-red-500/30",
+    info: "bg-primary/10 text-primary border-primary/30",
+  };
+  return <Badge className={cn("font-mono text-xs", variants[variant])}>{children}</Badge>;
 }
 
-export function AdminStat({ title, value, color = "#00e5ff" }: { title: string; value: string | number; color?: string }) {
-  return (
-    <div style={{
-      background: "#0d1a2a", border: "1px solid #1a3a4a", borderRadius: "8px", padding: "16px", minWidth: "120px",
-    }}>
-      <div style={{ fontSize: "0.7rem", color: "#5a7a8a", textTransform: "uppercase", marginBottom: "4px" }}>{title}</div>
-      <div style={{ fontSize: "1.3rem", fontWeight: 700, color }}>{value}</div>
-    </div>
-  );
-}
-
+// Legacy helpers for pages not yet migrated
 export function AdminButton({ children, onClick, variant = "primary", disabled, style }: {
   children: ReactNode; onClick?: () => void; variant?: "primary" | "danger" | "ghost"; disabled?: boolean; style?: any;
 }) {
-  const colors: Record<string, string> = {
-    primary: "#00e5ff", danger: "#ff1744", ghost: "transparent",
-  };
-  const bg: Record<string, string> = {
-    primary: "rgba(0,229,255,0.1)", danger: "rgba(255,23,68,0.1)", ghost: "transparent",
-  };
-  const border: Record<string, string> = {
-    primary: "1px solid rgba(0,229,255,0.3)", danger: "1px solid rgba(255,23,68,0.3)", ghost: "1px solid transparent",
-  };
-  return (
-    <button onClick={onClick} disabled={disabled} style={{
-      padding: "6px 14px", borderRadius: "6px", border: variant !== "ghost" ? border[variant] : "none",
-      background: bg[variant], color: colors[variant], cursor: disabled ? "not-allowed" : "pointer",
-      fontSize: "0.8rem", fontWeight: 600, opacity: disabled ? 0.5 : 1, ...style,
-    }}>{children}</button>
-  );
+  const shadcnVariant = variant === "danger" ? "destructive" : variant === "ghost" ? "ghost" : "default";
+  return <Button variant={shadcnVariant as any} size="sm" onClick={onClick} disabled={disabled} style={style}>{children}</Button>;
 }
 
 export function AdminInput({ value, onChange, placeholder, type = "text", style }: {
   value: string; onChange: (v: string) => void; placeholder?: string; type?: string; style?: any;
 }) {
-  return (
-    <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} style={{
-      padding: "8px 12px", borderRadius: "6px", border: "1px solid #1a3a4a", background: "#0a1628",
-      color: "#b8d4e3", fontSize: "0.875rem", outline: "none", width: "100%", ...style,
-    }} />
-  );
+  return <Input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className="w-full" style={style} />;
 }
 
 export function AdminSelect({ value, onChange, options }: {
   value: string; onChange: (v: string) => void; options: { label: string; value: string }[];
 }) {
   return (
-    <select value={value} onChange={e => onChange(e.target.value)} style={{
-      padding: "8px 12px", borderRadius: "6px", border: "1px solid #1a3a4a", background: "#0a1628",
-      color: "#b8d4e3", fontSize: "0.875rem", outline: "none",
-    }}>
+    <select value={value} onChange={e => onChange(e.target.value)}
+      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
       {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
     </select>
   );
@@ -144,6 +181,18 @@ export function AdminSelect({ value, onChange, options }: {
 export default function AdminLayout() {
   const [location, setLocation] = useLocation();
   const [collapsed, setCollapsed] = useState(false);
+
+  if (!getToken()) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center">
+          <h1 className="text-2xl font-bold text-destructive mb-2">Unauthorized</h1>
+          <p className="text-muted-foreground">Please log in to access admin panel</p>
+          <Button className="mt-4" onClick={() => window.location.href = "/"}>Go to Login</Button>
+        </motion.div>
+      </div>
+    );
+  }
 
   const pages: Record<string, { component: ReactNode; title: string }> = {
     "/admin": { component: <AdminDashboard />, title: "Dashboard" },
@@ -165,62 +214,83 @@ export default function AdminLayout() {
 
   const current = pages[location];
   if (!current) {
-    return <div style={{ padding: "48px", textAlign: "center", color: "#ff1744" }}>Admin page not found: {location}</div>;
-  }
-
-  if (!getToken()) {
-    return <div style={{ padding: "48px", textAlign: "center", color: "#ff1744" }}>Please log in to access admin panel</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-destructive">Page Not Found</h1>
+          <p className="text-muted-foreground mt-2">Admin page not found: {location}</p>
+          <Button className="mt-4" onClick={() => setLocation("/admin")}>Back to Dashboard</Button>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "#060d18", color: "#b8d4e3", fontFamily: "'Inter', sans-serif" }}>
-      <nav style={{
-        width: collapsed ? "56px" : "220px", transition: "width 0.2s", background: "#080f1e",
-        borderRight: "1px solid #1a3a4a", display: "flex", flexDirection: "column", position: "sticky", top: 0, height: "100vh",
-      }}>
-        <div style={{ padding: "16px", borderBottom: "1px solid #1a3a4a", display: "flex", alignItems: "center", gap: "8px" }}>
-          <button onClick={() => setCollapsed(!collapsed)} style={{ background: "none", border: "none", color: "#00e5ff", cursor: "pointer", fontSize: "1.2rem" }}>
-            {collapsed ? "☰" : "✕"}
-          </button>
-          {!collapsed && <span style={{ fontWeight: 700, color: "#00e5ff", fontSize: "0.9rem" }}>ADMIN</span>}
+    <div className="flex min-h-screen bg-background text-foreground">
+      <Toaster position="top-right" />
+      <aside className={cn(
+        "fixed lg:sticky top-0 left-0 z-40 h-screen border-r border-border bg-sidebar transition-all duration-300 flex flex-col",
+        collapsed ? "w-16" : "w-56"
+      )}>
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <Button variant="ghost" size="icon" onClick={() => setCollapsed(!collapsed)}>
+            {collapsed ? <Menu className="w-5 h-5" /> : <X className="w-5 h-5" />}
+          </Button>
+          {!collapsed && <span className="text-sm font-bold text-primary tracking-wider">ADMIN</span>}
         </div>
-        <div style={{ flex: 1, overflowY: "auto", padding: "8px" }}>
-          {NAV_ITEMS.map(item => {
-            const active = location === item.href;
-            return (
-              <a key={item.href} href={item.href} onClick={e => { e.preventDefault(); setLocation(item.href); }}
-                style={{
-                  display: "flex", alignItems: "center", gap: "8px", padding: "8px 10px", borderRadius: "6px",
-                  textDecoration: "none", color: active ? "#00e5ff" : "#5a7a8a", marginBottom: "2px",
-                  background: active ? "rgba(0,229,255,0.08)" : "transparent", fontSize: "0.8rem",
-                  fontWeight: active ? 600 : 400, whiteSpace: "nowrap", overflow: "hidden",
-                }}>
-                <span>{item.icon}</span>
-                {!collapsed && <span>{item.label}</span>}
-              </a>
-            );
-          })}
+        <ScrollArea className="flex-1 px-2 py-2">
+          <nav className="flex flex-col gap-1">
+            {NAV_ITEMS.map((item) => {
+              const active = location === item.href;
+              const Icon = item.icon;
+              return (
+                <Button
+                  key={item.href}
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setLocation(item.href)}
+                  className={cn(
+                    "w-full justify-start gap-3 px-3 py-2 h-auto text-sm font-normal",
+                    active ? "bg-sidebar-primary/10 text-sidebar-primary" : "text-sidebar-foreground/60 hover:text-sidebar-foreground"
+                  )}
+                >
+                  <Icon className="w-4 h-4 shrink-0" />
+                  {!collapsed && <span className="truncate">{item.label}</span>}
+                </Button>
+              );
+            })}
+          </nav>
+        </ScrollArea>
+        <div className="p-3 border-t border-border">
+          <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-muted-foreground" onClick={() => window.location.href = "/"}>
+            <LogOut className="w-4 h-4" />
+            {!collapsed && <span>Back to Site</span>}
+          </Button>
         </div>
-        <div style={{ padding: "12px", borderTop: "1px solid #1a3a4a" }}>
-          <a href="/" onClick={e => { e.preventDefault(); setLocation("/"); }}
-            style={{ color: "#5a7a8a", textDecoration: "none", fontSize: "0.8rem", display: "flex", alignItems: "center", gap: "6px" }}>
-            ← {!collapsed && "Back to Site"}
-          </a>
-        </div>
-      </nav>
-      <main style={{ flex: 1, overflow: "auto" }}>
-        {current.component}
+      </aside>
+      <main className={cn("flex-1 overflow-auto transition-all duration-300", collapsed ? "ml-16" : "ml-56 lg:ml-0")}>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={location}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            {current.component}
+          </motion.div>
+        </AnimatePresence>
       </main>
     </div>
   );
 }
 
-// ─── Page Components ─────────────────────────────────────────────────
-
 import AdminDashboard from "./AdminDashboard";
 import AdminMatches from "./AdminMatches";
 import AdminQuestions from "./AdminQuestions";
 import AdminUsers from "./AdminUsers";
+import AdminReplays from "./AdminReplays";
+import AdminTeams from "./AdminTeams";
 import AdminStory from "./AdminStory";
 import AdminShop from "./AdminShop";
 import AdminEvents from "./AdminEvents";
@@ -230,5 +300,3 @@ import AdminPrestige from "./AdminPrestige";
 import AdminAnalytics from "./AdminAnalytics";
 import AdminLogs from "./AdminLogs";
 import AdminSettings from "./AdminSettings";
-import AdminReplays from "./AdminReplays";
-import AdminTeams from "./AdminTeams";

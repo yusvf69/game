@@ -38,7 +38,7 @@ export interface StageQuestion {
   options: { id: number; text: string }[];
   timeLimit: number;
   type: string;
-  correctOptionId: number | null;
+  correctOptionIds: number[];
 }
 
 export interface StageMatchState {
@@ -118,7 +118,7 @@ function recordEvent(state: StageMatchState, type: string, teamId?: number | nul
 
 export function stripQuestion(q: StageQuestion) {
   if (!q) return q;
-  const { correctOptionId, ...rest } = q;
+  const { correctOptionIds, ...rest } = q;
   return rest;
 }
 
@@ -262,7 +262,7 @@ export async function loadQuestions(match: StageMatchState): Promise<StageQuesti
   const fullQs: StageQuestion[] = await Promise.all(questions.map(async (q) => {
     const options = await db.select({ id: questionOptionsTable.id, text: questionOptionsTable.optionText, isCorrect: questionOptionsTable.isCorrect })
       .from(questionOptionsTable).where(eq(questionOptionsTable.questionId, q.id));
-    const correctOpt = options.find(o => o.isCorrect === 1);
+    const correctIds = options.filter(o => o.isCorrect === 1).map(o => o.id);
     return {
       id: q.id,
       questionText: q.questionText,
@@ -271,7 +271,7 @@ export async function loadQuestions(match: StageMatchState): Promise<StageQuesti
       options: options.map(o => ({ id: o.id, text: o.text })),
       timeLimit: q.timeLimitSeconds || match.timerSeconds,
       type: q.type,
-      correctOptionId: correctOpt?.id || null,
+      correctOptionIds: correctIds,
     };
   }));
 
@@ -317,7 +317,7 @@ export function submitAnswer(
   if (!team) throw new Error("Team not found");
 
   const q = match.questions[match.currentQuestionIndex];
-  const isCorrect = q && q.correctOptionId === optionId;
+  const isCorrect = q && q.correctOptionIds.includes(optionId);
 
   team.total += 1;
 

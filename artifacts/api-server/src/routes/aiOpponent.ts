@@ -110,12 +110,13 @@ router.post("/stage/ai-opponent/tick", async (req, res) => {
       // Determine if bot gets the answer correct
       const q = match.questions[match.currentQuestionIndex];
       let willBeCorrect = false;
-      if (q && q.correctOptionId) {
+      if (q && q.correctOptionIds?.length > 0) {
+        const firstCorrect = q.correctOptionIds[0];
         willBeCorrect = Math.random() < skill.accuracy;
         if (willBeCorrect) {
-          match.buzzedOptionId = q.correctOptionId;
+          match.buzzedOptionId = firstCorrect;
         } else {
-          const wrongOptions = q.options?.filter((o: any) => o.id !== q.correctOptionId) || [];
+          const wrongOptions = q.options?.filter((o: any) => !q.correctOptionIds.includes(o.id)) || [];
           match.buzzedOptionId = wrongOptions[Math.floor(Math.random() * wrongOptions.length)]?.id || null;
         }
       }

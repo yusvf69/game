@@ -1,7 +1,10 @@
-import express, { type Express } from "express";
+import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
 import router from "./routes/index.js";
 import { rateLimit } from "./middleware/rateLimit.js";
+import { initSentry, captureError } from "./lib/sentry.js";
+
+initSentry();
 
 const app: Express = express();
 
@@ -22,7 +25,8 @@ app.use((req, res) => {
   res.status(404).json({ error: "not_found", path: req.path, originalUrl: req.originalUrl, baseUrl: req.baseUrl });
 });
 
-app.use((err: any, _req: any, res: any, _next: any) => {
+app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
+  captureError(err, { path: req.path, method: req.method });
   console.error("[express error]", err?.message || err);
   res.status(500).json({ error: err?.message || "Internal server error" });
 });

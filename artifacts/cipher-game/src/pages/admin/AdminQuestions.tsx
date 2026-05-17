@@ -1,33 +1,239 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { AdminPage, AdminTable, AdminButton, AdminInput, AdminSelect, adminFetch } from "./AdminLayout";
+import {
+  ListChecks, ToggleLeft, CheckSquare, Shield, Image, Music, Video,
+  GripVertical, Eye, X, Trash2, ChevronUp, ChevronDown, Plus,
+  Download, Upload,
+} from "lucide-react";
+
+interface QuestionOption {
+  text: string;
+  isCorrect: boolean;
+}
+
+interface Question {
+  id: number;
+  type: string;
+  questionText: string;
+  difficulty: number;
+  category: string;
+  mediaUrl: string | null;
+  correctAnswer: string;
+  timeLimitSeconds: number;
+  explanation: string;
+  options: { id: number; text: string; isCorrect?: number }[];
+  created_at: string;
+}
+
+const QUESTION_TYPES = [
+  { value: "multiple_choice", label: "Multiple Choice", icon: ListChecks, color: "blue" },
+  { value: "true_false", label: "True/False", icon: ToggleLeft, color: "green" },
+  { value: "multi_answer", label: "Multi Answer", icon: CheckSquare, color: "purple" },
+  { value: "cipher", label: "Cipher", icon: Shield, color: "cyan" },
+  { value: "image", label: "Image", icon: Image, color: "orange" },
+  { value: "audio", label: "Audio", icon: Music, color: "emerald" },
+  { value: "video", label: "Video", icon: Video, color: "red" },
+] as const;
+
+const CATEGORIES = ["technology", "security", "history", "logic", "intelligence", "general"];
+
+const TYPE_COLORS: Record<string, string> = {
+  multiple_choice: "#3b82f6",
+  true_false: "#22c55e",
+  multi_answer: "#a855f7",
+  cipher: "#06b6d4",
+  image: "#f97316",
+  audio: "#10b981",
+  video: "#ef4444",
+};
+
+function TypeCard({ type, selected, onSelect }: {
+  type: typeof QUESTION_TYPES[number];
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <motion.button
+      whileHover={{ scale: 1.03 }}
+      whileTap={{ scale: 0.97 }}
+      onClick={onSelect}
+      className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-all cursor-pointer ${
+        selected
+          ? "border-white/40 bg-white/10 shadow-lg shadow-white/5"
+          : "border-zinc-800/60 bg-zinc-900/50 hover:border-zinc-600/60 hover:bg-zinc-800/40"
+      }`}
+    >
+      <div className={`p-2.5 rounded-lg ${selected ? "bg-white/10" : "bg-zinc-800/50"}`}>
+        <type.icon className="w-5 h-5" style={{ color: TYPE_COLORS[type.value] }} />
+      </div>
+      <span className="text-xs font-mono text-zinc-400">{type.label}</span>
+    </motion.button>
+  );
+}
+
+function DragHandle({ onDragStart, onDragOver, onDragEnd, onDrop, index, onMoveUp, onMoveDown, isFirst, isLast }: {
+  onDragStart: (e: React.DragEvent) => void;
+  onDragOver: (e: React.DragEvent) => void;
+  onDragEnd: (e: React.DragEvent) => void;
+  onDrop: (e: React.DragEvent) => void;
+  index: number;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  isFirst: boolean;
+  isLast: boolean;
+}) {
+  return (
+    <div
+      draggable
+      onDragStart={onDragStart}
+      onDragOver={onDragOver}
+      onDragEnd={onDragEnd}
+      onDrop={onDrop}
+      className="flex items-center gap-1 cursor-grab active:cursor-grabbing opacity-40 hover:opacity-100 transition-opacity"
+    >
+      <GripVertical className="w-4 h-4 text-zinc-500" />
+      <div className="flex flex-col gap-0.5">
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onMoveUp(); }}
+          className={`${isFirst ? "opacity-20 cursor-not-allowed" : "hover:text-zinc-300"} text-zinc-600`}
+          disabled={isFirst}
+        >
+          <ChevronUp className="w-3 h-3" />
+        </button>
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onMoveDown(); }}
+          className={`${isLast ? "opacity-20 cursor-not-allowed" : "hover:text-zinc-300"} text-zinc-600`}
+          disabled={isLast}
+        >
+          <ChevronDown className="w-3 h-3" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function LivePreview({ question }: { question: any }) {
+  if (!question) return null;
+
+  const type = question.type || "multiple_choice";
+  const typeInfo = QUESTION_TYPES.find(t => t.value === type);
+
+  return (
+    <div className="border border-zinc-800/60 rounded-xl overflow-hidden bg-zinc-950/80">
+      <div className="flex items-center gap-2 px-4 py-2 border-b border-zinc-800/60 bg-zinc-900/50">
+        <Eye className="w-4 h-4 text-zinc-500" />
+        <span className="text-xs font-mono text-zinc-500">Live Preview</span>
+        {typeInfo && (
+          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800" style={{ color: TYPE_COLORS[type] }}>
+            {typeInfo.label}
+          </span>
+        )}
+      </div>
+      <div className="p-5 space-y-4">
+        <p className="font-mono text-sm text-zinc-100 leading-relaxed">
+          {question.questionText || "Question text will appear here..."}
+        </p>
+        {question.mediaUrl && type === "image" && (
+          <img src={question.mediaUrl} alt="preview" className="max-h-40 rounded-lg border border-zinc-800/60 object-cover" />
+        )}
+        {question.mediaUrl && type === "audio" && (
+          <audio src={question.mediaUrl} controls className="w-full max-w-md" />
+        )}
+        {question.mediaUrl && type === "video" && (
+          <video src={question.mediaUrl} controls className="w-full max-h-40 rounded-lg" />
+        )}
+        {type === "cipher" && (
+          <div className="font-mono text-lg tracking-[0.2em] text-cyan-300 leading-loose break-all bg-cyan-950/20 rounded-lg p-4 border border-cyan-900/30">
+            {question.questionText || "[CIPHER TEXT]"}
+          </div>
+        )}
+        {type === "true_false" ? (
+          <div className="flex gap-3">
+            <div className="flex-1 px-4 py-3 rounded-lg border text-center text-sm font-mono bg-green-500/5 border-green-500/30 text-green-400">True</div>
+            <div className="flex-1 px-4 py-3 rounded-lg border text-center text-sm font-mono bg-red-500/5 border-red-500/30 text-red-400">False</div>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {(question.options || []).map((opt: any, i: number) => (
+              <div
+                key={i}
+                className={`px-4 py-3 rounded-lg border text-sm font-mono ${
+                  opt.isCorrect
+                    ? "bg-green-500/10 border-green-500/40 text-green-300"
+                    : "bg-zinc-900/50 border-zinc-800/60 text-zinc-400"
+                }`}
+              >
+                <span className="text-zinc-600 mr-2">{String.fromCharCode(65 + i)}.</span>
+                {opt.text || `Option ${i + 1}`}
+              </div>
+            ))}
+          </div>
+        )}
+        {question.explanation && (
+          <div className="text-xs font-mono text-zinc-600 italic border-t border-zinc-800/60 pt-3 mt-3">
+            {question.explanation}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function AdminQuestions() {
-  const [questions, setQuestions] = useState<any[]>([]);
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
   const [editing, setEditing] = useState<any>(null);
   const [msg, setMsg] = useState("");
-
-  const categories = ["technology", "security", "history", "logic", "intelligence", "general"];
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   function loadQuestions() {
     setLoading(true);
     const params = new URLSearchParams({ page: String(page), limit: "20" });
-    if (search) params.set("category", search);
+    if (categoryFilter) params.set("category", categoryFilter);
     adminFetch(`/admin/questions?${params}`).then(r => r.json()).then(d => {
       if (d.questions) { setQuestions(d.questions); setTotal(d.total); }
     }).catch(() => {}).finally(() => setLoading(false));
   }
 
-  useEffect(() => { loadQuestions(); }, [page, search]);
+  useEffect(() => { loadQuestions(); }, [page, categoryFilter]);
 
   async function deleteQuestion(id: number) {
     if (!confirm("Delete this question?")) return;
-    const r = await adminFetch(`/admin/questions/${id}`, { method: "DELETE" });
+    await adminFetch(`/admin/questions/${id}`, { method: "DELETE" });
+    setMsg("Deleted");
+    loadQuestions();
+  }
+
+  async function exportQuestions() {
+    const r = await adminFetch("/admin/questions/export");
+    const data = await r.json();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `questions-export-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setMsg("Exported");
+  }
+
+  async function importQuestions(file: File) {
+    const text = await file.text();
+    const arr = JSON.parse(text);
+    const r = await adminFetch("/admin/questions/import", {
+      method: "POST",
+      body: JSON.stringify(arr),
+    });
     const d = await r.json();
-    setMsg(d.error || "Deleted");
+    setMsg(d.error || `Imported ${d.imported} questions`);
     loadQuestions();
   }
 
@@ -35,91 +241,487 @@ export default function AdminQuestions() {
     if (!editing) return;
     const method = editing.id ? "PUT" : "POST";
     const url = editing.id ? `/admin/questions/${editing.id}` : "/admin/questions";
-    const r = await adminFetch(url, { method, body: JSON.stringify(editing) });
+
+    const body: any = {
+      type: editing.type || "multiple_choice",
+      questionText: editing.questionText,
+      difficulty: editing.difficulty,
+      category: editing.category,
+      correctAnswer: editing.correctAnswer || "",
+      timeLimitSeconds: editing.timeLimitSeconds,
+      explanation: editing.explanation || "",
+      mediaUrl: editing.mediaUrl || null,
+    };
+
+    if (editing.type === "true_false") {
+      body.options = undefined;
+    } else if (editing.options && editing.options.length > 0) {
+      body.options = editing.options;
+    }
+
+    const r = await adminFetch(url, { method, body: JSON.stringify(body) });
     const d = await r.json();
     setMsg(d.error || "Saved");
     setEditing(null);
     loadQuestions();
   }
 
-  const headers = ["ID", "Text", "Category", "Difficulty", "Options", "Created", "Actions"];
-  const rows = questions.map(q => [
-    q.id, q.questionText?.substring(0, 50) || "", q.category, q.difficulty,
-    q.options?.length || 0, new Date(q.created_at).toLocaleDateString(),
-    <div style={{ display: "flex", gap: "4px" }}>
-      <AdminButton onClick={() => setEditing(q)}>Edit</AdminButton>
-      <AdminButton variant="danger" onClick={() => deleteQuestion(q.id)}>Del</AdminButton>
-    </div>,
-  ]);
+  function initNewQuestion() {
+    setEditing({
+      type: "multiple_choice",
+      questionText: "",
+      difficulty: 3,
+      category: "general",
+      correctAnswer: "",
+      timeLimitSeconds: 30,
+      explanation: "",
+      mediaUrl: "",
+      options: [{ text: "", isCorrect: false }, { text: "", isCorrect: false }],
+    });
+  }
+
+  function editQuestion(q: Question) {
+    setEditing({
+      id: q.id,
+      type: q.type || "multiple_choice",
+      questionText: q.questionText,
+      difficulty: q.difficulty,
+      category: q.category,
+      correctAnswer: q.correctAnswer || "",
+      timeLimitSeconds: q.timeLimitSeconds,
+      explanation: q.explanation || "",
+      mediaUrl: q.mediaUrl || "",
+      options: q.options.map(o => ({ text: o.text, isCorrect: o.isCorrect === 1 })),
+    });
+  }
+
+  function updateEditing(field: string, value: any) {
+    setEditing((prev: any) => ({ ...prev, [field]: value }));
+  }
+
+  function handleTypeChange(type: string) {
+    const base = {
+      ...editing,
+      type,
+      correctAnswer: "",
+      mediaUrl: "",
+    };
+    if (type === "true_false") {
+      base.options = [];
+      base.correctAnswer = "true";
+    } else if (type === "multi_answer") {
+      base.options = editing?.options?.length >= 2
+        ? editing.options
+        : [{ text: "", isCorrect: false }, { text: "", isCorrect: false }];
+    } else if (["image", "audio", "video"].includes(type)) {
+      base.options = editing?.options?.length >= 2
+        ? editing.options
+        : [{ text: "", isCorrect: false }, { text: "", isCorrect: false }];
+    } else if (type === "cipher") {
+      base.options = editing?.options?.length >= 2
+        ? editing.options
+        : [{ text: "", isCorrect: false }, { text: "", isCorrect: false }];
+    } else {
+      base.options = editing?.options?.length >= 2
+        ? editing.options
+        : [{ text: "", isCorrect: false }, { text: "", isCorrect: false }];
+    }
+    setEditing(base);
+  }
+
+  function addOption() {
+    setEditing((prev: any) => ({
+      ...prev,
+      options: [...(prev.options || []), { text: "", isCorrect: false }],
+    }));
+  }
+
+  function removeOption(index: number) {
+    setEditing((prev: any) => ({
+      ...prev,
+      options: prev.options.filter((_: any, i: number) => i !== index),
+    }));
+  }
+
+  function updateOption(index: number, field: string, value: any) {
+    setEditing((prev: any) => {
+      const opts = [...(prev.options || [])];
+      opts[index] = { ...opts[index], [field]: value };
+      return { ...prev, options: opts };
+    });
+  }
+
+  function moveOption(fromIndex: number, toIndex: number) {
+    setEditing((prev: any) => {
+      const opts = [...(prev.options || [])];
+      const [moved] = opts.splice(fromIndex, 1);
+      opts.splice(toIndex, 0, moved);
+      return { ...prev, options: opts };
+    });
+  }
+
+  function handleDragStart(index: number) {
+    setDragIndex(index);
+  }
+
+  function handleDragOver(e: React.DragEvent, index: number) {
+    e.preventDefault();
+    if (dragIndex === null || dragIndex === index) return;
+    moveOption(dragIndex, index);
+    setDragIndex(index);
+  }
+
+  function handleDragEnd() {
+    setDragIndex(null);
+  }
+
+  const headers = ["ID", "Type", "Text", "Category", "Diff", "Options", "Created", "Actions"];
+  const rows = questions.map(q => {
+    const typeInfo = QUESTION_TYPES.find(t => t.value === q.type);
+    return [
+      q.id,
+      <span className="flex items-center gap-1.5 text-xs" style={{ color: TYPE_COLORS[q.type] || "#888" }}>
+        {typeInfo && <typeInfo.icon className="w-3.5 h-3.5" />}
+        {typeInfo?.label || q.type}
+      </span>,
+      q.questionText?.substring(0, 40) || "",
+      q.category,
+      q.difficulty,
+      q.options?.length || "-",
+      new Date(q.created_at).toLocaleDateString(),
+      <div className="flex gap-1">
+        <AdminButton onClick={() => editQuestion(q)}>Edit</AdminButton>
+        <AdminButton variant="danger" onClick={() => deleteQuestion(q.id)}>Del</AdminButton>
+      </div>,
+    ];
+  });
 
   return (
-    <AdminPage title="Question Management">
-      <div style={{ display: "flex", gap: "12px", marginBottom: "16px", alignItems: "center" }}>
-        <AdminInput value={search} onChange={setSearch} placeholder="Filter by category..." style={{ maxWidth: "200px" }} />
-        <AdminButton onClick={() => setEditing({ type: "multiple_choice", difficulty: 3, category: "general", options: [], timeLimitSeconds: 30 })}>
-          + New Question
+    <AdminPage title="Advanced Question Builder">
+      <div className="flex items-center gap-3 mb-4 flex-wrap">
+        <AdminInput
+          value={categoryFilter}
+          onChange={setCategoryFilter}
+          placeholder="Filter by category..."
+          style={{ maxWidth: "200px" }}
+        />
+        <AdminButton onClick={initNewQuestion}>+ New Question</AdminButton>
+        <AdminButton onClick={exportQuestions}>
+          <Download className="w-4 h-4 inline mr-1" /> Export
         </AdminButton>
-        {msg && <span style={{ color: "#00e5ff", fontSize: "0.8rem" }}>{msg}</span>}
+        <AdminButton onClick={() => fileInputRef.current?.click()}>
+          <Upload className="w-4 h-4 inline mr-1" /> Import
+        </AdminButton>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".json"
+          className="hidden"
+          onChange={e => {
+            const file = e.target.files?.[0];
+            if (file) importQuestions(file);
+            e.target.value = "";
+          }}
+        />
+        {msg && <span className="text-cyan-400 text-xs">{msg}</span>}
       </div>
 
-      {editing && (
-        <div style={{
-          background: "#0d1a2a", border: "1px solid #1a3a4a", borderRadius: "12px", padding: "20px", marginBottom: "20px",
-        }}>
-          <h3 style={{ color: "#00e5ff", marginBottom: "16px" }}>{editing.id ? "Edit Question" : "New Question"}</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-            <div>
-              <label style={{ fontSize: "0.75rem", color: "#5a7a8a", display: "block", marginBottom: "4px" }}>Question Text</label>
-              <textarea value={editing.questionText || ""} onChange={e => setEditing({ ...editing, questionText: e.target.value })}
-                style={{ width: "100%", minHeight: "60px", padding: "8px", borderRadius: "6px", border: "1px solid #1a3a4a", background: "#0a1628", color: "#b8d4e3", fontSize: "0.875rem" }} />
+      <AnimatePresence mode="wait">
+        {editing && (
+          <motion.div
+            key="editor"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="mb-6 p-5 rounded-xl border border-zinc-800/60 bg-zinc-900/40"
+          >
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-sm font-mono text-zinc-300">
+                {editing.id ? "Edit Question" : "New Question"}
+                <span className="ml-2 text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ color: TYPE_COLORS[editing.type], background: `${TYPE_COLORS[editing.type]}15` }}>
+                  {QUESTION_TYPES.find(t => t.value === editing.type)?.label || editing.type}
+                </span>
+              </h3>
+              <button
+                onClick={() => setEditing(null)}
+                className="p-1.5 rounded-lg hover:bg-zinc-800 transition-colors text-zinc-500 hover:text-zinc-300"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
-            <div>
-              <label style={{ fontSize: "0.75rem", color: "#5a7a8a", display: "block", marginBottom: "4px" }}>Category</label>
-              <AdminSelect value={editing.category || "general"} onChange={v => setEditing({ ...editing, category: v })}
-                options={categories.map(c => ({ label: c, value: c }))} />
-              <label style={{ fontSize: "0.75rem", color: "#5a7a8a", display: "block", margin: "8px 0 4px" }}>Difficulty (1-10)</label>
-              <input type="number" min={1} max={10} value={editing.difficulty || 3} onChange={e => setEditing({ ...editing, difficulty: parseInt(e.target.value) })}
-                style={{ width: "80px", padding: "8px", borderRadius: "6px", border: "1px solid #1a3a4a", background: "#0a1628", color: "#b8d4e3" }} />
-              <label style={{ fontSize: "0.75rem", color: "#5a7a8a", display: "block", margin: "8px 0 4px" }}>Time Limit (sec)</label>
-              <input type="number" value={editing.timeLimitSeconds || 30} onChange={e => setEditing({ ...editing, timeLimitSeconds: parseInt(e.target.value) })}
-                style={{ width: "80px", padding: "8px", borderRadius: "6px", border: "1px solid #1a3a4a", background: "#0a1628", color: "#b8d4e3" }} />
-            </div>
-          </div>
-          <div style={{ marginTop: "16px" }}>
-            <label style={{ fontSize: "0.75rem", color: "#5a7a8a", display: "block", marginBottom: "4px" }}>Options</label>
-            {(editing.options || []).map((opt: any, i: number) => (
-              <div key={i} style={{ display: "flex", gap: "8px", marginBottom: "6px", alignItems: "center" }}>
-                <input type="text" value={opt.text || ""} onChange={e => {
-                  const opts = [...(editing.options || [])];
-                  opts[i] = { ...opts[i], text: e.target.value };
-                  setEditing({ ...editing, options: opts });
-                }} style={{ flex: 1, padding: "6px 10px", borderRadius: "6px", border: "1px solid #1a3a4a", background: "#0a1628", color: "#b8d4e3" }} />
-                <label style={{ fontSize: "0.75rem", color: "#5a7a8a", display: "flex", alignItems: "center", gap: "4px" }}>
-                  <input type="checkbox" checked={opt.isCorrect || false} onChange={e => {
-                    const opts = [...(editing.options || [])];
-                    opts[i] = { ...opts[i], isCorrect: e.target.checked };
-                    setEditing({ ...editing, options: opts });
-                  }} /> Correct
-                </label>
-                <AdminButton variant="danger" onClick={() => {
-                  setEditing({ ...editing, options: (editing.options || []).filter((_: any, j: number) => j !== i) });
-                }}>✕</AdminButton>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="space-y-5">
+                {/* Type Selector */}
+                <div>
+                  <label className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider block mb-2">Question Type</label>
+                  <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
+                    {QUESTION_TYPES.map(t => (
+                      <TypeCard
+                        key={t.value}
+                        type={t}
+                        selected={editing.type === t.value}
+                        onSelect={() => handleTypeChange(t.value)}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Question Text */}
+                <div>
+                  <label className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider block mb-1.5">
+                    {editing.type === "cipher" ? "Cipher Text" : "Question Text"}
+                  </label>
+                  <textarea
+                    value={editing.questionText || ""}
+                    onChange={e => updateEditing("questionText", e.target.value)}
+                    rows={editing.type === "cipher" ? 4 : 3}
+                    className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-200 text-sm font-mono focus:outline-none focus:border-zinc-600 transition-colors resize-none"
+                    placeholder={editing.type === "cipher" ? "Enter encrypted cipher text..." : "Enter question text..."}
+                  />
+                </div>
+
+                {/* Media URL */}
+                {["image", "audio", "video"].includes(editing.type) && (
+                  <div>
+                    <label className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider block mb-1.5">
+                      {editing.type === "image" ? "Image URL" : editing.type === "audio" ? "Audio URL" : "Video URL"}
+                    </label>
+                    <div className="flex gap-2">
+                      <AdminInput
+                        value={editing.mediaUrl || ""}
+                        onChange={v => updateEditing("mediaUrl", v)}
+                        placeholder={`Enter ${editing.type} URL...`}
+                        style={{ flex: 1 }}
+                      />
+                    </div>
+                    {editing.mediaUrl && (
+                      <div className="mt-2 rounded-lg overflow-hidden border border-zinc-800/60 max-h-40">
+                        {editing.type === "image" ? (
+                          <img src={editing.mediaUrl} alt="" className="max-h-36 object-contain mx-auto" onError={(e) => (e.currentTarget.style.display = "none")} />
+                        ) : editing.type === "audio" ? (
+                          <audio src={editing.mediaUrl} controls className="w-full p-2" />
+                        ) : (
+                          <video src={editing.mediaUrl} controls className="w-full max-h-36" />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Cipher specific visual */}
+                {editing.type === "cipher" && (
+                  <div className="bg-cyan-950/20 rounded-lg p-4 border border-cyan-900/30">
+                    <p className="font-mono text-[10px] text-cyan-400 tracking-widest mb-2">SIGNAL INTERCEPT</p>
+                    <p className="font-mono text-xs text-cyan-300/60">
+                      The cipher text above will be displayed with tracking spacing and a blue theme during gameplay.
+                    </p>
+                  </div>
+                )}
+
+                {/* True/False specific */}
+                {editing.type === "true_false" && (
+                  <div>
+                    <label className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider block mb-1.5">Correct Answer</label>
+                    <div className="flex gap-3">
+                      {["true", "false"].map(val => (
+                        <button
+                          key={val}
+                          onClick={() => updateEditing("correctAnswer", val)}
+                          className={`flex-1 px-4 py-3 rounded-lg border text-center text-sm font-mono transition-all cursor-pointer ${
+                            editing.correctAnswer === val
+                              ? val === "true"
+                                ? "bg-green-500/10 border-green-500/40 text-green-400"
+                                : "bg-red-500/10 border-red-500/40 text-red-400"
+                              : "bg-zinc-900/50 border-zinc-800/60 text-zinc-500 hover:border-zinc-600"
+                          }`}
+                        >
+                          {val === "true" ? "True" : "False"}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Options (for types that use them) */}
+                {editing.type !== "true_false" && (
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider">
+                        Options
+                        {editing.type === "multi_answer" && <span className="ml-1 text-yellow-500">(multi-select)</span>}
+                      </label>
+                      {editing.type === "multi_answer" && (
+                        <span className="text-[10px] text-yellow-600/60">Check all correct answers</span>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      {(editing.options || []).map((opt: QuestionOption, i: number) => (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          className="flex items-center gap-2"
+                        >
+                          <DragHandle
+                            index={i}
+                            isFirst={i === 0}
+                            isLast={i === (editing.options?.length || 0) - 1}
+                            onMoveUp={() => moveOption(i, i - 1)}
+                            onMoveDown={() => moveOption(i, i + 1)}
+                            onDragStart={() => handleDragStart(i)}
+                            onDragOver={(e) => handleDragOver(e, i)}
+                            onDragEnd={handleDragEnd}
+                            onDrop={handleDragEnd}
+                          />
+                          <span className="text-[10px] font-mono text-zinc-600 w-4">{String.fromCharCode(65 + i)}.</span>
+                          <input
+                            type="text"
+                            value={opt.text}
+                            onChange={e => updateOption(i, "text", e.target.value)}
+                            placeholder={`Option ${i + 1}`}
+                            className="flex-1 px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-200 text-sm font-mono focus:outline-none focus:border-zinc-600 transition-colors"
+                          />
+                          <label className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-mono cursor-pointer transition-all ${
+                            opt.isCorrect
+                              ? editing.type === "multi_answer"
+                                ? "bg-green-500/10 border-green-500/40 text-green-400"
+                                : "bg-green-500/10 border-green-500/40 text-green-400"
+                              : "bg-zinc-900/50 border-zinc-800/60 text-zinc-500 hover:border-zinc-600"
+                          }`}>
+                            <input
+                              type={editing.type === "multi_answer" ? "checkbox" : "radio"}
+                              name="correct-option"
+                              checked={opt.isCorrect}
+                              onChange={e => {
+                                if (editing.type === "multi_answer") {
+                                  updateOption(i, "isCorrect", e.target.checked);
+                                } else {
+                                  const opts = (editing.options || []).map((o: QuestionOption, j: number) => ({
+                                    ...o,
+                                    isCorrect: j === i,
+                                  }));
+                                  setEditing((prev: any) => ({ ...prev, options: opts }));
+                                }
+                              }}
+                              className="sr-only"
+                            />
+                            {editing.type === "multi_answer" ? (opt.isCorrect ? "✓" : "○") : (opt.isCorrect ? "✓" : "○")}
+                          </label>
+                          {(editing.options?.length || 0) > 2 && (
+                            <button
+                              type="button"
+                              onClick={() => removeOption(i)}
+                              className="p-1.5 rounded-lg hover:bg-red-950/30 text-zinc-600 hover:text-red-400 transition-colors"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </motion.div>
+                      ))}
+                    </div>
+                    <button
+                      onClick={addOption}
+                      className="mt-2 flex items-center gap-1.5 text-xs font-mono text-zinc-500 hover:text-zinc-300 transition-colors"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Add Option
+                    </button>
+                  </div>
+                )}
+
+                {/* Metadata row */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider block mb-1.5">Category</label>
+                    <AdminSelect
+                      value={editing.category || "general"}
+                      onChange={v => updateEditing("category", v)}
+                      options={CATEGORIES.map(c => ({ label: c, value: c }))}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider block mb-1.5">Difficulty (1-10)</label>
+                    <input
+                      type="range"
+                      min={1}
+                      max={10}
+                      value={editing.difficulty || 3}
+                      onChange={e => updateEditing("difficulty", parseInt(e.target.value))}
+                      className="w-full accent-cyan-500"
+                    />
+                    <div className="flex justify-between text-[10px] font-mono text-zinc-600 mt-0.5">
+                      <span>1</span>
+                      <span className="text-zinc-400">{editing.difficulty || 3}</span>
+                      <span>10</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider block mb-1.5">Time Limit (sec)</label>
+                    <input
+                      type="number"
+                      min={5}
+                      max={120}
+                      value={editing.timeLimitSeconds || 30}
+                      onChange={e => updateEditing("timeLimitSeconds", parseInt(e.target.value))}
+                      className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-200 text-sm font-mono focus:outline-none focus:border-zinc-600"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider block mb-1.5">Correct Answer (text)</label>
+                    <input
+                      type="text"
+                      value={editing.correctAnswer || ""}
+                      onChange={e => updateEditing("correctAnswer", e.target.value)}
+                      placeholder={editing.type === "true_false" ? "Auto-set from selection" : "Stored as reference"}
+                      readOnly={editing.type === "true_false"}
+                      className={`w-full px-3 py-2 rounded-lg border font-mono text-sm focus:outline-none focus:border-zinc-600 transition-colors ${
+                        editing.type === "true_false"
+                          ? "bg-zinc-900/50 border-zinc-800/30 text-zinc-600"
+                          : "bg-zinc-950 border-zinc-800 text-zinc-200"
+                      }`}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider block mb-1.5">Explanation (shown after answer)</label>
+                  <textarea
+                    value={editing.explanation || ""}
+                    onChange={e => updateEditing("explanation", e.target.value)}
+                    rows={2}
+                    className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-200 text-sm font-mono focus:outline-none focus:border-zinc-600 transition-colors resize-none"
+                    placeholder="Explain the correct answer..."
+                  />
+                </div>
+
+                {/* Action buttons */}
+                <div className="flex gap-3 pt-2">
+                  <AdminButton onClick={saveQuestion}>
+                    {editing.id ? "Update Question" : "Create Question"}
+                  </AdminButton>
+                  <AdminButton variant="ghost" onClick={() => setEditing(null)}>Cancel</AdminButton>
+                </div>
               </div>
-            ))}
-            <AdminButton onClick={() => {
-              setEditing({ ...editing, options: [...(editing.options || []), { text: "", isCorrect: false }] });
-            }}>+ Add Option</AdminButton>
-          </div>
-          <div style={{ marginTop: "16px", display: "flex", gap: "8px" }}>
-            <AdminButton onClick={saveQuestion}>Save</AdminButton>
-            <AdminButton variant="ghost" onClick={() => setEditing(null)}>Cancel</AdminButton>
-          </div>
-        </div>
+
+              {/* Live Preview Panel */}
+              <div ref={previewRef} className="lg:sticky lg:top-4 self-start">
+                <LivePreview question={editing} />
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {loading ? (
+        <p className="text-zinc-600 text-sm font-mono">Loading...</p>
+      ) : (
+        <AdminTable headers={headers} rows={rows} />
       )}
 
-      {loading ? <p style={{ color: "#5a7a8a" }}>Loading...</p> : <AdminTable headers={headers} rows={rows} />}
-
-      <div style={{ marginTop: "12px", display: "flex", gap: "8px", alignItems: "center", fontSize: "0.8rem", color: "#5a7a8a" }}>
+      <div className="mt-3 flex items-center gap-3 text-xs font-mono text-zinc-600">
         <AdminButton disabled={page <= 1} onClick={() => setPage(p => p - 1)}>← Prev</AdminButton>
         <span>Page {page} of {Math.ceil(total / 20)} ({total} total)</span>
         <AdminButton disabled={page >= Math.ceil(total / 20)} onClick={() => setPage(p => p + 1)}>Next →</AdminButton>

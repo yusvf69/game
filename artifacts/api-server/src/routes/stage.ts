@@ -338,26 +338,10 @@ router.post("/stage/start", async (req, res) => {
     .orderBy(sql`RANDOM()`)
     .limit(match.totalQuestions);
 
-  const qs = await Promise.all(questions.map(async (q) => {
-    const options = await db.select({ id: questionOptionsTable.id, text: questionOptionsTable.optionText })
-      .from(questionOptionsTable).where(eq(questionOptionsTable.questionId, q.id));
-    return {
-      id: q.id,
-      questionText: q.questionText,
-      difficulty: q.difficulty,
-      category: q.category,
-      options,
-      timeLimit: q.timeLimitSeconds || match.timerSeconds,
-      type: q.type,
-      correctOptionId: options.find(o => o.id)?.id,
-    };
-  }));
-
-  // Re-fetch with isCorrect to get correct option IDs
   const fullQs = await Promise.all(questions.map(async (q) => {
     const options = await db.select({ id: questionOptionsTable.id, text: questionOptionsTable.optionText, isCorrect: questionOptionsTable.isCorrect })
       .from(questionOptionsTable).where(eq(questionOptionsTable.questionId, q.id));
-    const correctOpt = options.find(o => o.isCorrect === 1);
+    const correctIds = options.filter(o => o.isCorrect === 1).map(o => o.id);
     return {
       id: q.id,
       questionText: q.questionText,
@@ -366,7 +350,7 @@ router.post("/stage/start", async (req, res) => {
       options: options.map(o => ({ id: o.id, text: o.text })),
       timeLimit: q.timeLimitSeconds || match.timerSeconds,
       type: q.type,
-      correctOptionId: correctOpt?.id || null,
+      correctOptionIds: correctIds,
     };
   }));
 
@@ -390,7 +374,7 @@ router.post("/stage/start", async (req, res) => {
 
 function stripAnswer(q: any) {
   if (!q) return q;
-  const { correctOptionId, ...rest } = q;
+  const { correctOptionIds, ...rest } = q;
   return rest;
 }
 
@@ -425,7 +409,7 @@ router.post("/stage/answer", async (req, res) => {
   if (!team) { res.status(404).json({ error: "Team not found" }); return; }
 
   const q = match.questions[match.currentQuestionIndex];
-  const isCorrect = q && q.correctOptionId === optionId;
+  const isCorrect = q && q.correctOptionIds?.includes(optionId);
 
   team.total += 1;
 

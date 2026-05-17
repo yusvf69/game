@@ -514,7 +514,7 @@ var require_node = __commonJS({
   "../../node_modules/.pnpm/debug@4.4.3/node_modules/debug/src/node.js"(exports, module) {
     var tty = __require("tty");
     var util2 = __require("util");
-    exports.init = init2;
+    exports.init = init3;
     exports.log = log;
     exports.formatArgs = formatArgs;
     exports.save = save;
@@ -663,7 +663,7 @@ var require_node = __commonJS({
     function load() {
       return process.env.DEBUG;
     }
-    function init2(debug) {
+    function init3(debug) {
       debug.inspectOpts = {};
       const keys = Object.keys(exports.inspectOpts);
       for (let i = 0; i < keys.length; i++) {
@@ -20905,7 +20905,7 @@ var require_application = __commonJS({
     var flatten = Array.prototype.flat;
     var app2 = exports = module.exports = {};
     var trustProxyDefaultSymbol = "@@symbol:trust_proxy_default";
-    app2.init = function init2() {
+    app2.init = function init3() {
       var router25 = null;
       this.cache = /* @__PURE__ */ Object.create(null);
       this.engines = /* @__PURE__ */ Object.create(null);
@@ -23894,7 +23894,7 @@ var require_lib3 = __commonJS({
 // ../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v4/core/core.js
 // @__NO_SIDE_EFFECTS__
 function $constructor(name, initializer3, params) {
-  function init2(inst, def) {
+  function init3(inst, def) {
     var _a;
     Object.defineProperty(inst, "_zod", {
       value: inst._zod ?? {},
@@ -23917,14 +23917,14 @@ function $constructor(name, initializer3, params) {
   function _(def) {
     var _a;
     const inst = params?.Parent ? new Definition() : this;
-    init2(inst, def);
+    init3(inst, def);
     (_a = inst._zod).deferred ?? (_a.deferred = []);
     for (const fn of inst._zod.deferred) {
       fn();
     }
     return inst;
   }
-  Object.defineProperty(_, "init", { value: init2 });
+  Object.defineProperty(_, "init", { value: init3 });
   Object.defineProperty(_, Symbol.hasInstance, {
     value: (inst) => {
       if (params?.Parent && inst instanceof params.Parent)
@@ -41369,7 +41369,7 @@ async function getStageMatch2(matchId) {
 }
 function stripAnswer(q) {
   if (!q) return q;
-  const { correctOptionId, ...rest } = q;
+  const { correctOptionIds, ...rest } = q;
   return rest;
 }
 var import_express21, router21, stageMatchCache, DOMAIN_CATEGORIES3, TEAM_COLORS, TEAM_EMBLEMS, stage_default;
@@ -41576,22 +41576,9 @@ var init_stage2 = __esm({
         if (cats) selectedCategories.push(...cats);
       }
       const questions = await db.select().from(questionsTable).where(selectedCategories.length > 0 ? sql15`${questionsTable.category} IN (${sql15.join(selectedCategories.map((c) => sql15`${c}`), sql15`, `)})` : void 0).orderBy(sql15`RANDOM()`).limit(match.totalQuestions);
-      const qs = await Promise.all(questions.map(async (q) => {
-        const options = await db.select({ id: questionOptionsTable.id, text: questionOptionsTable.optionText }).from(questionOptionsTable).where(eq22(questionOptionsTable.questionId, q.id));
-        return {
-          id: q.id,
-          questionText: q.questionText,
-          difficulty: q.difficulty,
-          category: q.category,
-          options,
-          timeLimit: q.timeLimitSeconds || match.timerSeconds,
-          type: q.type,
-          correctOptionId: options.find((o) => o.id)?.id
-        };
-      }));
       const fullQs = await Promise.all(questions.map(async (q) => {
         const options = await db.select({ id: questionOptionsTable.id, text: questionOptionsTable.optionText, isCorrect: questionOptionsTable.isCorrect }).from(questionOptionsTable).where(eq22(questionOptionsTable.questionId, q.id));
-        const correctOpt = options.find((o) => o.isCorrect === 1);
+        const correctIds = options.filter((o) => o.isCorrect === 1).map((o) => o.id);
         return {
           id: q.id,
           questionText: q.questionText,
@@ -41600,7 +41587,7 @@ var init_stage2 = __esm({
           options: options.map((o) => ({ id: o.id, text: o.text })),
           timeLimit: q.timeLimitSeconds || match.timerSeconds,
           type: q.type,
-          correctOptionId: correctOpt?.id || null
+          correctOptionIds: correctIds
         };
       }));
       match.questions = fullQs;
@@ -41665,7 +41652,7 @@ var init_stage2 = __esm({
         return;
       }
       const q = match.questions[match.currentQuestionIndex];
-      const isCorrect = q && q.correctOptionId === optionId;
+      const isCorrect = q && q.correctOptionIds?.includes(optionId);
       team.total += 1;
       const pointsMultiplier = match.wrongAttempts > 0 ? 0.5 : 1;
       const speedBonus = match.timerStartedAt ? Date.now() - match.timerStartedAt < 5e3 ? 25 : 15 : 0;
@@ -49614,25 +49601,68 @@ router22.get("/admin/questions/:id", requirePermission("manage_questions"), asyn
   const opts = await db.select().from(questionOptionsTable).where(eq24(questionOptionsTable.questionId, q.id));
   res.json({ ...q, options: opts });
 });
+function validateQuestionBody(body) {
+  const { type, questionText, correctAnswer } = body;
+  if (!questionText) return "questionText is required";
+  switch (type) {
+    case "true_false":
+      if (!correctAnswer || !["true", "false"].includes(correctAnswer.toLowerCase()))
+        return "correctAnswer must be 'true' or 'false' for true_false questions";
+      break;
+    case "cipher":
+      if (!correctAnswer) return "correctAnswer is required for cipher questions";
+      break;
+    case "image":
+    case "audio":
+    case "video":
+      if (!body.mediaUrl) return "mediaUrl is required for media questions";
+      if (!correctAnswer) return "correctAnswer is required";
+      break;
+    case "multi_answer":
+      if (!body.options || body.options.length < 2)
+        return "At least 2 options required for multi_answer questions";
+      if (!body.options.some((o) => o.isCorrect))
+        return "At least one option must be marked correct";
+      break;
+    case "multiple_choice":
+    case "text":
+    default:
+      if (!body.options || body.options.length < 2)
+        return "At least 2 options required";
+      if (!body.options.some((o) => o.isCorrect))
+        return "One option must be marked correct";
+      break;
+  }
+  return null;
+}
 router22.post("/admin/questions", requirePermission("manage_questions"), async (req, res) => {
-  const { type, questionText, difficulty, category, correctAnswer, timeLimitSeconds, explanation, options } = req.body;
-  if (!questionText || !options || options.length < 2) {
-    return res.status(400).json({ error: "questionText and at least 2 options required" });
+  const { type, questionText, difficulty, category, correctAnswer, timeLimitSeconds, explanation, options, mediaUrl } = req.body;
+  const validationErr = validateQuestionBody(req.body);
+  if (validationErr) return res.status(400).json({ error: validationErr });
+  const qType = type || "multiple_choice";
+  let resolvedOptions = options || [];
+  if (qType === "true_false") {
+    const isCorrect = correctAnswer?.toLowerCase() === "true";
+    resolvedOptions = [
+      { text: "True", isCorrect },
+      { text: "False", isCorrect: !isCorrect }
+    ];
   }
   const [question] = await db.insert(questionsTable).values({
-    type: type || "multiple_choice",
+    type: qType,
     questionText,
     difficulty: difficulty || 3,
     category: category || "general",
-    correctAnswer,
+    correctAnswer: correctAnswer || "",
     timeLimitSeconds: timeLimitSeconds || 30,
-    explanation
+    explanation: explanation || "",
+    mediaUrl: mediaUrl || null
   }).returning();
-  for (let i = 0; i < options.length; i++) {
+  for (let i = 0; i < resolvedOptions.length; i++) {
     await db.insert(questionOptionsTable).values({
       questionId: question.id,
-      optionText: options[i].text,
-      isCorrect: options[i].isCorrect ? 1 : 0
+      optionText: resolvedOptions[i].text,
+      isCorrect: resolvedOptions[i].isCorrect ? 1 : 0
     });
   }
   logAdmin(req.user.id, "ADMIN_CREATED_QUESTION", "question", String(question.id));
@@ -49642,23 +49672,39 @@ router22.put("/admin/questions/:id", requirePermission("manage_questions"), asyn
   const id = parseInt(req.params.id);
   const [existing] = await db.select().from(questionsTable).where(eq24(questionsTable.id, id)).limit(1);
   if (!existing) return res.status(404).json({ error: "Question not found" });
-  const { type, questionText, difficulty, category, correctAnswer, timeLimitSeconds, explanation } = req.body;
-  await db.update(questionsTable).set({
-    ...type && { type },
-    ...questionText && { questionText },
-    ...difficulty && { difficulty },
-    ...category && { category },
-    ...correctAnswer && { correctAnswer },
-    ...timeLimitSeconds && { timeLimitSeconds },
-    ...explanation && { explanation }
-  }).where(eq24(questionsTable.id, id));
-  if (req.body.options) {
+  const body = req.body;
+  if (body.type || body.questionText || body.correctAnswer || body.mediaUrl || body.options) {
+    const validationErr = validateQuestionBody(body);
+    if (validationErr) return res.status(400).json({ error: validationErr });
+  }
+  const qType = body.type || existing.type;
+  let resolvedOptions = body.options;
+  if (qType === "true_false" && body.correctAnswer) {
+    const isCorrect = body.correctAnswer.toLowerCase() === "true";
+    resolvedOptions = [
+      { text: "True", isCorrect },
+      { text: "False", isCorrect: !isCorrect }
+    ];
+  }
+  const updateData = {};
+  if (body.type) updateData.type = body.type;
+  if (body.questionText) updateData.questionText = body.questionText;
+  if (body.difficulty) updateData.difficulty = body.difficulty;
+  if (body.category) updateData.category = body.category;
+  if (body.correctAnswer !== void 0) updateData.correctAnswer = body.correctAnswer;
+  if (body.timeLimitSeconds) updateData.timeLimitSeconds = body.timeLimitSeconds;
+  if (body.explanation !== void 0) updateData.explanation = body.explanation;
+  if (body.mediaUrl !== void 0) updateData.mediaUrl = body.mediaUrl;
+  if (Object.keys(updateData).length > 0) {
+    await db.update(questionsTable).set(updateData).where(eq24(questionsTable.id, id));
+  }
+  if (resolvedOptions) {
     await db.delete(questionOptionsTable).where(eq24(questionOptionsTable.questionId, id));
-    for (let i = 0; i < req.body.options.length; i++) {
+    for (let i = 0; i < resolvedOptions.length; i++) {
       await db.insert(questionOptionsTable).values({
         questionId: id,
-        optionText: req.body.options[i].text,
-        isCorrect: req.body.options[i].isCorrect ? 1 : 0
+        optionText: resolvedOptions[i].text,
+        isCorrect: resolvedOptions[i].isCorrect ? 1 : 0
       });
     }
   }
@@ -49718,6 +49764,50 @@ router22.post("/admin/questions/generate", requirePermission("manage_questions")
   }));
   logAdmin(req.user.id, "ADMIN_COPIED_QUESTIONS", "question", null, { count: questionsWithOptions.length });
   res.json({ questions: questionsWithOptions });
+});
+router22.get("/admin/questions/export", requirePermission("manage_questions"), async (req, res) => {
+  const { rows } = await getPool().query(`SELECT * FROM questions ORDER BY id`);
+  const questions = await Promise.all(rows.map(async (q) => {
+    const opts = await db.select().from(questionOptionsTable).where(eq24(questionOptionsTable.questionId, q.id));
+    return { ...q, options: opts };
+  }));
+  res.setHeader("Content-Type", "application/json");
+  res.setHeader("Content-Disposition", `attachment; filename="questions-export-${Date.now()}.json"`);
+  res.json(questions);
+});
+router22.post("/admin/questions/import", requirePermission("manage_questions"), async (req, res) => {
+  const questions = req.body;
+  if (!Array.isArray(questions) || questions.length === 0) {
+    return res.status(400).json({ error: "Expected array of questions" });
+  }
+  let imported = 0;
+  for (const q of questions) {
+    try {
+      const [question] = await db.insert(questionsTable).values({
+        type: q.type || "multiple_choice",
+        questionText: q.questionText || q.question_text,
+        difficulty: q.difficulty || 3,
+        category: q.category || "general",
+        correctAnswer: q.correctAnswer || q.correct_answer || "",
+        timeLimitSeconds: q.timeLimitSeconds || q.time_limit_seconds || 30,
+        explanation: q.explanation || "",
+        mediaUrl: q.mediaUrl || q.media_url || null
+      }).returning();
+      const opts = q.options || [];
+      for (let i = 0; i < opts.length; i++) {
+        await db.insert(questionOptionsTable).values({
+          questionId: question.id,
+          optionText: opts[i].text || opts[i].optionText || opts[i].option_text || "",
+          isCorrect: opts[i].isCorrect || opts[i].is_correct ? 1 : 0
+        });
+      }
+      imported++;
+    } catch (e) {
+      console.error("[admin] Import question failed:", e.message);
+    }
+  }
+  logAdmin(req.user.id, "ADMIN_IMPORTED_QUESTIONS", "question", null, { imported });
+  res.json({ success: true, imported });
 });
 router22.get("/admin/users", requirePermission("manage_users"), async (req, res) => {
   const page = parseInt(req.query.page) || 1;
@@ -49945,7 +50035,7 @@ router22.get("/admin/replays/:matchId", requirePermission("manage_matches"), asy
   if (rows.length === 0) return res.status(404).json({ error: "Match not found" });
   const state = rows[0].state;
   const qs = (state.questions || []).map((q) => {
-    const { correctOptionId, ...rest } = q;
+    const { correctOptionIds, ...rest } = q;
     return rest;
   });
   res.json({
@@ -50223,12 +50313,13 @@ router23.post("/stage/ai-opponent/tick", async (req, res) => {
       match.phase = "buzzed";
       const q = match.questions[match.currentQuestionIndex];
       let willBeCorrect = false;
-      if (q && q.correctOptionId) {
+      if (q && q.correctOptionIds?.length > 0) {
+        const firstCorrect = q.correctOptionIds[0];
         willBeCorrect = Math.random() < skill.accuracy;
         if (willBeCorrect) {
-          match.buzzedOptionId = q.correctOptionId;
+          match.buzzedOptionId = firstCorrect;
         } else {
-          const wrongOptions = q.options?.filter((o) => o.id !== q.correctOptionId) || [];
+          const wrongOptions = q.options?.filter((o) => !q.correctOptionIds.includes(o.id)) || [];
           match.buzzedOptionId = wrongOptions[Math.floor(Math.random() * wrongOptions.length)]?.id || null;
         }
       }
@@ -50288,7 +50379,30 @@ router24.use(aiOpponent_default);
 router24.use(admin_default);
 var routes_default = router24;
 
+// src/lib/sentry.ts
+import * as Sentry from "@sentry/node";
+function initSentry() {
+  if (process.env.SENTRY_DSN) {
+    Sentry.init({
+      dsn: process.env.SENTRY_DSN,
+      environment: process.env.VERCEL_ENV || process.env.NODE_ENV || "development",
+      tracesSampleRate: parseFloat(process.env.SENTRY_TRACES_SAMPLE_RATE || "0.1")
+    });
+    console.log("[sentry] Initialized with DSN:", process.env.SENTRY_DSN.substring(0, 20) + "...");
+  } else {
+    console.log("[sentry] SENTRY_DSN not set, skipping initialization");
+  }
+}
+function captureError(error40, context) {
+  if (process.env.SENTRY_DSN) {
+    Sentry.captureException(error40, { extra: context });
+  } else {
+    console.error("[sentry] (dry) Error:", error40.message, context);
+  }
+}
+
 // src/main.ts
+initSentry();
 var app = (0, import_express25.default)();
 app.use((0, import_cors.default)());
 app.use(import_express25.default.json());
@@ -50302,7 +50416,8 @@ app.use("/api", routes_default);
 app.use((req, res) => {
   res.status(404).json({ error: "not_found", path: req.path, originalUrl: req.originalUrl, baseUrl: req.baseUrl });
 });
-app.use((err, _req, res, _next) => {
+app.use((err, req, res, _next) => {
+  captureError(err, { path: req.path, method: req.method });
   console.error("[express error]", err?.message || err);
   res.status(500).json({ error: err?.message || "Internal server error" });
 });

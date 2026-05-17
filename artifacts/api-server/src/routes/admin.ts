@@ -230,27 +230,75 @@ router.get("/admin/questions/:id", requirePermission("manage_questions"), async 
   res.json({ ...q, options: opts });
 });
 
+function validateQuestionBody(body: any): string | null {
+  const { type, questionText, correctAnswer } = body;
+  if (!questionText) return "questionText is required";
+
+  switch (type) {
+    case "true_false":
+      if (!correctAnswer || !["true", "false"].includes(correctAnswer.toLowerCase()))
+        return "correctAnswer must be 'true' or 'false' for true_false questions";
+      break;
+    case "cipher":
+      if (!correctAnswer) return "correctAnswer is required for cipher questions";
+      break;
+    case "image":
+    case "audio":
+    case "video":
+      if (!body.mediaUrl) return "mediaUrl is required for media questions";
+      if (!correctAnswer) return "correctAnswer is required";
+      break;
+    case "multi_answer":
+      if (!body.options || body.options.length < 2)
+        return "At least 2 options required for multi_answer questions";
+      if (!body.options.some((o: any) => o.isCorrect))
+        return "At least one option must be marked correct";
+      break;
+    case "multiple_choice":
+    case "text":
+    default:
+      if (!body.options || body.options.length < 2)
+        return "At least 2 options required";
+      if (!body.options.some((o: any) => o.isCorrect))
+        return "One option must be marked correct";
+      break;
+  }
+  return null;
+}
+
 router.post("/admin/questions", requirePermission("manage_questions"), async (req, res) => {
-  const { type, questionText, difficulty, category, correctAnswer, timeLimitSeconds, explanation, options } = req.body;
-  if (!questionText || !options || options.length < 2) {
-    return res.status(400).json({ error: "questionText and at least 2 options required" });
+  const { type, questionText, difficulty, category, correctAnswer, timeLimitSeconds, explanation, options, mediaUrl } = req.body;
+
+  const validationErr = validateQuestionBody(req.body);
+  if (validationErr) return res.status(400).json({ error: validationErr });
+
+  const qType = type || "multiple_choice";
+  let resolvedOptions = options || [];
+
+  if (qType === "true_false") {
+    const isCorrect = correctAnswer?.toLowerCase() === "true";
+    resolvedOptions = [
+      { text: "True", isCorrect },
+      { text: "False", isCorrect: !isCorrect },
+    ];
   }
 
   const [question] = await db.insert(questionsTable).values({
-    type: type || "multiple_choice",
+    type: qType,
     questionText,
     difficulty: difficulty || 3,
     category: category || "general",
-    correctAnswer,
+    correctAnswer: correctAnswer || "",
     timeLimitSeconds: timeLimitSeconds || 30,
-    explanation,
+    explanation: explanation || "",
+    mediaUrl: mediaUrl || null,
   }).returning();
 
-  for (let i = 0; i < options.length; i++) {
+  for (let i = 0; i < resolvedOptions.length; i++) {
     await db.insert(questionOptionsTable).values({
       questionId: question.id,
-      optionText: options[i].text,
-      isCorrect: options[i].isCorrect ? 1 : 0,
+      optionText: resolvedOptions[i].text,
+      isCorrect: resolvedOptions[i].isCorrect ? 1 : 0,
     });
   }
 
@@ -263,24 +311,45 @@ router.put("/admin/questions/:id", requirePermission("manage_questions"), async 
   const [existing] = await db.select().from(questionsTable).where(eq(questionsTable.id, id)).limit(1);
   if (!existing) return res.status(404).json({ error: "Question not found" });
 
-  const { type, questionText, difficulty, category, correctAnswer, timeLimitSeconds, explanation } = req.body;
-  await db.update(questionsTable).set({
-    ...(type && { type }),
-    ...(questionText && { questionText }),
-    ...(difficulty && { difficulty }),
-    ...(category && { category }),
-    ...(correctAnswer && { correctAnswer }),
-    ...(timeLimitSeconds && { timeLimitSeconds }),
-    ...(explanation && { explanation }),
-  }).where(eq(questionsTable.id, id));
+  const body = req.body;
 
-  if (req.body.options) {
+  if (body.type || body.questionText || body.correctAnswer || body.mediaUrl || body.options) {
+    const validationErr = validateQuestionBody(body);
+    if (validationErr) return res.status(400).json({ error: validationErr });
+  }
+
+  const qType = body.type || existing.type;
+  let resolvedOptions = body.options;
+
+  if (qType === "true_false" && body.correctAnswer) {
+    const isCorrect = body.correctAnswer.toLowerCase() === "true";
+    resolvedOptions = [
+      { text: "True", isCorrect },
+      { text: "False", isCorrect: !isCorrect },
+    ];
+  }
+
+  const updateData: Record<string, any> = {};
+  if (body.type) updateData.type = body.type;
+  if (body.questionText) updateData.questionText = body.questionText;
+  if (body.difficulty) updateData.difficulty = body.difficulty;
+  if (body.category) updateData.category = body.category;
+  if (body.correctAnswer !== undefined) updateData.correctAnswer = body.correctAnswer;
+  if (body.timeLimitSeconds) updateData.timeLimitSeconds = body.timeLimitSeconds;
+  if (body.explanation !== undefined) updateData.explanation = body.explanation;
+  if (body.mediaUrl !== undefined) updateData.mediaUrl = body.mediaUrl;
+
+  if (Object.keys(updateData).length > 0) {
+    await db.update(questionsTable).set(updateData).where(eq(questionsTable.id, id));
+  }
+
+  if (resolvedOptions) {
     await db.delete(questionOptionsTable).where(eq(questionOptionsTable.questionId, id));
-    for (let i = 0; i < req.body.options.length; i++) {
+    for (let i = 0; i < resolvedOptions.length; i++) {
       await db.insert(questionOptionsTable).values({
         questionId: id,
-        optionText: req.body.options[i].text,
-        isCorrect: req.body.options[i].isCorrect ? 1 : 0,
+        optionText: resolvedOptions[i].text,
+        isCorrect: resolvedOptions[i].isCorrect ? 1 : 0,
       });
     }
   }
@@ -350,6 +419,55 @@ router.post("/admin/questions/generate", requirePermission("manage_questions"), 
 
   logAdmin(req.user!.id, "ADMIN_COPIED_QUESTIONS", "question", null, { count: questionsWithOptions.length });
   res.json({ questions: questionsWithOptions });
+});
+
+// ─── Import / Export Questions ──────────────────────────────────────────
+
+router.get("/admin/questions/export", requirePermission("manage_questions"), async (req, res) => {
+  const { rows } = await getPool().query(`SELECT * FROM questions ORDER BY id`);
+  const questions = await Promise.all(rows.map(async (q: any) => {
+    const opts = await db.select().from(questionOptionsTable).where(eq(questionOptionsTable.questionId, q.id));
+    return { ...q, options: opts };
+  }));
+  res.setHeader("Content-Type", "application/json");
+  res.setHeader("Content-Disposition", `attachment; filename="questions-export-${Date.now()}.json"`);
+  res.json(questions);
+});
+
+router.post("/admin/questions/import", requirePermission("manage_questions"), async (req, res) => {
+  const questions = req.body;
+  if (!Array.isArray(questions) || questions.length === 0) {
+    return res.status(400).json({ error: "Expected array of questions" });
+  }
+  let imported = 0;
+  for (const q of questions) {
+    try {
+      const [question] = await db.insert(questionsTable).values({
+        type: q.type || "multiple_choice",
+        questionText: q.questionText || q.question_text,
+        difficulty: q.difficulty || 3,
+        category: q.category || "general",
+        correctAnswer: q.correctAnswer || q.correct_answer || "",
+        timeLimitSeconds: q.timeLimitSeconds || q.time_limit_seconds || 30,
+        explanation: q.explanation || "",
+        mediaUrl: q.mediaUrl || q.media_url || null,
+      }).returning();
+
+      const opts = q.options || [];
+      for (let i = 0; i < opts.length; i++) {
+        await db.insert(questionOptionsTable).values({
+          questionId: question.id,
+          optionText: opts[i].text || opts[i].optionText || opts[i].option_text || "",
+          isCorrect: opts[i].isCorrect || opts[i].is_correct ? 1 : 0,
+        });
+      }
+      imported++;
+    } catch (e: any) {
+      console.error("[admin] Import question failed:", e.message);
+    }
+  }
+  logAdmin(req.user!.id, "ADMIN_IMPORTED_QUESTIONS", "question", null, { imported });
+  res.json({ success: true, imported });
 });
 
 // ─── User Management ────────────────────────────────────────────────────
@@ -604,7 +722,7 @@ router.get("/admin/replays/:matchId", requirePermission("manage_matches"), async
   if (rows.length === 0) return res.status(404).json({ error: "Match not found" });
   const state = rows[0].state;
   const qs = (state.questions || []).map((q: any) => {
-    const { correctOptionId, ...rest } = q;
+    const { correctOptionIds, ...rest } = q;
     return rest;
   });
   res.json({
