@@ -693,4 +693,44 @@ function stopTimer(match: StageMatchState) {
   match.timerStartedAt = null;
 }
 
+// POST /stage/seed-questions — populate DB with default questions for testing
+router.post("/stage/seed-questions", async (_req, res) => {
+  const questionData = [
+    { type: "multiple_choice", questionText: "Which programming paradigm treats computation as the evaluation of mathematical functions and avoids changing state?", difficulty: 4, category: "technology", correctAnswer: "Functional Programming", timeLimitSeconds: 30, explanation: "Functional programming is a declarative programming paradigm where programs are constructed by composing pure functions, avoiding shared state and mutable data.", options: ["Object-Oriented Programming", "Functional Programming", "Procedural Programming", "Logic Programming"], correctIndex: 1 },
+    { type: "multiple_choice", questionText: "In cryptography, what is the primary purpose of a 'salt' when storing passwords?", difficulty: 5, category: "security", correctAnswer: "Prevent rainbow table attacks", timeLimitSeconds: 30, explanation: "A salt is random data added to a password before hashing.", options: ["Speed up hash computation", "Prevent rainbow table attacks", "Encrypt the database", "Compress the password"], correctIndex: 1 },
+    { type: "multiple_choice", questionText: "What is the time complexity of a binary search algorithm?", difficulty: 3, category: "technology", correctAnswer: "O(log n)", timeLimitSeconds: 25, explanation: "Binary search repeatedly halves the search space.", options: ["O(n)", "O(n²)", "O(log n)", "O(1)"], correctIndex: 2 },
+    { type: "multiple_choice", questionText: "The 'Turing Test' was proposed as a measure of what?", difficulty: 3, category: "history", correctAnswer: "Machine intelligence", timeLimitSeconds: 30, explanation: "Alan Turing proposed the Turing Test in 1950.", options: ["Processing speed", "Machine intelligence", "Network security", "Data storage capacity"], correctIndex: 1 },
+    { type: "multiple_choice", questionText: "Which encryption standard replaced DES as the U.S. federal standard in 2001?", difficulty: 5, category: "security", correctAnswer: "AES", timeLimitSeconds: 30, explanation: "AES was adopted by NIST in 2001.", options: ["RSA", "AES", "SHA-256", "Blowfish"], correctIndex: 1 },
+    { type: "multiple_choice", questionText: "What does 'OSINT' stand for in intelligence operations?", difficulty: 2, category: "intelligence", correctAnswer: "Open Source Intelligence", timeLimitSeconds: 20, explanation: "OSINT is intelligence collected from publicly available sources.", options: ["Operational Security Intelligence", "Open Source Intelligence", "Online System Integrity Test", "Offensive Signal Intelligence"], correctIndex: 1 },
+    { type: "multiple_choice", questionText: "In network security, what does 'man-in-the-middle' (MITM) refer to?", difficulty: 4, category: "security", correctAnswer: "An attack where communication is intercepted and potentially altered", timeLimitSeconds: 35, explanation: "A MITM attack occurs when an attacker secretly intercepts messages.", options: ["A firewall configuration", "An attack where communication is intercepted and potentially altered", "A type of VPN protocol", "A network topology model"], correctIndex: 1 },
+    { type: "multiple_choice", questionText: "Which Cold War operation involved the CIA attempting to overthrow the Cuban government in 1961?", difficulty: 4, category: "history", correctAnswer: "Bay of Pigs Invasion", timeLimitSeconds: 30, explanation: "The Bay of Pigs Invasion was a failed CIA attempt.", options: ["Operation Mongoose", "Bay of Pigs Invasion", "Operation Northwoods", "Operation Zapata"], correctIndex: 1 },
+    { type: "multiple_choice", questionText: "What is the Voynich Manuscript?", difficulty: 3, category: "history", correctAnswer: "An undeciphered illustrated codex from the early 15th century", timeLimitSeconds: 35, explanation: "The Voynich Manuscript is a hand-written codex in unknown script.", options: ["A decoded WWII German cipher", "An ancient Roman military manual", "An undeciphered illustrated codex from the early 15th century", "A collection of medieval alchemical recipes"], correctIndex: 2 },
+    { type: "multiple_choice", questionText: "In logic puzzles, if A implies B and B implies C, what can we conclude?", difficulty: 2, category: "logic", correctAnswer: "A implies C", timeLimitSeconds: 25, explanation: "This is the Law of Syllogism.", options: ["C implies A", "A implies C", "B implies A", "None of the above"], correctIndex: 1 },
+    { type: "multiple_choice", questionText: "What algorithm is commonly used for public-key cryptography?", difficulty: 6, category: "security", correctAnswer: "RSA", timeLimitSeconds: 30, explanation: "RSA is a public-key cryptosystem.", options: ["AES", "RSA", "Diffie-Hellman", "Elliptic Curve"], correctIndex: 1 },
+    { type: "multiple_choice", questionText: "Which philosopher wrote 'The Art of War'?", difficulty: 2, category: "history", correctAnswer: "Sun Tzu", timeLimitSeconds: 20, explanation: "Sun Tzu was an ancient Chinese military strategist.", options: ["Confucius", "Lao Tzu", "Sun Tzu", "Mencius"], correctIndex: 2 },
+    { type: "multiple_choice", questionText: "Identify the next number in the sequence: 2, 6, 18, 54, ?", difficulty: 3, category: "logic", correctAnswer: "162", timeLimitSeconds: 30, explanation: "Each term is multiplied by 3.", options: ["108", "162", "72", "216"], correctIndex: 1 },
+    { type: "threat_assessment", questionText: "A previously unknown signal has been detected emanating from within The Archive's own network infrastructure.", difficulty: 6, category: "security", correctAnswer: "critical", timeLimitSeconds: 40, explanation: "A signal from within the network is a critical threat.", options: ["Low", "Medium", "High", "Critical"], correctIndex: 3 },
+    { type: "logic_grid", questionText: "Three Archive agents — Alex, Blake, and Casey — each specialize in a different field (cryptography, forensics, surveillance).\n\nClues:\n1. Alex does not work in surveillance.\n2. Blake works in forensics.\n3. Casey does not work in cryptography.\n\nWho works in surveillance?", difficulty: 4, category: "logic", correctAnswer: "Casey", timeLimitSeconds: 50, explanation: "From clue 2: Blake = Forensics. From clue 1: Alex ≠ Surveillance, so Alex = Cryptography. From clue 3: Casey ≠ Cryptography, so Casey = Surveillance.", options: ["Alex", "Blake", "Casey", "Cannot be determined"], correctIndex: 2 },
+    { type: "multi_step", questionText: "PHASE 1: You discover a locked terminal. The password hint reads: 'The first prime number greater than 10.'\n\nPHASE 2: Enter the terminal. Inside is a file labeled with the atomic number of the element used in the first nuclear bomb.\n\nWhat is the file label?", difficulty: 5, category: "technology", correctAnswer: "94", timeLimitSeconds: 60, explanation: "Step 1: First prime > 10 is 11. Step 2: The element used in the first nuclear bomb was Plutonium (Pu), atomic number 94.", options: ["11", "92", "94", "Pu"], correctIndex: 2 },
+  ];
+  let added = 0;
+  for (const q of questionData) {
+    const [existing] = await db.select({ id: questionsTable.id }).from(questionsTable)
+      .where(sql`${questionsTable.questionText} = ${q.questionText}`).limit(1);
+    if (existing) continue;
+    const [question] = await db.insert(questionsTable).values({
+      type: q.type, questionText: q.questionText, difficulty: q.difficulty,
+      category: q.category, correctAnswer: q.correctAnswer,
+      timeLimitSeconds: q.timeLimitSeconds, explanation: q.explanation,
+    }).returning();
+    for (let i = 0; i < q.options.length; i++) {
+      await db.insert(questionOptionsTable).values({
+        questionId: question.id, optionText: q.options[i], isCorrect: i === q.correctIndex ? 1 : 0,
+      });
+    }
+    added++;
+  }
+  res.json({ success: true, added });
+});
+
 export default router;
