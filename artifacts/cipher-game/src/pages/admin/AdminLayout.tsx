@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { href: "/admin/matches", label: "Live Matches", icon: "▶", section: "game" },
   { href: "/admin/questions", label: "Questions", icon: "?" },
   { href: "/admin/users", label: "Users", icon: "👤" },
+  { href: "/admin/replays", label: "Replays", icon: "🎬" },
   { href: "/admin/story", label: "Story", icon: "📖" },
   { href: "/admin/shop", label: "Shop", icon: "🛒" },
   { href: "/admin/events", label: "Events", icon: "🌍" },
@@ -148,6 +149,7 @@ export default function AdminLayout() {
     "/admin/matches": { component: <AdminMatches />, title: "Live Match Center" },
     "/admin/questions": { component: <AdminQuestions />, title: "Question Management" },
     "/admin/users": { component: <AdminUsers />, title: "User Management" },
+    "/admin/replays": { component: <AdminReplays />, title: "Match Replays" },
     "/admin/story": { component: <AdminStory />, title: "Story Management" },
     "/admin/shop": { component: <AdminShop />, title: "Shop Management" },
     "/admin/events": { component: <AdminEvents />, title: "World Events" },
@@ -226,3 +228,4 @@ import AdminPrestige from "./AdminPrestige";
 import AdminAnalytics from "./AdminAnalytics";
 import AdminLogs from "./AdminLogs";
 import AdminSettings from "./AdminSettings";
+import AdminReplays from "./AdminReplays";

@@ -21,7 +21,7 @@ import tacticalRouter from "./tactical";
 import teamOpsRouter from "./teamOps";
 import stageRouter from "./stage";
 import adminRouter from "./admin";
-import { Router, type IRouter } from "express";
+import aiOpponentRouter from "./aiOpponent";
 
 const router: IRouter = Router();
 router.use(healthRouter);
@@ -45,6 +45,7 @@ router.use(missionRouter);
 router.use(tacticalRouter);
 router.use(teamOpsRouter);
 router.use(stageRouter);
+router.use(aiOpponentRouter);
 router.use(adminRouter);
 
 export default router;

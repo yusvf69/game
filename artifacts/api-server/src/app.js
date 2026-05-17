@@ -5390,7 +5390,7 @@ var require_raw_body = __commonJS({
       }
       var buffer = decoder ? "" : [];
       stream.on("aborted", onAborted);
-      stream.on("close", cleanup);
+      stream.on("close", cleanup2);
       stream.on("data", onData);
       stream.on("end", onEnd);
       stream.on("error", onEnd);
@@ -5407,7 +5407,7 @@ var require_raw_body = __commonJS({
           invokeCallback();
         }
         function invokeCallback() {
-          cleanup();
+          cleanup2();
           if (args[0]) {
             halt(stream);
           }
@@ -5454,13 +5454,13 @@ var require_raw_body = __commonJS({
           done(null, string4);
         }
       }
-      function cleanup() {
+      function cleanup2() {
         buffer = null;
         stream.removeListener("aborted", onAborted);
         stream.removeListener("data", onData);
         stream.removeListener("end", onEnd);
         stream.removeListener("error", onEnd);
-        stream.removeListener("close", cleanup);
+        stream.removeListener("close", cleanup2);
       }
     }
     function tryRequireAsyncHooks() {
@@ -5509,10 +5509,10 @@ var require_ee_first = __commonJS({
         }
       }
       function callback() {
-        cleanup();
+        cleanup2();
         done.apply(null, arguments);
       }
-      function cleanup() {
+      function cleanup2() {
         var x;
         for (var i2 = 0; i2 < cleanups.length; i2++) {
           x = cleanups[i2];
@@ -5522,7 +5522,7 @@ var require_ee_first = __commonJS({
       function thunk(fn2) {
         done = fn2;
       }
-      thunk.cancel = cleanup;
+      thunk.cancel = cleanup2;
       return thunk;
     }
     function listener(event, done) {
@@ -20502,27 +20502,27 @@ var require_router = __commonJS({
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var methods = METHODS.map((method) => method.toLowerCase());
-    module.exports = Router24;
+    module.exports = Router25;
     module.exports.Route = Route;
-    function Router24(options) {
-      if (!(this instanceof Router24)) {
-        return new Router24(options);
+    function Router25(options) {
+      if (!(this instanceof Router25)) {
+        return new Router25(options);
       }
       const opts = options || {};
-      function router24(req, res, next) {
-        router24.handle(req, res, next);
+      function router25(req, res, next) {
+        router25.handle(req, res, next);
       }
-      Object.setPrototypeOf(router24, this);
-      router24.caseSensitive = opts.caseSensitive;
-      router24.mergeParams = opts.mergeParams;
-      router24.params = {};
-      router24.strict = opts.strict;
-      router24.stack = [];
-      return router24;
+      Object.setPrototypeOf(router25, this);
+      router25.caseSensitive = opts.caseSensitive;
+      router25.mergeParams = opts.mergeParams;
+      router25.params = {};
+      router25.strict = opts.strict;
+      router25.stack = [];
+      return router25;
     }
-    Router24.prototype = function() {
+    Router25.prototype = function() {
     };
-    Router24.prototype.param = function param(name, fn) {
+    Router25.prototype.param = function param(name, fn) {
       if (!name) {
         throw new TypeError("argument name is required");
       }
@@ -20542,7 +20542,7 @@ var require_router = __commonJS({
       params.push(fn);
       return this;
     };
-    Router24.prototype.handle = function handle(req, res, callback) {
+    Router25.prototype.handle = function handle(req, res, callback) {
       if (!callback) {
         throw new TypeError("argument callback is required");
       }
@@ -20669,7 +20669,7 @@ var require_router = __commonJS({
         }
       }
     };
-    Router24.prototype.use = function use(handler) {
+    Router25.prototype.use = function use(handler) {
       let offset = 0;
       let path = "/";
       if (typeof handler !== "function") {
@@ -20702,7 +20702,7 @@ var require_router = __commonJS({
       }
       return this;
     };
-    Router24.prototype.route = function route(path) {
+    Router25.prototype.route = function route(path) {
       const route2 = new Route(path);
       const layer = new Layer(path, {
         sensitive: this.caseSensitive,
@@ -20717,7 +20717,7 @@ var require_router = __commonJS({
       return route2;
     };
     methods.concat("all").forEach(function(method) {
-      Router24.prototype[method] = function(path) {
+      Router25.prototype[method] = function(path) {
         const route = this.route(path);
         route[method].apply(route, slice.call(arguments, 1));
         return this;
@@ -20900,13 +20900,13 @@ var require_application = __commonJS({
     var compileTrust = require_utils3().compileTrust;
     var resolve = __require("node:path").resolve;
     var once = require_once();
-    var Router24 = require_router();
+    var Router25 = require_router();
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var app2 = exports = module.exports = {};
     var trustProxyDefaultSymbol = "@@symbol:trust_proxy_default";
     app2.init = function init2() {
-      var router24 = null;
+      var router25 = null;
       this.cache = /* @__PURE__ */ Object.create(null);
       this.engines = /* @__PURE__ */ Object.create(null);
       this.settings = /* @__PURE__ */ Object.create(null);
@@ -20915,13 +20915,13 @@ var require_application = __commonJS({
         configurable: true,
         enumerable: true,
         get: function getrouter() {
-          if (router24 === null) {
-            router24 = new Router24({
+          if (router25 === null) {
+            router25 = new Router25({
               caseSensitive: this.enabled("case sensitive routing"),
               strict: this.enabled("strict routing")
             });
           }
-          return router24;
+          return router25;
         }
       });
     };
@@ -20992,15 +20992,15 @@ var require_application = __commonJS({
       if (fns.length === 0) {
         throw new TypeError("app.use() requires a middleware function");
       }
-      var router24 = this.router;
+      var router25 = this.router;
       fns.forEach(function(fn2) {
         if (!fn2 || !fn2.handle || !fn2.set) {
-          return router24.use(path, fn2);
+          return router25.use(path, fn2);
         }
         debug(".use app under %s", path);
         fn2.mountpath = path;
         fn2.parent = this;
-        router24.use(path, function mounted_app(req, res, next) {
+        router25.use(path, function mounted_app(req, res, next) {
           var orig = req.app;
           fn2.handle(req, res, function(err) {
             Object.setPrototypeOf(req, orig.request);
@@ -22777,12 +22777,12 @@ var require_send = __commonJS({
       var stream2 = fs.createReadStream(path2, options);
       this.emit("stream", stream2);
       stream2.pipe(res);
-      function cleanup() {
+      function cleanup2() {
         stream2.destroy();
       }
-      onFinished(res, cleanup);
+      onFinished(res, cleanup2);
       stream2.on("error", function onerror(err) {
-        cleanup();
+        cleanup2();
         self.onStatError(err);
       });
       stream2.on("end", function onend() {
@@ -23573,7 +23573,7 @@ var require_express = __commonJS({
     var EventEmitter = __require("node:events").EventEmitter;
     var mixin = require_merge_descriptors();
     var proto = require_application();
-    var Router24 = require_router();
+    var Router25 = require_router();
     var req = require_request();
     var res = require_response();
     exports = module.exports = createApplication;
@@ -23595,8 +23595,8 @@ var require_express = __commonJS({
     exports.application = proto;
     exports.request = req;
     exports.response = res;
-    exports.Route = Router24.Route;
-    exports.Router = Router24;
+    exports.Route = Router25.Route;
+    exports.Router = Router25;
     exports.json = bodyParser.json;
     exports.raw = bodyParser.raw;
     exports.static = require_serve_static();
@@ -40949,9 +40949,598 @@ var require_pino = __commonJS({
   }
 });
 
+// src/routes/stage.ts
+var stage_exports = {};
+__export(stage_exports, {
+  cacheMatch: () => cacheMatch,
+  default: () => stage_default,
+  getStageMatch: () => getStageMatch,
+  persistMatch: () => persistMatch
+});
+import { eq as eq20, sql as sql13 } from "drizzle-orm";
+async function getUserFromToken18(token) {
+  if (!token) return null;
+  const bearerToken = token.replace("Bearer ", "");
+  const [session] = await db.select().from(sessionsTable).where(eq20(sessionsTable.token, bearerToken)).limit(1);
+  if (!session || session.expiresAt < /* @__PURE__ */ new Date()) return null;
+  const [user] = await db.select().from(usersTable).where(eq20(usersTable.id, session.userId)).limit(1);
+  return user || null;
+}
+function generateCode(length = 5) {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < length; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+function pool() {
+  return getPool();
+}
+async function ensureMatch(matchId, force = false) {
+  if (!force) {
+    const cached2 = stageMatchCache.get(matchId);
+    if (cached2) return cached2;
+  }
+  try {
+    const { rows } = await pool().query(`SELECT state FROM stage_matches WHERE match_id = $1`, [matchId]);
+    if (rows.length === 0) return void 0;
+    const state = rows[0].state;
+    stageMatchCache.set(matchId, state);
+    return state;
+  } catch (e) {
+    console.error("[stage] ensureMatch DB error:", e?.message);
+    return void 0;
+  }
+}
+function cacheMatch(state) {
+  stageMatchCache.set(state.id, state);
+}
+function recordEvent(state, type, teamId, data) {
+  state.log.push({
+    type,
+    teamId: teamId ?? null,
+    data: data || null,
+    timestamp: Date.now()
+  });
+}
+async function persistMatch(state) {
+  const insert = () => pool().query(
+    `INSERT INTO stage_matches (match_id, host_id, room_code, state) VALUES ($1, $2, $3, $4)
+     ON CONFLICT (match_id) DO UPDATE SET state = $4, updated_at = NOW()`,
+    [state.id, state.hostId, state.roomCode, JSON.stringify(state)]
+  );
+  try {
+    await insert();
+  } catch (e) {
+    if (e?.code === "42P01") {
+      try {
+        await pool().query(`
+          CREATE TABLE IF NOT EXISTS stage_matches (
+            id SERIAL PRIMARY KEY,
+            match_id BIGINT NOT NULL UNIQUE,
+            host_id INTEGER NOT NULL,
+            room_code VARCHAR(10) NOT NULL,
+            state JSONB NOT NULL,
+            created_at TIMESTAMP DEFAULT NOW() NOT NULL,
+            updated_at TIMESTAMP DEFAULT NOW() NOT NULL
+          )
+        `);
+      } catch (e2) {
+        console.error("[stage] create table failed:", e2);
+        throw new Error(`Failed to create stage_matches table: ${e2?.message || "unknown"}`);
+      }
+      await insert();
+    } else if (e?.code === "22003") {
+      try {
+        await pool().query(`ALTER TABLE stage_matches ALTER COLUMN match_id TYPE BIGINT`);
+      } catch (e2) {
+        console.error("[stage] alter column failed:", e2);
+        throw new Error(`Failed to migrate match_id column: ${e2?.message || "unknown"}`);
+      }
+      await insert();
+    } else {
+      console.error("[stage] persist failed:", e);
+      throw new Error(`Failed to persist match: ${e?.message || "unknown"}`);
+    }
+  }
+}
+async function getStageMatch(matchId) {
+  return ensureMatch(matchId);
+}
+function stripAnswer(q) {
+  if (!q) return q;
+  const { correctOptionId, ...rest } = q;
+  return rest;
+}
+var import_express21, router21, stageMatchCache, DOMAIN_CATEGORIES2, TEAM_COLORS, TEAM_EMBLEMS, stage_default;
+var init_stage = __esm({
+  "src/routes/stage.ts"() {
+    "use strict";
+    import_express21 = __toESM(require_express2(), 1);
+    init_src();
+    init_src();
+    init_src();
+    router21 = (0, import_express21.Router)();
+    stageMatchCache = /* @__PURE__ */ new Map();
+    DOMAIN_CATEGORIES2 = {
+      cyber_systems: ["technology", "security"],
+      cognitive_analysis: ["logic", "intelligence"],
+      historical_archives: ["history"],
+      threat_intelligence: ["security", "intelligence"],
+      scientific_division: ["technology"],
+      behavioral_analysis: ["intelligence"],
+      global_mapping: ["history", "technology"],
+      cipher_division: ["security", "intelligence"]
+    };
+    TEAM_COLORS = ["#3b82f6", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#14b8a6", "#f97316"];
+    TEAM_EMBLEMS = ["raven", "wolf", "phoenix", "viper", "titan", "shadow", "ghost", "cipher"];
+    router21.post("/stage/create", async (req, res) => {
+      const user = await getUserFromToken18(req.headers.authorization);
+      if (!user) {
+        res.status(401).json({ error: "Not authenticated" });
+        return;
+      }
+      const { teamCount, domains, difficulty, timerSeconds, questionCount } = req.body;
+      if (!domains || domains.length === 0) {
+        res.status(400).json({ error: "Select at least one domain" });
+        return;
+      }
+      const roomCode = generateCode(5);
+      const matchId = Date.now() + Math.floor(Math.random() * 1e3);
+      const usedCodes = /* @__PURE__ */ new Set();
+      const teams = [];
+      for (let i = 0; i < (teamCount || 2); i++) {
+        let code = generateCode(4);
+        while (usedCodes.has(code)) code = generateCode(4);
+        usedCodes.add(code);
+        teams.push({
+          id: i + 1,
+          name: "",
+          color: TEAM_COLORS[i % 8],
+          emblem: TEAM_EMBLEMS[i % 8],
+          code,
+          score: 0,
+          correct: 0,
+          total: 0,
+          streak: 0,
+          tacticalLoadout: []
+        });
+      }
+      const stageMatch = {
+        id: matchId,
+        roomCode,
+        hostId: user.id,
+        teams,
+        questions: [],
+        currentQuestionIndex: 0,
+        phase: "lobby",
+        buzzerTeamId: null,
+        wrongAttempts: 0,
+        timerSeconds: timerSeconds || 30,
+        timerStartedAt: null,
+        timerDuration: timerSeconds || 30,
+        originalTimerSeconds: timerSeconds || 30,
+        domainOrder: domains || [],
+        currentDomain: domains?.[0] || "general",
+        domains: domains || [],
+        difficulty: difficulty || "agent",
+        totalQuestions: questionCount || 10,
+        buzzedOptionId: null,
+        log: []
+      };
+      recordEvent(stageMatch, "match_created", null, { teamCount: teams.length, domains, difficulty });
+      cacheMatch(stageMatch);
+      await persistMatch(stageMatch);
+      res.json({
+        matchId,
+        roomCode,
+        teams: teams.map((t) => ({ id: t.id, name: t.name, color: t.color, emblem: t.emblem, code: t.code }))
+      });
+    });
+    router21.post("/stage/buzzer-connect", async (req, res) => {
+      const { teamCode } = req.body;
+      if (!teamCode) {
+        res.status(400).json({ error: "Team code required" });
+        return;
+      }
+      let match = Array.from(stageMatchCache.values()).find(
+        (m) => m.teams.some((t) => t.code === teamCode.toUpperCase())
+      );
+      if (!match) {
+        const rows = await db.select().from(stageMatchesTable).limit(50);
+        for (const row of rows) {
+          const m = { ...row.state, timer: null };
+          if (m.teams.some((t) => t.code === teamCode.toUpperCase())) {
+            match = m;
+            cacheMatch(m);
+            break;
+          }
+        }
+      }
+      if (!match) {
+        res.status(404).json({ error: "Invalid team code" });
+        return;
+      }
+      const team = match.teams.find((t) => t.code === teamCode.toUpperCase());
+      if (!team) {
+        res.status(404).json({ error: "Team not found" });
+        return;
+      }
+      if (!team.name) {
+        res.status(400).json({ error: "Team not configured yet" });
+        return;
+      }
+      res.json({ matchId: match.id, teamId: team.id, teamName: team.name, teamColor: team.color, teamEmblem: team.emblem, roomCode: match.roomCode, tacticalLoadout: team.tacticalLoadout });
+    });
+    router21.post("/stage/team-config", async (req, res) => {
+      const user = await getUserFromToken18(req.headers.authorization);
+      if (!user) {
+        res.status(401).json({ error: "Not authenticated" });
+        return;
+      }
+      const { matchId, teamIndex, name, color, emblem } = req.body;
+      const match = await ensureMatch(matchId, true);
+      if (!match) {
+        res.status(404).json({ error: "Match not found" });
+        return;
+      }
+      if (match.hostId !== user.id) {
+        res.status(403).json({ error: "Only host can configure" });
+        return;
+      }
+      const team = match.teams[teamIndex];
+      if (!team) {
+        res.status(404).json({ error: "Team not found" });
+        return;
+      }
+      if (name) team.name = name;
+      if (color) team.color = color;
+      if (emblem) team.emblem = emblem;
+      recordEvent(match, "team_configured", team.id, { name, color, emblem });
+      await persistMatch(match);
+      res.json({ team });
+    });
+    router21.post("/stage/batch-config", async (req, res) => {
+      const user = await getUserFromToken18(req.headers.authorization);
+      if (!user) {
+        res.status(401).json({ error: "Not authenticated" });
+        return;
+      }
+      const { matchId, teams } = req.body;
+      const match = await ensureMatch(matchId, true);
+      if (!match) {
+        res.status(404).json({ error: "Match not found" });
+        return;
+      }
+      if (match.hostId !== user.id) {
+        res.status(403).json({ error: "Only host can configure" });
+        return;
+      }
+      for (const t of teams || []) {
+        const team = match.teams[t.teamIndex];
+        if (!team) continue;
+        if (t.name) team.name = t.name;
+        if (t.color) team.color = t.color;
+        if (t.emblem) team.emblem = t.emblem;
+        if (t.tacticalLoadout) team.tacticalLoadout = t.tacticalLoadout;
+        recordEvent(match, "team_configured", team.id, { name: team.name, color: team.color, emblem: team.emblem });
+      }
+      await persistMatch(match);
+      res.json({ success: true });
+    });
+    router21.post("/stage/start", async (req, res) => {
+      const user = await getUserFromToken18(req.headers.authorization);
+      if (!user) {
+        res.status(401).json({ error: "Not authenticated" });
+        return;
+      }
+      const { matchId } = req.body;
+      const match = await ensureMatch(matchId, true);
+      if (!match) {
+        res.status(404).json({ error: "Match not found" });
+        return;
+      }
+      if (match.hostId !== user.id) {
+        res.status(403).json({ error: "Only host can start" });
+        return;
+      }
+      const namedTeams = match.teams.filter((t) => t.name);
+      if (namedTeams.length < 1) {
+        res.status(400).json({ error: "Need at least 1 team" });
+        return;
+      }
+      const selectedCategories = [];
+      for (const d of match.domains) {
+        const cats = DOMAIN_CATEGORIES2[d];
+        if (cats) selectedCategories.push(...cats);
+      }
+      const questions = await db.select().from(questionsTable).where(selectedCategories.length > 0 ? sql13`${questionsTable.category} IN (${sql13.join(selectedCategories.map((c) => sql13`${c}`), sql13`, `)})` : void 0).orderBy(sql13`RANDOM()`).limit(match.totalQuestions);
+      const qs = await Promise.all(questions.map(async (q) => {
+        const options = await db.select({ id: questionOptionsTable.id, text: questionOptionsTable.optionText }).from(questionOptionsTable).where(eq20(questionOptionsTable.questionId, q.id));
+        return {
+          id: q.id,
+          questionText: q.questionText,
+          difficulty: q.difficulty,
+          category: q.category,
+          options,
+          timeLimit: q.timeLimitSeconds || match.timerSeconds,
+          type: q.type,
+          correctOptionId: options.find((o) => o.id)?.id
+        };
+      }));
+      const fullQs = await Promise.all(questions.map(async (q) => {
+        const options = await db.select({ id: questionOptionsTable.id, text: questionOptionsTable.optionText, isCorrect: questionOptionsTable.isCorrect }).from(questionOptionsTable).where(eq20(questionOptionsTable.questionId, q.id));
+        const correctOpt = options.find((o) => o.isCorrect === 1);
+        return {
+          id: q.id,
+          questionText: q.questionText,
+          difficulty: q.difficulty,
+          category: q.category,
+          options: options.map((o) => ({ id: o.id, text: o.text })),
+          timeLimit: q.timeLimitSeconds || match.timerSeconds,
+          type: q.type,
+          correctOptionId: correctOpt?.id || null
+        };
+      }));
+      match.questions = fullQs;
+      match.totalQuestions = fullQs.length;
+      match.currentQuestionIndex = 0;
+      match.phase = "question";
+      match.timerStartedAt = Date.now();
+      match.currentDomain = match.domainOrder[0] || "general";
+      match.buzzedOptionId = null;
+      recordEvent(match, "match_started", null, { totalQuestions: fullQs.length });
+      await persistMatch(match);
+      res.json({ success: true, totalQuestions: fullQs.length });
+    });
+    router21.post("/stage/buzz", async (req, res) => {
+      const { matchId, teamId } = req.body;
+      const match = await ensureMatch(matchId, true);
+      if (!match) {
+        res.status(404).json({ error: "Match not found" });
+        return;
+      }
+      if (match.phase !== "question" && match.phase !== "rebuzz") {
+        res.status(400).json({ error: "Not accepting buzzes" });
+        return;
+      }
+      if (match.buzzerTeamId !== null) {
+        res.json({ success: false, reason: "already_buzzed" });
+        return;
+      }
+      match.buzzerTeamId = teamId;
+      match.phase = "buzzed";
+      recordEvent(match, "buzzer_pressed", teamId);
+      await persistMatch(match);
+      res.json({ success: true, teamId });
+    });
+    router21.post("/stage/answer", async (req, res) => {
+      const user = await getUserFromToken18(req.headers.authorization);
+      if (!user) {
+        res.status(401).json({ error: "Not authenticated" });
+        return;
+      }
+      const { matchId, optionId } = req.body;
+      const match = await ensureMatch(matchId, true);
+      if (!match) {
+        res.status(404).json({ error: "Match not found" });
+        return;
+      }
+      if (match.hostId !== user.id) {
+        res.status(403).json({ error: "Only host can mark answers" });
+        return;
+      }
+      if (match.buzzerTeamId === null) {
+        res.status(400).json({ error: "No team has buzzed" });
+        return;
+      }
+      const team = match.teams.find((t) => t.id === match.buzzerTeamId);
+      if (!team) {
+        res.status(404).json({ error: "Team not found" });
+        return;
+      }
+      const q = match.questions[match.currentQuestionIndex];
+      const isCorrect = q && q.correctOptionId === optionId;
+      team.total += 1;
+      const pointsMultiplier = match.wrongAttempts > 0 ? 0.5 : 1;
+      const speedBonus = match.timerStartedAt ? Date.now() - match.timerStartedAt < 5e3 ? 25 : 15 : 0;
+      const streakBonus = isCorrect && team.streak > 0 ? 50 : 0;
+      const pointsGained = isCorrect ? Math.round((100 + speedBonus + streakBonus) * pointsMultiplier) : 0;
+      if (isCorrect) {
+        team.correct += 1;
+        team.score += pointsGained;
+        team.streak += 1;
+        match.phase = "answered";
+        match.wrongAttempts = 0;
+        match.buzzedOptionId = optionId;
+        recordEvent(match, "answer_correct", team.id, { pointsGained, newScore: team.score });
+        await persistMatch(match);
+        res.json({ success: true, correct: true, pointsGained, newScore: team.score });
+        return;
+      }
+      team.streak = 0;
+      if (match.wrongAttempts === 0) {
+        match.wrongAttempts = 1;
+        match.buzzerTeamId = null;
+        match.buzzedOptionId = optionId;
+        match.phase = "rebuzz";
+        recordEvent(match, "answer_incorrect", team.id, { rebuzz: true });
+        await persistMatch(match);
+        res.json({ success: true, correct: false, pointsGained: 0, rebuzz: true });
+        return;
+      }
+      match.phase = "answered";
+      match.wrongAttempts = 0;
+      match.buzzedOptionId = optionId;
+      recordEvent(match, "answer_incorrect", team.id, { final: true });
+      await persistMatch(match);
+      res.json({ success: true, correct: false, pointsGained: 0, newScore: team.score });
+    });
+    router21.post("/stage/next", async (req, res) => {
+      const user = await getUserFromToken18(req.headers.authorization);
+      if (!user) {
+        res.status(401).json({ error: "Not authenticated" });
+        return;
+      }
+      const { matchId } = req.body;
+      const match = await ensureMatch(matchId, true);
+      if (!match) {
+        res.status(404).json({ error: "Match not found" });
+        return;
+      }
+      if (match.hostId !== user.id) {
+        res.status(403).json({ error: "Only host can advance" });
+        return;
+      }
+      match.currentQuestionIndex++;
+      match.buzzerTeamId = null;
+      match.buzzedOptionId = null;
+      match.wrongAttempts = 0;
+      match.timerSeconds = match.originalTimerSeconds;
+      if (match.currentQuestionIndex >= match.questions.length) {
+        match.phase = "ended";
+        recordEvent(match, "match_ended", null, { reason: "all_questions_answered" });
+        await persistMatch(match);
+        res.json({ finished: true });
+        return;
+      }
+      match.phase = "question";
+      match.timerStartedAt = Date.now();
+      recordEvent(match, "next_question", null, { questionIndex: match.currentQuestionIndex });
+      await persistMatch(match);
+      res.json({ success: true, currentQuestion: match.currentQuestionIndex });
+    });
+    router21.post("/stage/skip", async (req, res) => {
+      const user = await getUserFromToken18(req.headers.authorization);
+      if (!user) {
+        res.status(401).json({ error: "Not authenticated" });
+        return;
+      }
+      const { matchId } = req.body;
+      const match = await ensureMatch(matchId, true);
+      if (!match) {
+        res.status(404).json({ error: "Match not found" });
+        return;
+      }
+      if (match.hostId !== user.id) {
+        res.status(403).json({ error: "Only host can skip" });
+        return;
+      }
+      match.buzzerTeamId = null;
+      recordEvent(match, "question_skipped", null, { questionIndex: match.currentQuestionIndex });
+      await persistMatch(match);
+      res.json({ success: true });
+    });
+    router21.get("/stage/:id", async (req, res) => {
+      const matchId = parseInt(req.params.id);
+      const match = await ensureMatch(matchId);
+      if (!match) {
+        res.status(404).json({ error: "Match not found" });
+        return;
+      }
+      if (match.phase === "rebuzz" && match.buzzerTeamId === null) {
+        match.phase = "question";
+        match.timerStartedAt = Date.now();
+        await persistMatch(match).catch(() => {
+        });
+      }
+      const q = match.questions[match.currentQuestionIndex];
+      const qStrip = q ? stripAnswer(q) : null;
+      res.json({
+        id: match.id,
+        roomCode: match.roomCode,
+        phase: match.phase,
+        teams: match.teams.filter((t) => t.name).map((t) => ({
+          id: t.id,
+          name: t.name,
+          color: t.color,
+          emblem: t.emblem,
+          code: t.code,
+          score: t.score,
+          correct: t.correct,
+          total: t.total,
+          streak: t.streak,
+          tacticalLoadout: t.tacticalLoadout
+        })),
+        currentQuestionIndex: match.currentQuestionIndex,
+        totalQuestions: match.totalQuestions,
+        currentDomain: match.currentDomain,
+        buzzerTeamId: match.buzzerTeamId,
+        wrongAttempts: match.wrongAttempts,
+        originalTimerSeconds: match.originalTimerSeconds,
+        timerSeconds: match.timerSeconds,
+        question: qStrip,
+        domains: match.domains,
+        difficulty: match.difficulty
+      });
+    });
+    router21.post("/stage/timeout", async (req, res) => {
+      const { matchId } = req.body;
+      const match = await ensureMatch(matchId, true);
+      if (!match) {
+        res.status(404).json({ error: "Match not found" });
+        return;
+      }
+      if (match.phase === "question") {
+        match.phase = "answered";
+        recordEvent(match, "timer_expired", null, { questionIndex: match.currentQuestionIndex });
+        await persistMatch(match).catch(() => {
+        });
+      }
+      res.json({ success: true });
+    });
+    router21.post("/stage/seed-questions", async (_req, res) => {
+      const questionData = [
+        { type: "multiple_choice", questionText: "Which programming paradigm treats computation as the evaluation of mathematical functions and avoids changing state?", difficulty: 4, category: "technology", correctAnswer: "Functional Programming", timeLimitSeconds: 30, explanation: "Functional programming is a declarative programming paradigm where programs are constructed by composing pure functions, avoiding shared state and mutable data.", options: ["Object-Oriented Programming", "Functional Programming", "Procedural Programming", "Logic Programming"], correctIndex: 1 },
+        { type: "multiple_choice", questionText: "In cryptography, what is the primary purpose of a 'salt' when storing passwords?", difficulty: 5, category: "security", correctAnswer: "Prevent rainbow table attacks", timeLimitSeconds: 30, explanation: "A salt is random data added to a password before hashing.", options: ["Speed up hash computation", "Prevent rainbow table attacks", "Encrypt the database", "Compress the password"], correctIndex: 1 },
+        { type: "multiple_choice", questionText: "What is the time complexity of a binary search algorithm?", difficulty: 3, category: "technology", correctAnswer: "O(log n)", timeLimitSeconds: 25, explanation: "Binary search repeatedly halves the search space.", options: ["O(n)", "O(n\xB2)", "O(log n)", "O(1)"], correctIndex: 2 },
+        { type: "multiple_choice", questionText: "The 'Turing Test' was proposed as a measure of what?", difficulty: 3, category: "history", correctAnswer: "Machine intelligence", timeLimitSeconds: 30, explanation: "Alan Turing proposed the Turing Test in 1950.", options: ["Processing speed", "Machine intelligence", "Network security", "Data storage capacity"], correctIndex: 1 },
+        { type: "multiple_choice", questionText: "Which encryption standard replaced DES as the U.S. federal standard in 2001?", difficulty: 5, category: "security", correctAnswer: "AES", timeLimitSeconds: 30, explanation: "AES was adopted by NIST in 2001.", options: ["RSA", "AES", "SHA-256", "Blowfish"], correctIndex: 1 },
+        { type: "multiple_choice", questionText: "What does 'OSINT' stand for in intelligence operations?", difficulty: 2, category: "intelligence", correctAnswer: "Open Source Intelligence", timeLimitSeconds: 20, explanation: "OSINT is intelligence collected from publicly available sources.", options: ["Operational Security Intelligence", "Open Source Intelligence", "Online System Integrity Test", "Offensive Signal Intelligence"], correctIndex: 1 },
+        { type: "multiple_choice", questionText: "In network security, what does 'man-in-the-middle' (MITM) refer to?", difficulty: 4, category: "security", correctAnswer: "An attack where communication is intercepted and potentially altered", timeLimitSeconds: 35, explanation: "A MITM attack occurs when an attacker secretly intercepts messages.", options: ["A firewall configuration", "An attack where communication is intercepted and potentially altered", "A type of VPN protocol", "A network topology model"], correctIndex: 1 },
+        { type: "multiple_choice", questionText: "Which Cold War operation involved the CIA attempting to overthrow the Cuban government in 1961?", difficulty: 4, category: "history", correctAnswer: "Bay of Pigs Invasion", timeLimitSeconds: 30, explanation: "The Bay of Pigs Invasion was a failed CIA attempt.", options: ["Operation Mongoose", "Bay of Pigs Invasion", "Operation Northwoods", "Operation Zapata"], correctIndex: 1 },
+        { type: "multiple_choice", questionText: "What is the Voynich Manuscript?", difficulty: 3, category: "history", correctAnswer: "An undeciphered illustrated codex from the early 15th century", timeLimitSeconds: 35, explanation: "The Voynich Manuscript is a hand-written codex in unknown script.", options: ["A decoded WWII German cipher", "An ancient Roman military manual", "An undeciphered illustrated codex from the early 15th century", "A collection of medieval alchemical recipes"], correctIndex: 2 },
+        { type: "multiple_choice", questionText: "In logic puzzles, if A implies B and B implies C, what can we conclude?", difficulty: 2, category: "logic", correctAnswer: "A implies C", timeLimitSeconds: 25, explanation: "This is the Law of Syllogism.", options: ["C implies A", "A implies C", "B implies A", "None of the above"], correctIndex: 1 },
+        { type: "multiple_choice", questionText: "What algorithm is commonly used for public-key cryptography?", difficulty: 6, category: "security", correctAnswer: "RSA", timeLimitSeconds: 30, explanation: "RSA is a public-key cryptosystem.", options: ["AES", "RSA", "Diffie-Hellman", "Elliptic Curve"], correctIndex: 1 },
+        { type: "multiple_choice", questionText: "Which philosopher wrote 'The Art of War'?", difficulty: 2, category: "history", correctAnswer: "Sun Tzu", timeLimitSeconds: 20, explanation: "Sun Tzu was an ancient Chinese military strategist.", options: ["Confucius", "Lao Tzu", "Sun Tzu", "Mencius"], correctIndex: 2 },
+        { type: "multiple_choice", questionText: "Identify the next number in the sequence: 2, 6, 18, 54, ?", difficulty: 3, category: "logic", correctAnswer: "162", timeLimitSeconds: 30, explanation: "Each term is multiplied by 3.", options: ["108", "162", "72", "216"], correctIndex: 1 },
+        { type: "threat_assessment", questionText: "A previously unknown signal has been detected emanating from within The Archive's own network infrastructure.", difficulty: 6, category: "security", correctAnswer: "critical", timeLimitSeconds: 40, explanation: "A signal from within the network is a critical threat.", options: ["Low", "Medium", "High", "Critical"], correctIndex: 3 },
+        { type: "logic_grid", questionText: "Three Archive agents \u2014 Alex, Blake, and Casey \u2014 each specialize in a different field (cryptography, forensics, surveillance).\n\nClues:\n1. Alex does not work in surveillance.\n2. Blake works in forensics.\n3. Casey does not work in cryptography.\n\nWho works in surveillance?", difficulty: 4, category: "logic", correctAnswer: "Casey", timeLimitSeconds: 50, explanation: "From clue 2: Blake = Forensics. From clue 1: Alex \u2260 Surveillance, so Alex = Cryptography. From clue 3: Casey \u2260 Cryptography, so Casey = Surveillance.", options: ["Alex", "Blake", "Casey", "Cannot be determined"], correctIndex: 2 },
+        { type: "multi_step", questionText: "PHASE 1: You discover a locked terminal. The password hint reads: 'The first prime number greater than 10.'\n\nPHASE 2: Enter the terminal. Inside is a file labeled with the atomic number of the element used in the first nuclear bomb.\n\nWhat is the file label?", difficulty: 5, category: "technology", correctAnswer: "94", timeLimitSeconds: 60, explanation: "Step 1: First prime > 10 is 11. Step 2: The element used in the first nuclear bomb was Plutonium (Pu), atomic number 94.", options: ["11", "92", "94", "Pu"], correctIndex: 2 }
+      ];
+      let added = 0;
+      for (const q of questionData) {
+        const [existing] = await db.select({ id: questionsTable.id }).from(questionsTable).where(sql13`${questionsTable.questionText} = ${q.questionText}`).limit(1);
+        if (existing) continue;
+        const [question] = await db.insert(questionsTable).values({
+          type: q.type,
+          questionText: q.questionText,
+          difficulty: q.difficulty,
+          category: q.category,
+          correctAnswer: q.correctAnswer,
+          timeLimitSeconds: q.timeLimitSeconds,
+          explanation: q.explanation
+        }).returning();
+        for (let i = 0; i < q.options.length; i++) {
+          await db.insert(questionOptionsTable).values({
+            questionId: question.id,
+            optionText: q.options[i],
+            isCorrect: i === q.correctIndex ? 1 : 0
+          });
+        }
+        added++;
+      }
+      res.json({ success: true, added });
+    });
+    stage_default = router21;
+  }
+});
+
 // src/main.ts
-var import_express24 = __toESM(require_express2(), 1);
+var import_express25 = __toESM(require_express2(), 1);
 var import_cors = __toESM(require_lib3(), 1);
+
+// src/routes/index.ts
+var import_express24 = __toESM(require_express2(), 1);
 
 // src/routes/health.ts
 var import_express = __toESM(require_express2(), 1);
@@ -45488,6 +46077,51 @@ var import_express4 = __toESM(require_express2(), 1);
 init_src();
 init_src();
 import { eq as eq3, and, desc, sql, inArray } from "drizzle-orm";
+
+// src/middleware/rateLimit.ts
+init_src();
+var buckets = /* @__PURE__ */ new Map();
+var CLEANUP_INTERVAL = 6e4;
+var lastCleanup = Date.now();
+function cleanup() {
+  const now = Date.now();
+  if (now - lastCleanup < CLEANUP_INTERVAL) return;
+  lastCleanup = now;
+  for (const [key, entry] of buckets) {
+    if (now - entry.windowStart > 12e4) buckets.delete(key);
+  }
+}
+function rateLimit(maxRequests, windowMs = 6e4) {
+  return (req, res, next) => {
+    cleanup();
+    const key = `${req.ip || req.socket.remoteAddress || "unknown"}:${req.path}`;
+    const now = Date.now();
+    const entry = buckets.get(key);
+    if (!entry || now - entry.windowStart > windowMs) {
+      buckets.set(key, { count: 1, windowStart: now });
+      next();
+      return;
+    }
+    if (entry.count >= maxRequests) {
+      res.status(429).json({ error: "Too many requests", retryAfter: Math.ceil((entry.windowStart + windowMs - now) / 1e3) });
+      return;
+    }
+    entry.count++;
+    next();
+  };
+}
+async function logSuspiciousActivity(userId, action, details, severity = 1) {
+  try {
+    await getPool().query(
+      `INSERT INTO anti_cheat_logs (user_id, action, details, severity, flagged)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [userId, action, JSON.stringify(details), severity, severity >= 3 ? true : false]
+    );
+  } catch {
+  }
+}
+
+// src/routes/gameplay.ts
 var router4 = (0, import_express4.Router)();
 async function getUserFromToken2(token) {
   if (!token) return null;
@@ -45496,6 +46130,35 @@ async function getUserFromToken2(token) {
   if (!session || session.expiresAt < /* @__PURE__ */ new Date()) return null;
   const [user] = await db.select().from(usersTable).where(eq3(usersTable.id, session.userId)).limit(1);
   return user || null;
+}
+async function detectAnomalies(userId, questionId, timeSpentMs, isCorrect) {
+  const anomalies = [];
+  if (timeSpentMs < 500) {
+    anomalies.push("impossible_speed");
+  }
+  if (timeSpentMs < 2e3 && timeSpentMs >= 500) {
+    anomalies.push("suspicious_speed");
+  }
+  try {
+    const { rows } = await getPool().query(
+      `SELECT count(*) as cnt FROM answer_logs
+       WHERE user_id = $1 AND question_id = $2
+       AND created_at > now() - interval '30 seconds'`,
+      [userId, questionId]
+    );
+    if (Number(rows[0]?.cnt || 0) > 0) {
+      anomalies.push("duplicate_answer");
+    }
+  } catch {
+  }
+  if (anomalies.length > 0) {
+    await logSuspiciousActivity(userId, "answer_anomaly", {
+      questionId,
+      timeSpentMs,
+      isCorrect,
+      anomalies
+    });
+  }
 }
 var XP_PER_LEVEL = 500;
 function calcLevel(xp) {
@@ -45575,6 +46238,13 @@ router4.post("/questions/:questionId/answer", async (req, res) => {
     return;
   }
   const { optionId, timeSpentMs } = req.body;
+  if (user) {
+    await detectAnomalies(user.id, questionId, timeSpentMs || 0, false);
+  }
+  if ((timeSpentMs || 0) < 300) {
+    res.json({ correct: false, xpGained: 0, correctOptionId: null, explanation: "Answer rejected \u2014 too fast", streakBonus: 0, newLevel: null });
+    return;
+  }
   const [selectedOption] = await db.select().from(questionOptionsTable).where(eq3(questionOptionsTable.id, optionId)).limit(1);
   const isCorrect = selectedOption?.isCorrect === 1;
   const [correctOption] = await db.select().from(questionOptionsTable).where(and(eq3(questionOptionsTable.questionId, questionId), eq3(questionOptionsTable.isCorrect, 1))).limit(1);
@@ -48361,553 +49031,8 @@ router20.get("/team/list", async (req, res) => {
 });
 var teamOps_default = router20;
 
-// src/routes/stage.ts
-var import_express21 = __toESM(require_express2(), 1);
-init_src();
-init_src();
-init_src();
-import { eq as eq20, sql as sql13 } from "drizzle-orm";
-var router21 = (0, import_express21.Router)();
-async function getUserFromToken18(token) {
-  if (!token) return null;
-  const bearerToken = token.replace("Bearer ", "");
-  const [session] = await db.select().from(sessionsTable).where(eq20(sessionsTable.token, bearerToken)).limit(1);
-  if (!session || session.expiresAt < /* @__PURE__ */ new Date()) return null;
-  const [user] = await db.select().from(usersTable).where(eq20(usersTable.id, session.userId)).limit(1);
-  return user || null;
-}
-function generateCode(length = 5) {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let code = "";
-  for (let i = 0; i < length; i++) code += chars[Math.floor(Math.random() * chars.length)];
-  return code;
-}
-var stageMatchCache = /* @__PURE__ */ new Map();
-function pool() {
-  return getPool();
-}
-async function ensureMatch(matchId, force = false) {
-  if (!force) {
-    const cached2 = stageMatchCache.get(matchId);
-    if (cached2) return cached2;
-  }
-  try {
-    const { rows } = await pool().query(`SELECT state FROM stage_matches WHERE match_id = $1`, [matchId]);
-    if (rows.length === 0) return void 0;
-    const state = rows[0].state;
-    stageMatchCache.set(matchId, state);
-    return state;
-  } catch (e) {
-    console.error("[stage] ensureMatch DB error:", e?.message);
-    return void 0;
-  }
-}
-function cacheMatch(state) {
-  stageMatchCache.set(state.id, state);
-}
-async function persistMatch(state) {
-  const insert = () => pool().query(
-    `INSERT INTO stage_matches (match_id, host_id, room_code, state) VALUES ($1, $2, $3, $4)
-     ON CONFLICT (match_id) DO UPDATE SET state = $4, updated_at = NOW()`,
-    [state.id, state.hostId, state.roomCode, JSON.stringify(state)]
-  );
-  try {
-    await insert();
-  } catch (e) {
-    if (e?.code === "42P01") {
-      try {
-        await pool().query(`
-          CREATE TABLE IF NOT EXISTS stage_matches (
-            id SERIAL PRIMARY KEY,
-            match_id BIGINT NOT NULL UNIQUE,
-            host_id INTEGER NOT NULL,
-            room_code VARCHAR(10) NOT NULL,
-            state JSONB NOT NULL,
-            created_at TIMESTAMP DEFAULT NOW() NOT NULL,
-            updated_at TIMESTAMP DEFAULT NOW() NOT NULL
-          )
-        `);
-      } catch (e2) {
-        console.error("[stage] create table failed:", e2);
-        throw new Error(`Failed to create stage_matches table: ${e2?.message || "unknown"}`);
-      }
-      await insert();
-    } else if (e?.code === "22003") {
-      try {
-        await pool().query(`ALTER TABLE stage_matches ALTER COLUMN match_id TYPE BIGINT`);
-      } catch (e2) {
-        console.error("[stage] alter column failed:", e2);
-        throw new Error(`Failed to migrate match_id column: ${e2?.message || "unknown"}`);
-      }
-      await insert();
-    } else {
-      console.error("[stage] persist failed:", e);
-      throw new Error(`Failed to persist match: ${e?.message || "unknown"}`);
-    }
-  }
-}
-var DOMAIN_CATEGORIES2 = {
-  cyber_systems: ["technology", "security"],
-  cognitive_analysis: ["logic", "intelligence"],
-  historical_archives: ["history"],
-  threat_intelligence: ["security", "intelligence"],
-  scientific_division: ["technology"],
-  behavioral_analysis: ["intelligence"],
-  global_mapping: ["history", "technology"],
-  cipher_division: ["security", "intelligence"]
-};
-var TEAM_COLORS = ["#3b82f6", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#14b8a6", "#f97316"];
-var TEAM_EMBLEMS = ["raven", "wolf", "phoenix", "viper", "titan", "shadow", "ghost", "cipher"];
-router21.post("/stage/create", async (req, res) => {
-  const user = await getUserFromToken18(req.headers.authorization);
-  if (!user) {
-    res.status(401).json({ error: "Not authenticated" });
-    return;
-  }
-  const { teamCount, domains, difficulty, timerSeconds, questionCount } = req.body;
-  if (!domains || domains.length === 0) {
-    res.status(400).json({ error: "Select at least one domain" });
-    return;
-  }
-  const roomCode = generateCode(5);
-  const matchId = Date.now() + Math.floor(Math.random() * 1e3);
-  const usedCodes = /* @__PURE__ */ new Set();
-  const teams = [];
-  for (let i = 0; i < (teamCount || 2); i++) {
-    let code = generateCode(4);
-    while (usedCodes.has(code)) code = generateCode(4);
-    usedCodes.add(code);
-    teams.push({
-      id: i + 1,
-      name: "",
-      color: TEAM_COLORS[i % 8],
-      emblem: TEAM_EMBLEMS[i % 8],
-      code,
-      score: 0,
-      correct: 0,
-      total: 0,
-      streak: 0,
-      tacticalLoadout: []
-    });
-  }
-  const stageMatch = {
-    id: matchId,
-    roomCode,
-    hostId: user.id,
-    teams,
-    questions: [],
-    currentQuestionIndex: 0,
-    phase: "lobby",
-    buzzerTeamId: null,
-    wrongAttempts: 0,
-    timerSeconds: timerSeconds || 30,
-    timerStartedAt: null,
-    timerDuration: timerSeconds || 30,
-    originalTimerSeconds: timerSeconds || 30,
-    domainOrder: domains || [],
-    currentDomain: domains?.[0] || "general",
-    domains: domains || [],
-    difficulty: difficulty || "agent",
-    totalQuestions: questionCount || 10,
-    buzzedOptionId: null
-  };
-  cacheMatch(stageMatch);
-  await persistMatch(stageMatch);
-  res.json({
-    matchId,
-    roomCode,
-    teams: teams.map((t) => ({ id: t.id, name: t.name, color: t.color, emblem: t.emblem, code: t.code }))
-  });
-});
-router21.post("/stage/buzzer-connect", async (req, res) => {
-  const { teamCode } = req.body;
-  if (!teamCode) {
-    res.status(400).json({ error: "Team code required" });
-    return;
-  }
-  let match = Array.from(stageMatchCache.values()).find(
-    (m) => m.teams.some((t) => t.code === teamCode.toUpperCase())
-  );
-  if (!match) {
-    const rows = await db.select().from(stageMatchesTable).limit(50);
-    for (const row of rows) {
-      const m = { ...row.state, timer: null };
-      if (m.teams.some((t) => t.code === teamCode.toUpperCase())) {
-        match = m;
-        cacheMatch(m);
-        break;
-      }
-    }
-  }
-  if (!match) {
-    res.status(404).json({ error: "Invalid team code" });
-    return;
-  }
-  const team = match.teams.find((t) => t.code === teamCode.toUpperCase());
-  if (!team) {
-    res.status(404).json({ error: "Team not found" });
-    return;
-  }
-  if (!team.name) {
-    res.status(400).json({ error: "Team not configured yet" });
-    return;
-  }
-  res.json({ matchId: match.id, teamId: team.id, teamName: team.name, teamColor: team.color, teamEmblem: team.emblem, roomCode: match.roomCode, tacticalLoadout: team.tacticalLoadout });
-});
-router21.post("/stage/team-config", async (req, res) => {
-  const user = await getUserFromToken18(req.headers.authorization);
-  if (!user) {
-    res.status(401).json({ error: "Not authenticated" });
-    return;
-  }
-  const { matchId, teamIndex, name, color, emblem } = req.body;
-  const match = await ensureMatch(matchId, true);
-  if (!match) {
-    res.status(404).json({ error: "Match not found" });
-    return;
-  }
-  if (match.hostId !== user.id) {
-    res.status(403).json({ error: "Only host can configure" });
-    return;
-  }
-  const team = match.teams[teamIndex];
-  if (!team) {
-    res.status(404).json({ error: "Team not found" });
-    return;
-  }
-  if (name) team.name = name;
-  if (color) team.color = color;
-  if (emblem) team.emblem = emblem;
-  await persistMatch(match);
-  res.json({ team });
-});
-router21.post("/stage/batch-config", async (req, res) => {
-  const user = await getUserFromToken18(req.headers.authorization);
-  if (!user) {
-    res.status(401).json({ error: "Not authenticated" });
-    return;
-  }
-  const { matchId, teams } = req.body;
-  const match = await ensureMatch(matchId, true);
-  if (!match) {
-    res.status(404).json({ error: "Match not found" });
-    return;
-  }
-  if (match.hostId !== user.id) {
-    res.status(403).json({ error: "Only host can configure" });
-    return;
-  }
-  for (const t of teams || []) {
-    const team = match.teams[t.teamIndex];
-    if (!team) continue;
-    if (t.name) team.name = t.name;
-    if (t.color) team.color = t.color;
-    if (t.emblem) team.emblem = t.emblem;
-    if (t.tacticalLoadout) team.tacticalLoadout = t.tacticalLoadout;
-  }
-  await persistMatch(match);
-  res.json({ success: true });
-});
-router21.post("/stage/start", async (req, res) => {
-  const user = await getUserFromToken18(req.headers.authorization);
-  if (!user) {
-    res.status(401).json({ error: "Not authenticated" });
-    return;
-  }
-  const { matchId } = req.body;
-  const match = await ensureMatch(matchId, true);
-  if (!match) {
-    res.status(404).json({ error: "Match not found" });
-    return;
-  }
-  if (match.hostId !== user.id) {
-    res.status(403).json({ error: "Only host can start" });
-    return;
-  }
-  const namedTeams = match.teams.filter((t) => t.name);
-  if (namedTeams.length < 1) {
-    res.status(400).json({ error: "Need at least 1 team" });
-    return;
-  }
-  const selectedCategories = [];
-  for (const d of match.domains) {
-    const cats = DOMAIN_CATEGORIES2[d];
-    if (cats) selectedCategories.push(...cats);
-  }
-  const questions = await db.select().from(questionsTable).where(selectedCategories.length > 0 ? sql13`${questionsTable.category} IN (${sql13.join(selectedCategories.map((c) => sql13`${c}`), sql13`, `)})` : void 0).orderBy(sql13`RANDOM()`).limit(match.totalQuestions);
-  const qs = await Promise.all(questions.map(async (q) => {
-    const options = await db.select({ id: questionOptionsTable.id, text: questionOptionsTable.optionText }).from(questionOptionsTable).where(eq20(questionOptionsTable.questionId, q.id));
-    return {
-      id: q.id,
-      questionText: q.questionText,
-      difficulty: q.difficulty,
-      category: q.category,
-      options,
-      timeLimit: q.timeLimitSeconds || match.timerSeconds,
-      type: q.type,
-      correctOptionId: options.find((o) => o.id)?.id
-    };
-  }));
-  const fullQs = await Promise.all(questions.map(async (q) => {
-    const options = await db.select({ id: questionOptionsTable.id, text: questionOptionsTable.optionText, isCorrect: questionOptionsTable.isCorrect }).from(questionOptionsTable).where(eq20(questionOptionsTable.questionId, q.id));
-    const correctOpt = options.find((o) => o.isCorrect === 1);
-    return {
-      id: q.id,
-      questionText: q.questionText,
-      difficulty: q.difficulty,
-      category: q.category,
-      options: options.map((o) => ({ id: o.id, text: o.text })),
-      timeLimit: q.timeLimitSeconds || match.timerSeconds,
-      type: q.type,
-      correctOptionId: correctOpt?.id || null
-    };
-  }));
-  match.questions = fullQs;
-  match.totalQuestions = fullQs.length;
-  match.currentQuestionIndex = 0;
-  match.phase = "question";
-  match.timerStartedAt = Date.now();
-  match.currentDomain = match.domainOrder[0] || "general";
-  match.buzzedOptionId = null;
-  await persistMatch(match);
-  res.json({ success: true, totalQuestions: fullQs.length });
-});
-function stripAnswer(q) {
-  if (!q) return q;
-  const { correctOptionId, ...rest } = q;
-  return rest;
-}
-router21.post("/stage/buzz", async (req, res) => {
-  const { matchId, teamId } = req.body;
-  const match = await ensureMatch(matchId, true);
-  if (!match) {
-    res.status(404).json({ error: "Match not found" });
-    return;
-  }
-  if (match.phase !== "question" && match.phase !== "rebuzz") {
-    res.status(400).json({ error: "Not accepting buzzes" });
-    return;
-  }
-  if (match.buzzerTeamId !== null) {
-    res.json({ success: false, reason: "already_buzzed" });
-    return;
-  }
-  match.buzzerTeamId = teamId;
-  match.phase = "buzzed";
-  await persistMatch(match);
-  res.json({ success: true, teamId });
-});
-router21.post("/stage/answer", async (req, res) => {
-  const user = await getUserFromToken18(req.headers.authorization);
-  if (!user) {
-    res.status(401).json({ error: "Not authenticated" });
-    return;
-  }
-  const { matchId, optionId } = req.body;
-  const match = await ensureMatch(matchId, true);
-  if (!match) {
-    res.status(404).json({ error: "Match not found" });
-    return;
-  }
-  if (match.hostId !== user.id) {
-    res.status(403).json({ error: "Only host can mark answers" });
-    return;
-  }
-  if (match.buzzerTeamId === null) {
-    res.status(400).json({ error: "No team has buzzed" });
-    return;
-  }
-  const team = match.teams.find((t) => t.id === match.buzzerTeamId);
-  if (!team) {
-    res.status(404).json({ error: "Team not found" });
-    return;
-  }
-  const q = match.questions[match.currentQuestionIndex];
-  const isCorrect = q && q.correctOptionId === optionId;
-  team.total += 1;
-  const pointsMultiplier = match.wrongAttempts > 0 ? 0.5 : 1;
-  const speedBonus = match.timerStartedAt ? Date.now() - match.timerStartedAt < 5e3 ? 25 : 15 : 0;
-  const streakBonus = isCorrect && team.streak > 0 ? 50 : 0;
-  const pointsGained = isCorrect ? Math.round((100 + speedBonus + streakBonus) * pointsMultiplier) : 0;
-  if (isCorrect) {
-    team.correct += 1;
-    team.score += pointsGained;
-    team.streak += 1;
-    match.phase = "answered";
-    match.wrongAttempts = 0;
-    match.buzzedOptionId = optionId;
-    await persistMatch(match);
-    res.json({ success: true, correct: true, pointsGained, newScore: team.score });
-    return;
-  }
-  team.streak = 0;
-  if (match.wrongAttempts === 0) {
-    match.wrongAttempts = 1;
-    match.buzzerTeamId = null;
-    match.buzzedOptionId = optionId;
-    match.phase = "rebuzz";
-    await persistMatch(match);
-    res.json({ success: true, correct: false, pointsGained: 0, rebuzz: true });
-    return;
-  }
-  match.phase = "answered";
-  match.wrongAttempts = 0;
-  match.buzzedOptionId = optionId;
-  await persistMatch(match);
-  res.json({ success: true, correct: false, pointsGained: 0, newScore: team.score });
-});
-router21.post("/stage/next", async (req, res) => {
-  const user = await getUserFromToken18(req.headers.authorization);
-  if (!user) {
-    res.status(401).json({ error: "Not authenticated" });
-    return;
-  }
-  const { matchId } = req.body;
-  const match = await ensureMatch(matchId, true);
-  if (!match) {
-    res.status(404).json({ error: "Match not found" });
-    return;
-  }
-  if (match.hostId !== user.id) {
-    res.status(403).json({ error: "Only host can advance" });
-    return;
-  }
-  match.currentQuestionIndex++;
-  match.buzzerTeamId = null;
-  match.buzzedOptionId = null;
-  match.wrongAttempts = 0;
-  match.timerSeconds = match.originalTimerSeconds;
-  if (match.currentQuestionIndex >= match.questions.length) {
-    match.phase = "ended";
-    await persistMatch(match);
-    res.json({ finished: true });
-    return;
-  }
-  match.phase = "question";
-  await persistMatch(match);
-  res.json({ success: true, currentQuestion: match.currentQuestionIndex });
-});
-router21.post("/stage/skip", async (req, res) => {
-  const user = await getUserFromToken18(req.headers.authorization);
-  if (!user) {
-    res.status(401).json({ error: "Not authenticated" });
-    return;
-  }
-  const { matchId } = req.body;
-  const match = await ensureMatch(matchId, true);
-  if (!match) {
-    res.status(404).json({ error: "Match not found" });
-    return;
-  }
-  if (match.hostId !== user.id) {
-    res.status(403).json({ error: "Only host can skip" });
-    return;
-  }
-  match.buzzerTeamId = null;
-  await persistMatch(match);
-  res.json({ success: true });
-});
-router21.get("/stage/:id", async (req, res) => {
-  const matchId = parseInt(req.params.id);
-  const match = await ensureMatch(matchId);
-  if (!match) {
-    res.status(404).json({ error: "Match not found" });
-    return;
-  }
-  if (match.phase === "rebuzz" && match.buzzerTeamId === null) {
-    match.phase = "question";
-    match.timerStartedAt = Date.now();
-    await persistMatch(match).catch(() => {
-    });
-  }
-  const q = match.questions[match.currentQuestionIndex];
-  const qStrip = q ? stripAnswer(q) : null;
-  res.json({
-    id: match.id,
-    roomCode: match.roomCode,
-    phase: match.phase,
-    teams: match.teams.filter((t) => t.name).map((t) => ({
-      id: t.id,
-      name: t.name,
-      color: t.color,
-      emblem: t.emblem,
-      code: t.code,
-      score: t.score,
-      correct: t.correct,
-      total: t.total,
-      streak: t.streak,
-      tacticalLoadout: t.tacticalLoadout
-    })),
-    currentQuestionIndex: match.currentQuestionIndex,
-    totalQuestions: match.totalQuestions,
-    currentDomain: match.currentDomain,
-    buzzerTeamId: match.buzzerTeamId,
-    wrongAttempts: match.wrongAttempts,
-    originalTimerSeconds: match.originalTimerSeconds,
-    timerSeconds: match.timerSeconds,
-    question: qStrip,
-    domains: match.domains,
-    difficulty: match.difficulty
-  });
-});
-router21.post("/stage/timeout", async (req, res) => {
-  const { matchId } = req.body;
-  const match = await ensureMatch(matchId, true);
-  if (!match) {
-    res.status(404).json({ error: "Match not found" });
-    return;
-  }
-  if (match.phase === "question") {
-    match.phase = "answered";
-    await persistMatch(match).catch(() => {
-    });
-  }
-  res.json({ success: true });
-});
-router21.post("/stage/seed-questions", async (_req, res) => {
-  const questionData = [
-    { type: "multiple_choice", questionText: "Which programming paradigm treats computation as the evaluation of mathematical functions and avoids changing state?", difficulty: 4, category: "technology", correctAnswer: "Functional Programming", timeLimitSeconds: 30, explanation: "Functional programming is a declarative programming paradigm where programs are constructed by composing pure functions, avoiding shared state and mutable data.", options: ["Object-Oriented Programming", "Functional Programming", "Procedural Programming", "Logic Programming"], correctIndex: 1 },
-    { type: "multiple_choice", questionText: "In cryptography, what is the primary purpose of a 'salt' when storing passwords?", difficulty: 5, category: "security", correctAnswer: "Prevent rainbow table attacks", timeLimitSeconds: 30, explanation: "A salt is random data added to a password before hashing.", options: ["Speed up hash computation", "Prevent rainbow table attacks", "Encrypt the database", "Compress the password"], correctIndex: 1 },
-    { type: "multiple_choice", questionText: "What is the time complexity of a binary search algorithm?", difficulty: 3, category: "technology", correctAnswer: "O(log n)", timeLimitSeconds: 25, explanation: "Binary search repeatedly halves the search space.", options: ["O(n)", "O(n\xB2)", "O(log n)", "O(1)"], correctIndex: 2 },
-    { type: "multiple_choice", questionText: "The 'Turing Test' was proposed as a measure of what?", difficulty: 3, category: "history", correctAnswer: "Machine intelligence", timeLimitSeconds: 30, explanation: "Alan Turing proposed the Turing Test in 1950.", options: ["Processing speed", "Machine intelligence", "Network security", "Data storage capacity"], correctIndex: 1 },
-    { type: "multiple_choice", questionText: "Which encryption standard replaced DES as the U.S. federal standard in 2001?", difficulty: 5, category: "security", correctAnswer: "AES", timeLimitSeconds: 30, explanation: "AES was adopted by NIST in 2001.", options: ["RSA", "AES", "SHA-256", "Blowfish"], correctIndex: 1 },
-    { type: "multiple_choice", questionText: "What does 'OSINT' stand for in intelligence operations?", difficulty: 2, category: "intelligence", correctAnswer: "Open Source Intelligence", timeLimitSeconds: 20, explanation: "OSINT is intelligence collected from publicly available sources.", options: ["Operational Security Intelligence", "Open Source Intelligence", "Online System Integrity Test", "Offensive Signal Intelligence"], correctIndex: 1 },
-    { type: "multiple_choice", questionText: "In network security, what does 'man-in-the-middle' (MITM) refer to?", difficulty: 4, category: "security", correctAnswer: "An attack where communication is intercepted and potentially altered", timeLimitSeconds: 35, explanation: "A MITM attack occurs when an attacker secretly intercepts messages.", options: ["A firewall configuration", "An attack where communication is intercepted and potentially altered", "A type of VPN protocol", "A network topology model"], correctIndex: 1 },
-    { type: "multiple_choice", questionText: "Which Cold War operation involved the CIA attempting to overthrow the Cuban government in 1961?", difficulty: 4, category: "history", correctAnswer: "Bay of Pigs Invasion", timeLimitSeconds: 30, explanation: "The Bay of Pigs Invasion was a failed CIA attempt.", options: ["Operation Mongoose", "Bay of Pigs Invasion", "Operation Northwoods", "Operation Zapata"], correctIndex: 1 },
-    { type: "multiple_choice", questionText: "What is the Voynich Manuscript?", difficulty: 3, category: "history", correctAnswer: "An undeciphered illustrated codex from the early 15th century", timeLimitSeconds: 35, explanation: "The Voynich Manuscript is a hand-written codex in unknown script.", options: ["A decoded WWII German cipher", "An ancient Roman military manual", "An undeciphered illustrated codex from the early 15th century", "A collection of medieval alchemical recipes"], correctIndex: 2 },
-    { type: "multiple_choice", questionText: "In logic puzzles, if A implies B and B implies C, what can we conclude?", difficulty: 2, category: "logic", correctAnswer: "A implies C", timeLimitSeconds: 25, explanation: "This is the Law of Syllogism.", options: ["C implies A", "A implies C", "B implies A", "None of the above"], correctIndex: 1 },
-    { type: "multiple_choice", questionText: "What algorithm is commonly used for public-key cryptography?", difficulty: 6, category: "security", correctAnswer: "RSA", timeLimitSeconds: 30, explanation: "RSA is a public-key cryptosystem.", options: ["AES", "RSA", "Diffie-Hellman", "Elliptic Curve"], correctIndex: 1 },
-    { type: "multiple_choice", questionText: "Which philosopher wrote 'The Art of War'?", difficulty: 2, category: "history", correctAnswer: "Sun Tzu", timeLimitSeconds: 20, explanation: "Sun Tzu was an ancient Chinese military strategist.", options: ["Confucius", "Lao Tzu", "Sun Tzu", "Mencius"], correctIndex: 2 },
-    { type: "multiple_choice", questionText: "Identify the next number in the sequence: 2, 6, 18, 54, ?", difficulty: 3, category: "logic", correctAnswer: "162", timeLimitSeconds: 30, explanation: "Each term is multiplied by 3.", options: ["108", "162", "72", "216"], correctIndex: 1 },
-    { type: "threat_assessment", questionText: "A previously unknown signal has been detected emanating from within The Archive's own network infrastructure.", difficulty: 6, category: "security", correctAnswer: "critical", timeLimitSeconds: 40, explanation: "A signal from within the network is a critical threat.", options: ["Low", "Medium", "High", "Critical"], correctIndex: 3 },
-    { type: "logic_grid", questionText: "Three Archive agents \u2014 Alex, Blake, and Casey \u2014 each specialize in a different field (cryptography, forensics, surveillance).\n\nClues:\n1. Alex does not work in surveillance.\n2. Blake works in forensics.\n3. Casey does not work in cryptography.\n\nWho works in surveillance?", difficulty: 4, category: "logic", correctAnswer: "Casey", timeLimitSeconds: 50, explanation: "From clue 2: Blake = Forensics. From clue 1: Alex \u2260 Surveillance, so Alex = Cryptography. From clue 3: Casey \u2260 Cryptography, so Casey = Surveillance.", options: ["Alex", "Blake", "Casey", "Cannot be determined"], correctIndex: 2 },
-    { type: "multi_step", questionText: "PHASE 1: You discover a locked terminal. The password hint reads: 'The first prime number greater than 10.'\n\nPHASE 2: Enter the terminal. Inside is a file labeled with the atomic number of the element used in the first nuclear bomb.\n\nWhat is the file label?", difficulty: 5, category: "technology", correctAnswer: "94", timeLimitSeconds: 60, explanation: "Step 1: First prime > 10 is 11. Step 2: The element used in the first nuclear bomb was Plutonium (Pu), atomic number 94.", options: ["11", "92", "94", "Pu"], correctIndex: 2 }
-  ];
-  let added = 0;
-  for (const q of questionData) {
-    const [existing] = await db.select({ id: questionsTable.id }).from(questionsTable).where(sql13`${questionsTable.questionText} = ${q.questionText}`).limit(1);
-    if (existing) continue;
-    const [question] = await db.insert(questionsTable).values({
-      type: q.type,
-      questionText: q.questionText,
-      difficulty: q.difficulty,
-      category: q.category,
-      correctAnswer: q.correctAnswer,
-      timeLimitSeconds: q.timeLimitSeconds,
-      explanation: q.explanation
-    }).returning();
-    for (let i = 0; i < q.options.length; i++) {
-      await db.insert(questionOptionsTable).values({
-        questionId: question.id,
-        optionText: q.options[i],
-        isCorrect: i === q.correctIndex ? 1 : 0
-      });
-    }
-    added++;
-  }
-  res.json({ success: true, added });
-});
-var stage_default = router21;
+// src/routes/index.ts
+init_stage();
 
 // src/routes/admin.ts
 var import_express22 = __toESM(require_express2(), 1);
@@ -49416,6 +49541,44 @@ router22.post("/admin/events", requirePermission("manage_events"), async (req, r
   logAdmin(req.user.id, "ADMIN_CREATED_EVENT", "event", String(event.id));
   res.status(201).json(event);
 });
+router22.get("/admin/replays", requirePermission("manage_matches"), async (_req, res) => {
+  const { rows } = await getPool().query(
+    `SELECT match_id, room_code, host_id, state, created_at, updated_at
+     FROM stage_matches
+     WHERE state->>'phase' = 'ended'
+     ORDER BY updated_at DESC LIMIT 50`
+  );
+  const replays = rows.map((r) => ({
+    matchId: r.match_id,
+    roomCode: r.room_code,
+    hostId: r.host_id,
+    teamCount: r.state?.teams?.filter((t) => t.name).length || 0,
+    totalQuestions: r.state?.totalQuestions || 0,
+    phases: r.state?.log?.length || 0,
+    createdAt: r.created_at,
+    updatedAt: r.updated_at
+  }));
+  res.json({ replays });
+});
+router22.get("/admin/replays/:matchId", requirePermission("manage_matches"), async (req, res) => {
+  const { rows } = await getPool().query(`SELECT * FROM stage_matches WHERE match_id = $1`, [req.params.matchId]);
+  if (rows.length === 0) return res.status(404).json({ error: "Match not found" });
+  const state = rows[0].state;
+  const qs = (state.questions || []).map((q) => {
+    const { correctOptionId, ...rest } = q;
+    return rest;
+  });
+  res.json({
+    matchId: rows[0].match_id,
+    roomCode: rows[0].room_code,
+    teams: (state.teams || []).filter((t) => t.name),
+    questions: qs,
+    log: state.log || [],
+    phase: state.phase,
+    createdAt: rows[0].created_at,
+    updatedAt: rows[0].updated_at
+  });
+});
 router22.get("/admin/analytics", requirePermission("manage_analytics"), async (_req, res) => {
   const { rows: dailyUsers } = await getPool().query(
     `SELECT date_trunc('day', created_at) as day, count(*) as registrations
@@ -49536,38 +49699,170 @@ router22.post("/admin/settings", requirePermission("manage_settings"), async (re
 });
 var admin_default = router22;
 
-// src/routes/index.ts
+// src/routes/aiOpponent.ts
 var import_express23 = __toESM(require_express2(), 1);
+init_stage();
 var router23 = (0, import_express23.Router)();
-router23.use(health_default);
-router23.use(auth_default);
-router23.use(users_default);
-router23.use(gameplay_default);
-router23.use(story_default);
-router23.use(ranking_default);
-router23.use(social_default);
-router23.use(ai_default);
-router23.use(aiQuestions_default);
-router23.use(aiCharacters_default);
-router23.use(prestige_default);
-router23.use(skillTree_default);
-router23.use(tournaments_default);
-router23.use(shop_default);
-router23.use(worldEvents_default);
-router23.use(analytics_default);
-router23.use(antiCheat_default);
-router23.use(mission_default);
-router23.use(tactical_default);
-router23.use(teamOps_default);
-router23.use(stage_default);
-router23.use(admin_default);
-var routes_default = router23;
+var BOT_NAMES = [
+  "Cipher-7",
+  "Nexus-9",
+  "Phantom-X",
+  "Void-3",
+  "Aegis-1",
+  "Omega-5",
+  "Delta-Z",
+  "Sigma-4",
+  "Talon-6",
+  "Wraith-2"
+];
+var BOT_COLORS = ["#a855f7", "#14b8a6", "#f97316", "#06b6d4", "#d946ef"];
+var BOT_EMBLEMS = ["ai-1", "ai-2", "ai-3", "ai-4", "ai-5"];
+var DIFFICULTY_SKILL = {
+  recruit: { accuracy: 0.45, avgBuzzMs: 8e3, buzzVariance: 4e3 },
+  agent: { accuracy: 0.6, avgBuzzMs: 6e3, buzzVariance: 3e3 },
+  elite: { accuracy: 0.78, avgBuzzMs: 4e3, buzzVariance: 2e3 },
+  omega: { accuracy: 0.92, avgBuzzMs: 2500, buzzVariance: 1500 }
+};
+function pickRandom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+router23.post("/stage/ai-opponent/add", async (req, res) => {
+  const { matchId, botCount, difficulty } = req.body;
+  const count = Math.min(botCount || 1, 5);
+  const match = await getStageMatch(matchId);
+  if (!match) {
+    res.status(404).json({ error: "Match not found" });
+    return;
+  }
+  const bots = [];
+  for (let i = 0; i < count; i++) {
+    const bot = {
+      id: 1e3 + match.teams.length + i,
+      name: pickRandom(BOT_NAMES),
+      color: BOT_COLORS[i % BOT_COLORS.length],
+      emblem: BOT_EMBLEMS[i % BOT_EMBLEMS.length],
+      code: `AI-${match.teams.length + i + 1}`,
+      score: 0,
+      correct: 0,
+      total: 0,
+      streak: 0,
+      tacticalLoadout: [],
+      isBot: true,
+      skill: DIFFICULTY_SKILL[difficulty || "agent"]
+    };
+    match.teams.push(bot);
+    bots.push({ id: bot.id, name: bot.name, color: bot.color, emblem: bot.emblem });
+  }
+  const { persistMatch: persistMatch2, cacheMatch: cacheMatch2 } = await Promise.resolve().then(() => (init_stage(), stage_exports));
+  cacheMatch2(match);
+  await persistMatch2(match);
+  res.json({ success: true, bots });
+});
+router23.post("/stage/ai-opponent/tick", async (req, res) => {
+  const { matchId } = req.body;
+  const match = await getStageMatch(matchId);
+  if (!match) {
+    res.status(404).json({ error: "Match not found" });
+    return;
+  }
+  if (match.phase !== "question") {
+    res.json({ action: "waiting", phase: match.phase });
+    return;
+  }
+  if (match.buzzerTeamId !== null) {
+    res.json({ action: "waiting", reason: "already_buzzed" });
+    return;
+  }
+  const botTeams = match.teams.filter((t) => t.isBot);
+  if (botTeams.length === 0) {
+    res.json({ action: "no_bots" });
+    return;
+  }
+  const { persistMatch: persistMatch2, cacheMatch: cacheMatch2 } = await Promise.resolve().then(() => (init_stage(), stage_exports));
+  const elapsed = Date.now() - (match.timerStartedAt || Date.now());
+  for (const bot of botTeams) {
+    const skill = bot.skill || DIFFICULTY_SKILL.agent;
+    const buzzChance = Math.min(0.3, elapsed / (skill.avgBuzzMs * 3));
+    if (Math.random() < buzzChance && match.buzzerTeamId === null) {
+      match.buzzerTeamId = bot.id;
+      match.phase = "buzzed";
+      const q = match.questions[match.currentQuestionIndex];
+      let willBeCorrect = false;
+      if (q && q.correctOptionId) {
+        willBeCorrect = Math.random() < skill.accuracy;
+        if (willBeCorrect) {
+          match.buzzedOptionId = q.correctOptionId;
+        } else {
+          const wrongOptions = q.options?.filter((o) => o.id !== q.correctOptionId) || [];
+          match.buzzedOptionId = wrongOptions[Math.floor(Math.random() * wrongOptions.length)]?.id || null;
+        }
+      }
+      const team = match.teams.find((t) => t.id === bot.id);
+      if (team) {
+        team.total += 1;
+        if (willBeCorrect) {
+          team.score += 100;
+          team.correct += 1;
+          team.streak += 1;
+        } else {
+          team.streak = 0;
+        }
+      }
+      match.wrongAttempts = willBeCorrect ? 0 : 1;
+      match.phase = willBeCorrect ? "answered" : "rebuzz";
+      cacheMatch2(match);
+      await persistMatch2(match);
+      res.json({
+        action: "buzzed",
+        botId: bot.id,
+        botName: bot.name,
+        correct: willBeCorrect,
+        phase: match.phase
+      });
+      return;
+    }
+  }
+  res.json({ action: "no_buzz", botCount: botTeams.length });
+});
+var aiOpponent_default = router23;
+
+// src/routes/index.ts
+var router24 = (0, import_express24.Router)();
+router24.use(health_default);
+router24.use(auth_default);
+router24.use(users_default);
+router24.use(gameplay_default);
+router24.use(story_default);
+router24.use(ranking_default);
+router24.use(social_default);
+router24.use(ai_default);
+router24.use(aiQuestions_default);
+router24.use(aiCharacters_default);
+router24.use(prestige_default);
+router24.use(skillTree_default);
+router24.use(tournaments_default);
+router24.use(shop_default);
+router24.use(worldEvents_default);
+router24.use(analytics_default);
+router24.use(antiCheat_default);
+router24.use(mission_default);
+router24.use(tactical_default);
+router24.use(teamOps_default);
+router24.use(stage_default);
+router24.use(aiOpponent_default);
+router24.use(admin_default);
+var routes_default = router24;
 
 // src/main.ts
-var app = (0, import_express24.default)();
+var app = (0, import_express25.default)();
 app.use((0, import_cors.default)());
-app.use(import_express24.default.json());
-app.use(import_express24.default.urlencoded({ extended: true }));
+app.use(import_express25.default.json());
+app.use(import_express25.default.urlencoded({ extended: true }));
+app.use("/api/auth/login", rateLimit(5, 6e4));
+app.use("/api/auth/register", rateLimit(3, 6e4));
+app.use("/api/questions", rateLimit(30, 6e4));
+app.use("/api/stage/buzz", rateLimit(10, 1e4));
+app.use("/api/stage/answer", rateLimit(30, 6e4));
 app.use("/api", routes_default);
 app.use((req, res) => {
   res.status(404).json({ error: "not_found", path: req.path, originalUrl: req.originalUrl, baseUrl: req.baseUrl });

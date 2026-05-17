@@ -41,6 +41,13 @@ interface StageTeam {
   tacticalLoadout: string[];
 }
 
+interface StageEvent {
+  type: string;
+  teamId?: number | null;
+  data?: any;
+  timestamp: number;
+}
+
 interface StageMatchState {
   id: number;
   roomCode: string;
@@ -61,6 +68,7 @@ interface StageMatchState {
   difficulty: string;
   totalQuestions: number;
   buzzedOptionId: number | null;
+  log: StageEvent[];
 }
 
 const stageMatchCache = new Map<number, StageMatchState>();
@@ -86,6 +94,15 @@ async function ensureMatch(matchId: number, force = false): Promise<StageMatchSt
 
 function cacheMatch(state: StageMatchState): void {
   stageMatchCache.set(state.id, state);
+}
+
+function recordEvent(state: StageMatchState, type: string, teamId?: number | null, data?: any): void {
+  state.log.push({
+    type,
+    teamId: teamId ?? null,
+    data: data || null,
+    timestamp: Date.now(),
+  });
 }
 
 async function persistMatch(state: StageMatchState): Promise<void> {
@@ -135,6 +152,8 @@ async function persistMatch(state: StageMatchState): Promise<void> {
 export async function getStageMatch(matchId: number): Promise<StageMatchState | undefined> {
   return ensureMatch(matchId);
 }
+
+export { cacheMatch, persistMatch };
 
 const DOMAIN_CATEGORIES: Record<string, string[]> = {
   cyber_systems: ["technology", "security"],
@@ -208,8 +227,10 @@ router.post("/stage/create", async (req, res) => {
     difficulty: difficulty || "agent",
     totalQuestions: questionCount || 10,
     buzzedOptionId: null,
+    log: [],
   };
 
+  recordEvent(stageMatch, "match_created", null, { teamCount: teams.length, domains, difficulty });
   cacheMatch(stageMatch);
   await persistMatch(stageMatch);
 
@@ -260,6 +281,7 @@ router.post("/stage/team-config", async (req, res) => {
   if (name) team.name = name;
   if (color) team.color = color;
   if (emblem) team.emblem = emblem;
+  recordEvent(match, "team_configured", team.id, { name, color, emblem });
   await persistMatch(match);
 
   res.json({ team });
@@ -282,6 +304,7 @@ router.post("/stage/batch-config", async (req, res) => {
     if (t.color) team.color = t.color;
     if (t.emblem) team.emblem = t.emblem;
     if (t.tacticalLoadout) team.tacticalLoadout = t.tacticalLoadout;
+    recordEvent(match, "team_configured", team.id, { name: team.name, color: team.color, emblem: team.emblem });
   }
   await persistMatch(match);
 
@@ -353,6 +376,7 @@ router.post("/stage/start", async (req, res) => {
   match.timerStartedAt = Date.now();
   match.currentDomain = match.domainOrder[0] || "general";
   match.buzzedOptionId = null;
+  recordEvent(match, "match_started", null, { totalQuestions: fullQs.length });
   await persistMatch(match);
 
   res.json({ success: true, totalQuestions: fullQs.length });
@@ -374,6 +398,7 @@ router.post("/stage/buzz", async (req, res) => {
 
   match.buzzerTeamId = teamId;
   match.phase = "buzzed";
+  recordEvent(match, "buzzer_pressed", teamId);
   await persistMatch(match);
 
   res.json({ success: true, teamId });
@@ -411,6 +436,7 @@ router.post("/stage/answer", async (req, res) => {
     match.phase = "answered";
     match.wrongAttempts = 0;
     match.buzzedOptionId = optionId;
+    recordEvent(match, "answer_correct", team.id, { pointsGained, newScore: team.score });
     await persistMatch(match);
 
     res.json({ success: true, correct: true, pointsGained, newScore: team.score });
@@ -426,7 +452,7 @@ router.post("/stage/answer", async (req, res) => {
     match.buzzerTeamId = null;
     match.buzzedOptionId = optionId;
     match.phase = "rebuzz";
-
+    recordEvent(match, "answer_incorrect", team.id, { rebuzz: true });
     await persistMatch(match);
 
     res.json({ success: true, correct: false, pointsGained: 0, rebuzz: true });
@@ -437,6 +463,7 @@ router.post("/stage/answer", async (req, res) => {
   match.phase = "answered";
   match.wrongAttempts = 0;
   match.buzzedOptionId = optionId;
+  recordEvent(match, "answer_incorrect", team.id, { final: true });
   await persistMatch(match);
 
   res.json({ success: true, correct: false, pointsGained: 0, newScore: team.score });
@@ -460,12 +487,15 @@ router.post("/stage/next", async (req, res) => {
 
   if (match.currentQuestionIndex >= match.questions.length) {
     match.phase = "ended";
+    recordEvent(match, "match_ended", null, { reason: "all_questions_answered" });
     await persistMatch(match);
     res.json({ finished: true });
     return;
   }
 
   match.phase = "question";
+  match.timerStartedAt = Date.now();
+  recordEvent(match, "next_question", null, { questionIndex: match.currentQuestionIndex });
   await persistMatch(match);
 
   res.json({ success: true, currentQuestion: match.currentQuestionIndex });
@@ -482,6 +512,7 @@ router.post("/stage/skip", async (req, res) => {
   if (match.hostId !== user.id) { res.status(403).json({ error: "Only host can skip" }); return; }
 
   match.buzzerTeamId = null;
+  recordEvent(match, "question_skipped", null, { questionIndex: match.currentQuestionIndex });
   await persistMatch(match);
 
   res.json({ success: true });
@@ -532,6 +563,7 @@ router.post("/stage/timeout", async (req, res) => {
   if (!match) { res.status(404).json({ error: "Match not found" }); return; }
   if (match.phase === "question") {
     match.phase = "answered";
+    recordEvent(match, "timer_expired", null, { questionIndex: match.currentQuestionIndex });
     await persistMatch(match).catch(() => {});
   }
   res.json({ success: true });

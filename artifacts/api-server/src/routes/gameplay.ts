@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { db } from "@workspace/db";
+import { db, getPool } from "@workspace/db";
 import {
   questionsTable,
   questionOptionsTable,
@@ -15,6 +15,7 @@ import {
   aiPlayerProfilesTable,
 } from "@workspace/db";
 import { eq, ne, and, desc, sql, inArray } from "drizzle-orm";
+import { logSuspiciousActivity } from "../middleware/rateLimit.js";
 
 const router = Router();
 
@@ -25,6 +26,39 @@ async function getUserFromToken(token: string | undefined) {
   if (!session || session.expiresAt < new Date()) return null;
   const [user] = await db.select().from(usersTable).where(eq(usersTable.id, session.userId)).limit(1);
   return user || null;
+}
+
+async function detectAnomalies(userId: number, questionId: number, timeSpentMs: number, isCorrect: boolean) {
+  const anomalies: string[] = [];
+
+  // Impossible speed: under 500ms = likely automation
+  if (timeSpentMs < 500) {
+    anomalies.push("impossible_speed");
+  }
+
+  // Suspicious speed under 2s
+  if (timeSpentMs < 2000 && timeSpentMs >= 500) {
+    anomalies.push("suspicious_speed");
+  }
+
+  // Check duplicate answer (same user, same question, within 30 seconds)
+  try {
+    const { rows } = await getPool().query(
+      `SELECT count(*) as cnt FROM answer_logs
+       WHERE user_id = $1 AND question_id = $2
+       AND created_at > now() - interval '30 seconds'`,
+      [userId, questionId]
+    );
+    if (Number(rows[0]?.cnt || 0) > 0) {
+      anomalies.push("duplicate_answer");
+    }
+  } catch {}
+
+  if (anomalies.length > 0) {
+    await logSuspiciousActivity(userId, "answer_anomaly", {
+      questionId, timeSpentMs, isCorrect, anomalies,
+    });
+  }
 }
 
 const XP_PER_LEVEL = 500;
@@ -127,6 +161,18 @@ router.post("/questions/:questionId/answer", async (req, res) => {
   }
 
   const { optionId, timeSpentMs } = req.body;
+
+  // Anomaly detection
+  if (user) {
+    await detectAnomalies(user.id, questionId, timeSpentMs || 0, false);
+  }
+
+  // Reject impossible answer speeds
+  if ((timeSpentMs || 0) < 300) {
+    res.json({ correct: false, xpGained: 0, correctOptionId: null, explanation: "Answer rejected — too fast", streakBonus: 0, newLevel: null });
+    return;
+  }
+
   const [selectedOption] = await db.select().from(questionOptionsTable).where(eq(questionOptionsTable.id, optionId)).limit(1);
   const isCorrect = selectedOption?.isCorrect === 1;
 

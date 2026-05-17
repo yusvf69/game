@@ -530,6 +530,48 @@ router.post("/admin/events", requirePermission("manage_events"), async (req, res
   res.status(201).json(event);
 });
 
+// ─── Replay System ─────────────────────────────────────────────────────
+
+router.get("/admin/replays", requirePermission("manage_matches"), async (_req, res) => {
+  const { rows } = await getPool().query(
+    `SELECT match_id, room_code, host_id, state, created_at, updated_at
+     FROM stage_matches
+     WHERE state->>'phase' = 'ended'
+     ORDER BY updated_at DESC LIMIT 50`
+  );
+  const replays = rows.map((r: any) => ({
+    matchId: r.match_id,
+    roomCode: r.room_code,
+    hostId: r.host_id,
+    teamCount: r.state?.teams?.filter((t: any) => t.name).length || 0,
+    totalQuestions: r.state?.totalQuestions || 0,
+    phases: r.state?.log?.length || 0,
+    createdAt: r.created_at,
+    updatedAt: r.updated_at,
+  }));
+  res.json({ replays });
+});
+
+router.get("/admin/replays/:matchId", requirePermission("manage_matches"), async (req, res) => {
+  const { rows } = await getPool().query(`SELECT * FROM stage_matches WHERE match_id = $1`, [req.params.matchId]);
+  if (rows.length === 0) return res.status(404).json({ error: "Match not found" });
+  const state = rows[0].state;
+  const qs = (state.questions || []).map((q: any) => {
+    const { correctOptionId, ...rest } = q;
+    return rest;
+  });
+  res.json({
+    matchId: rows[0].match_id,
+    roomCode: rows[0].room_code,
+    teams: (state.teams || []).filter((t: any) => t.name),
+    questions: qs,
+    log: state.log || [],
+    phase: state.phase,
+    createdAt: rows[0].created_at,
+    updatedAt: rows[0].updated_at,
+  });
+});
+
 // ─── Analytics ─────────────────────────────────────────────────────────
 
 router.get("/admin/analytics", requirePermission("manage_analytics"), async (_req, res) => {
