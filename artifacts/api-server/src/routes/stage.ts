@@ -614,6 +614,13 @@ router.get("/stage/:id", async (req, res) => {
   const match = await ensureMatch(matchId);
   if (!match) { res.status(404).json({ error: "Match not found" }); return; }
 
+  // Auto-advance from intro → question on first poll (serverless-safe, no setTimeout needed)
+  if (match.phase === "intro" && match.questions.length > 0) {
+    match.phase = "question";
+    match.timerStartedAt = Date.now();
+    await persistMatch(match).catch(() => {});
+  }
+
   const q = match.questions[match.currentQuestionIndex];
   const qStrip = q ? stripAnswer(q) : null;
 
@@ -637,6 +644,18 @@ router.get("/stage/:id", async (req, res) => {
     domains: match.domains,
     difficulty: match.difficulty,
   });
+});
+
+// POST /stage/timeout — handle timer expiry from frontend polling
+router.post("/stage/timeout", async (req, res) => {
+  const { matchId } = req.body;
+  const match = await ensureMatch(matchId);
+  if (!match) { res.status(404).json({ error: "Match not found" }); return; }
+  if (match.phase === "question") {
+    match.phase = "answered";
+    await persistMatch(match).catch(() => {});
+  }
+  res.json({ success: true });
 });
 
 function startTimer(match: StageMatchState, io: any) {

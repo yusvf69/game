@@ -70175,6 +70175,12 @@ router21.get("/stage/:id", async (req, res) => {
     res.status(404).json({ error: "Match not found" });
     return;
   }
+  if (match.phase === "intro" && match.questions.length > 0) {
+    match.phase = "question";
+    match.timerStartedAt = Date.now();
+    await persistMatch(match).catch(() => {
+    });
+  }
   const q = match.questions[match.currentQuestionIndex];
   const qStrip = q ? stripAnswer(q) : null;
   res.json({
@@ -70204,6 +70210,20 @@ router21.get("/stage/:id", async (req, res) => {
     domains: match.domains,
     difficulty: match.difficulty
   });
+});
+router21.post("/stage/timeout", async (req, res) => {
+  const { matchId } = req.body;
+  const match = await ensureMatch(matchId);
+  if (!match) {
+    res.status(404).json({ error: "Match not found" });
+    return;
+  }
+  if (match.phase === "question") {
+    match.phase = "answered";
+    await persistMatch(match).catch(() => {
+    });
+  }
+  res.json({ success: true });
 });
 function startTimer(match, io2) {
   stopTimer(match);
