@@ -18,17 +18,17 @@ export function useAOSSocket() {
     const token = getToken();
     if (!token) return;
 
-    // Socket.IO not supported on Vercel serverless — skip connection
-    if (!import.meta.env.PROD) {
-      if (!sharedSocket) {
-        sharedSocket = io(BASE_URL, {
-          path: "/socket.io",
-          auth: { token },
-          transports: ["websocket", "polling"],
-          reconnection: true,
-          reconnectionDelay: 5000,
-        }).on("connect_error", () => {});
-      }
+    // Socket.IO not supported on Vercel serverless — skip entirely
+    if (import.meta.env.PROD) return;
+
+    if (!sharedSocket) {
+      sharedSocket = io(BASE_URL, {
+        path: "/socket.io",
+        auth: { token },
+        transports: ["websocket", "polling"],
+        reconnection: true,
+        reconnectionDelay: 5000,
+      }).on("connect_error", () => {});
     }
     listenerCount++;
 
