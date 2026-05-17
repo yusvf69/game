@@ -19,7 +19,7 @@ async function buildAll() {
     platform: "node",
     bundle: true,
     format: "esm",
-    outfile: path.resolve(artifactDir, "dist/app-bundle.mjs"),
+    outfile: path.resolve(artifactDir, "src/app.js"),
     logLevel: "info",
     external: ["*.node", "sharp", "pg-native", "drizzle-orm", "pg"],
     sourcemap: false,
