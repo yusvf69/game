@@ -69626,7 +69626,8 @@ async function ensureMatch(matchId) {
     const state = { ...rows[0].state, timer: null };
     stageMatchCache.set(matchId, state);
     return state;
-  } catch {
+  } catch (e) {
+    console.error("[stage] ensureMatch DB error:", e?.message);
     return void 0;
   }
 }
@@ -69661,10 +69662,12 @@ async function persistMatch(state) {
           [state.id, state.hostId, state.roomCode, JSON.stringify(rest)]
         );
       } catch (e2) {
-        console.warn("[stage] persist failed after table creation:", e2?.message);
+        console.error("[stage] persist failed after table creation:", e2);
+        throw new Error(`Failed to persist match: ${e2?.message || "unknown"}`);
       }
     } else {
-      console.warn("[stage] persist failed:", e?.message);
+      console.error("[stage] persist failed:", e);
+      throw new Error(`Failed to persist match: ${e?.message || "unknown"}`);
     }
   }
 }

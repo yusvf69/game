@@ -77,7 +77,10 @@ async function ensureMatch(matchId: number): Promise<StageMatchState | undefined
     const state = { ...rows[0].state, timer: null } as StageMatchState;
     stageMatchCache.set(matchId, state);
     return state;
-  } catch { return undefined; }
+  } catch (e: any) {
+    console.error("[stage] ensureMatch DB error:", e?.message);
+    return undefined;
+  }
 }
 
 function cacheMatch(state: StageMatchState): void {
@@ -113,10 +116,12 @@ async function persistMatch(state: StageMatchState): Promise<void> {
           [state.id, state.hostId, state.roomCode, JSON.stringify(rest)],
         );
       } catch (e2: any) {
-        console.warn("[stage] persist failed after table creation:", e2?.message);
+        console.error("[stage] persist failed after table creation:", e2);
+        throw new Error(`Failed to persist match: ${e2?.message || "unknown"}`);
       }
     } else {
-      console.warn("[stage] persist failed:", e?.message);
+      console.error("[stage] persist failed:", e);
+      throw new Error(`Failed to persist match: ${e?.message || "unknown"}`);
     }
   }
 }
