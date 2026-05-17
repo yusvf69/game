@@ -70286,6 +70286,10 @@ app.use("/api", routes_default);
 app.use((req, res) => {
   res.status(404).json({ error: "not_found", path: req.path, originalUrl: req.originalUrl, baseUrl: req.baseUrl });
 });
+app.use((err, _req, res, _next) => {
+  console.error("[express error]", err?.message || err);
+  res.status(500).json({ error: err?.message || "Internal server error" });
+});
 var main_default = app;
 export {
   main_default as default

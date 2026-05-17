@@ -14,4 +14,9 @@ app.use((req, res) => {
   res.status(404).json({ error: "not_found", path: req.path, originalUrl: req.originalUrl, baseUrl: req.baseUrl });
 });
 
+app.use((err: any, _req: any, res: any, _next: any) => {
+  console.error("[express error]", err?.message || err);
+  res.status(500).json({ error: err?.message || "Internal server error" });
+});
+
 export default app;
