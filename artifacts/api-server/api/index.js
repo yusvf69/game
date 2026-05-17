@@ -1,4 +1,9 @@
-import express from "express";
-const app = express();
-app.get("/api/healthz", (_req, res) => res.json({ status: "ok" }));
-export default app;
+let cachedApp;
+
+export default async function handler(req, res) {
+  if (!cachedApp) {
+    const { default: app } = await import("../src/app.js");
+    cachedApp = app;
+  }
+  return cachedApp(req, res);
+}

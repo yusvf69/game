@@ -1,7 +1,7 @@
 {
   "installCommand": "pnpm install --no-frozen-lockfile --ignore-scripts",
   "buildCommand": "mv tsconfig.json tsconfig.json.ignore && node ./build.mjs",
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api" }
+  "routes": [
+    { "src": "/(.*)", "dest": "/api/index.js" }
   ]
 }
