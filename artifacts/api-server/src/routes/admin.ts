@@ -88,7 +88,11 @@ router.get("/admin/dashboard", requirePermission("manage_analytics"), async (_re
   const totalUsers = (await db.select({ count: sql<number>`count(*)` }).from(usersTable))[0]?.count || 0;
   const onlineNow = (await db.select({ count: sql<number>`count(*)` }).from(sessionsTable).where(sql`expires_at > now()`))[0]?.count || 0;
   const totalMatches = (await db.select({ count: sql<number>`count(*)` }).from(stageMatchesTable))[0]?.count || 0;
-  const xpToday = (await db.select({ sum: sql<number>`coalesce(sum(amount),0)` }).from(sessionsTable).where(sql`created_at > now() - interval '24 hours'`))[0]?.sum || 0;
+  let xpToday = 0;
+  try {
+    const { rows } = await getPool().query(`SELECT coalesce(sum(amount),0) as sum FROM xp_log WHERE created_at > now() - interval '24 hours'`);
+    xpToday = Number(rows[0]?.sum || 0);
+  } catch {}
   const activeMatches = (await db.select({ count: sql<number>`count(*)` }).from(stageMatchesTable).where(sql`state->>'phase' != 'ended'`))[0]?.count || 0;
   const questionsCount = (await db.select({ count: sql<number>`count(*)` }).from(questionsTable))[0]?.count || 0;
 

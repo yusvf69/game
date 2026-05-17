@@ -49027,7 +49027,12 @@ router22.get("/admin/dashboard", requirePermission("manage_analytics"), async (_
   const totalUsers = (await db.select({ count: sql15`count(*)` }).from(usersTable))[0]?.count || 0;
   const onlineNow = (await db.select({ count: sql15`count(*)` }).from(sessionsTable).where(sql15`expires_at > now()`))[0]?.count || 0;
   const totalMatches = (await db.select({ count: sql15`count(*)` }).from(stageMatchesTable))[0]?.count || 0;
-  const xpToday = (await db.select({ sum: sql15`coalesce(sum(amount),0)` }).from(sessionsTable).where(sql15`created_at > now() - interval '24 hours'`))[0]?.sum || 0;
+  let xpToday = 0;
+  try {
+    const { rows } = await getPool().query(`SELECT coalesce(sum(amount),0) as sum FROM xp_log WHERE created_at > now() - interval '24 hours'`);
+    xpToday = Number(rows[0]?.sum || 0);
+  } catch {
+  }
   const activeMatches = (await db.select({ count: sql15`count(*)` }).from(stageMatchesTable).where(sql15`state->>'phase' != 'ended'`))[0]?.count || 0;
   const questionsCount = (await db.select({ count: sql15`count(*)` }).from(questionsTable))[0]?.count || 0;
   res.json({
