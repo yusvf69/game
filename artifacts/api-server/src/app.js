@@ -66550,27 +66550,31 @@ router2.post("/auth/login", async (req, res) => {
   });
 });
 router2.post("/auth/guest", async (req, res) => {
-  const guestNum = Math.floor(Math.random() * 99999);
-  const username = `Agent_${guestNum}`;
-  const [user] = await db.insert(usersTable).values({
-    username,
-    isGuest: true
-  }).returning();
-  await createUserWithDefaults(user.id);
-  const token = generateToken();
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1e3);
-  await db.insert(sessionsTable).values({ userId: user.id, token, expiresAt });
-  res.json({
-    user: {
-      id: user.id,
-      username: user.username,
-      email: null,
-      avatarUrl: null,
-      isGuest: true,
-      createdAt: user.createdAt
-    },
-    token
-  });
+  try {
+    const guestNum = Math.floor(Math.random() * 99999);
+    const username = `Agent_${guestNum}`;
+    const [user] = await db.insert(usersTable).values({
+      username,
+      isGuest: true
+    }).returning();
+    await createUserWithDefaults(user.id);
+    const token = generateToken();
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1e3);
+    await db.insert(sessionsTable).values({ userId: user.id, token, expiresAt });
+    res.json({
+      user: {
+        id: user.id,
+        username: user.username,
+        email: null,
+        avatarUrl: null,
+        isGuest: true,
+        createdAt: user.createdAt
+      },
+      token
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message, stack: e.stack?.split("\n").slice(0, 3).join("\n") });
+  }
 });
 router2.post("/auth/logout", async (req, res) => {
   const token = req.headers.authorization?.replace("Bearer ", "");
