@@ -4,11 +4,13 @@ import { AdminPage, AdminTable, AdminButton, AdminInput, adminFetch } from "./Ad
 interface Team {
   id: number;
   name: string;
-  description: string;
-  user_id: number;
+  emblem: string;
+  color: string;
+  captain_id: number;
   username: string;
   member_count: number;
   match_count: number;
+  max_players: number;
   created_at: string;
 }
 

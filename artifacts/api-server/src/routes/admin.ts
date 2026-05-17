@@ -747,12 +747,11 @@ router.post("/admin/settings", requirePermission("manage_settings"), async (req,
 
 router.get("/admin/teams", requirePermission("manage_teams"), async (_req, res) => {
   const { rows } = await getPool().query(
-    `SELECT t.*, tm.user_id, u.username,
+    `SELECT t.*, u.username,
             (SELECT count(*) FROM team_members WHERE team_id = t.id) as member_count,
             (SELECT count(*) FROM team_matches WHERE team_id = t.id) as match_count
      FROM team_operations t
-     LEFT JOIN team_members tm ON tm.team_id = t.id AND tm.role = 'leader'
-     LEFT JOIN users u ON u.id = tm.user_id
+     LEFT JOIN users u ON u.id = t.captain_id
      ORDER BY t.created_at DESC LIMIT 100`
   );
   res.json({ teams: rows });
@@ -788,15 +787,9 @@ router.post("/admin/teams/:id/transfer", requirePermission("manage_teams"), asyn
   const id = parseInt(req.params.id);
   const { newLeaderUserId } = req.body;
   if (!newLeaderUserId) return res.status(400).json({ error: "newLeaderUserId required" });
-  // Demote current leader
   await getPool().query(
-    `UPDATE team_members SET role = 'member' WHERE team_id = $1 AND role = 'leader'`,
-    [id]
-  );
-  // Promote new leader
-  await getPool().query(
-    `UPDATE team_members SET role = 'leader' WHERE team_id = $1 AND user_id = $2`,
-    [id, newLeaderUserId]
+    `UPDATE team_operations SET captain_id = $1 WHERE id = $2`,
+    [newLeaderUserId, id]
   );
   logAdmin(req.user!.id, "ADMIN_TRANSFERRED_TEAM", "team", String(id), { newLeaderUserId });
   res.json({ success: true });

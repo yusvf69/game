@@ -40949,10 +40949,10 @@ var require_pino = __commonJS({
   }
 });
 
-// ../../lib/game-engine/dist/events.js
+// ../../lib/game-engine/src/events.ts
 var EventBus, eventBus;
 var init_events = __esm({
-  "../../lib/game-engine/dist/events.js"() {
+  "../../lib/game-engine/src/events.ts"() {
     "use strict";
     init_src();
     init_src();
@@ -41005,49 +41005,52 @@ var init_events = __esm({
       }
     });
     eventBus.on("ANSWER_CORRECT", async (event) => {
-      if (!event.userId || !event.data)
-        return;
+      if (!event.userId || !event.data) return;
       const { xpAmount, questionDifficulty } = event.data;
-      if (!xpAmount)
-        return;
+      if (!xpAmount) return;
       try {
         await db.insert(xpLogTable).values({
           userId: event.userId,
           action: "correct_answer",
           amount: xpAmount
         });
-        await getPool().query(`UPDATE user_stats
+        await getPool().query(
+          `UPDATE user_stats
        SET xp = xp + $1, level = GREATEST(1, floor((xp + $1) / 500) + 1)
-       WHERE user_id = $2`, [xpAmount, event.userId]);
+       WHERE user_id = $2`,
+          [xpAmount, event.userId]
+        );
       } catch {
       }
     });
     eventBus.on("ANSWER_INCORRECT", async (event) => {
-      if (!event.userId)
-        return;
+      if (!event.userId) return;
       try {
-        await getPool().query(`UPDATE user_stats SET streak = 0 WHERE user_id = $1`, [event.userId]);
+        await getPool().query(
+          `UPDATE user_stats SET streak = 0 WHERE user_id = $1`,
+          [event.userId]
+        );
       } catch {
       }
     });
     eventBus.on("MATCH_ENDED", async (event) => {
-      if (!event.matchId)
-        return;
+      if (!event.matchId) return;
       const data = event.data;
-      if (!data?.teams)
-        return;
+      if (!data?.teams) return;
       for (const team of data.teams) {
-        if (!team.userId)
-          continue;
+        if (!team.userId) continue;
         try {
           const isWinner = team.id === data.winnerTeamId;
           const xpReward = isWinner ? 50 : 10;
-          await getPool().query(`UPDATE user_stats
+          await getPool().query(
+            `UPDATE user_stats
          SET total_games = total_games + 1,
              wins = wins + $1,
              losses = losses + $2,
              xp = xp + $3
-         WHERE user_id = $4`, [isWinner ? 1 : 0, isWinner ? 0 : 1, xpReward, team.userId]);
+         WHERE user_id = $4`,
+            [isWinner ? 1 : 0, isWinner ? 0 : 1, xpReward, team.userId]
+          );
         } catch {
         }
       }
@@ -41055,17 +41058,17 @@ var init_events = __esm({
   }
 });
 
-// ../../lib/game-engine/dist/scoring.js
+// ../../lib/game-engine/src/scoring.ts
 var init_scoring = __esm({
-  "../../lib/game-engine/dist/scoring.js"() {
+  "../../lib/game-engine/src/scoring.ts"() {
     "use strict";
   }
 });
 
-// ../../lib/game-engine/dist/stage.js
+// ../../lib/game-engine/src/stage.ts
 import { eq as eq20, sql as sql13 } from "drizzle-orm";
 var init_stage = __esm({
-  "../../lib/game-engine/dist/stage.js"() {
+  "../../lib/game-engine/src/stage.ts"() {
     "use strict";
     init_src();
     init_src();
@@ -41074,10 +41077,10 @@ var init_stage = __esm({
   }
 });
 
-// ../../lib/game-engine/dist/validation.js
+// ../../lib/game-engine/src/validation.ts
 import { eq as eq21, and as and9 } from "drizzle-orm";
 var init_validation = __esm({
-  "../../lib/game-engine/dist/validation.js"() {
+  "../../lib/game-engine/src/validation.ts"() {
     "use strict";
     init_src();
     init_src();
@@ -41085,7 +41088,7 @@ var init_validation = __esm({
   }
 });
 
-// ../../lib/game-engine/dist/ai.js
+// ../../lib/game-engine/src/ai.ts
 function pickRandom(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
@@ -41093,13 +41096,11 @@ function generateAITemplateQuestion(category, difficulty) {
   let pool2 = QUESTION_TEMPLATES;
   if (category) {
     const filtered = pool2.filter((q) => q.category === category);
-    if (filtered.length > 0)
-      pool2 = filtered;
+    if (filtered.length > 0) pool2 = filtered;
   }
   if (difficulty) {
     const filtered = pool2.filter((q) => q.difficulty === difficulty);
-    if (filtered.length > 0)
-      pool2 = filtered;
+    if (filtered.length > 0) pool2 = filtered;
     else {
       const close = pool2.sort((a, b) => Math.abs(a.difficulty - difficulty) - Math.abs(b.difficulty - difficulty));
       pool2 = [close[0]];
@@ -41120,8 +41121,7 @@ function configureOpenAI(config2) {
   openAIConfig = config2;
 }
 async function callOpenAI(prompt) {
-  if (!openAIConfig.apiKey)
-    return null;
+  if (!openAIConfig.apiKey) return null;
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -41139,8 +41139,7 @@ async function callOpenAI(prompt) {
         max_tokens: 800
       })
     });
-    if (!response.ok)
-      return null;
+    if (!response.ok) return null;
     const data = await response.json();
     return data.choices?.[0]?.message?.content || null;
   } catch {
@@ -41203,7 +41202,7 @@ Return ONLY valid JSON array:
 }
 var QUESTION_TEMPLATES, openAIConfig;
 var init_ai = __esm({
-  "../../lib/game-engine/dist/ai.js"() {
+  "../../lib/game-engine/src/ai.ts"() {
     "use strict";
     QUESTION_TEMPLATES = [
       {
@@ -41259,9 +41258,9 @@ var init_ai = __esm({
   }
 });
 
-// ../../lib/game-engine/dist/index.js
-var init_dist = __esm({
-  "../../lib/game-engine/dist/index.js"() {
+// ../../lib/game-engine/src/index.ts
+var init_src2 = __esm({
+  "../../lib/game-engine/src/index.ts"() {
     "use strict";
     init_events();
     init_stage();
@@ -41279,7 +41278,7 @@ __export(stage_exports, {
   getStageMatch: () => getStageMatch2,
   persistMatch: () => persistMatch2
 });
-import { eq as eq22, sql as sql14 } from "drizzle-orm";
+import { eq as eq22, sql as sql15 } from "drizzle-orm";
 async function getUserFromToken19(token) {
   if (!token) return null;
   const bearerToken = token.replace("Bearer ", "");
@@ -41381,7 +41380,7 @@ var init_stage2 = __esm({
     init_src();
     init_src();
     init_src();
-    init_dist();
+    init_src2();
     router21 = (0, import_express21.Router)();
     stageMatchCache = /* @__PURE__ */ new Map();
     DOMAIN_CATEGORIES3 = {
@@ -41576,7 +41575,7 @@ var init_stage2 = __esm({
         const cats = DOMAIN_CATEGORIES3[d];
         if (cats) selectedCategories.push(...cats);
       }
-      const questions = await db.select().from(questionsTable).where(selectedCategories.length > 0 ? sql14`${questionsTable.category} IN (${sql14.join(selectedCategories.map((c) => sql14`${c}`), sql14`, `)})` : void 0).orderBy(sql14`RANDOM()`).limit(match.totalQuestions);
+      const questions = await db.select().from(questionsTable).where(selectedCategories.length > 0 ? sql15`${questionsTable.category} IN (${sql15.join(selectedCategories.map((c) => sql15`${c}`), sql15`, `)})` : void 0).orderBy(sql15`RANDOM()`).limit(match.totalQuestions);
       const qs = await Promise.all(questions.map(async (q) => {
         const options = await db.select({ id: questionOptionsTable.id, text: questionOptionsTable.optionText }).from(questionOptionsTable).where(eq22(questionOptionsTable.questionId, q.id));
         return {
@@ -41853,7 +41852,7 @@ var init_stage2 = __esm({
       ];
       let added = 0;
       for (const q of questionData) {
-        const [existing] = await db.select({ id: questionsTable.id }).from(questionsTable).where(sql14`${questionsTable.questionText} = ${q.questionText}`).limit(1);
+        const [existing] = await db.select({ id: questionsTable.id }).from(questionsTable).where(sql15`${questionsTable.questionText} = ${q.questionText}`).limit(1);
         if (existing) continue;
         const [question] = await db.insert(questionsTable).values({
           type: q.type,
@@ -49441,8 +49440,8 @@ function requirePermission(...permissions) {
 }
 
 // src/routes/admin.ts
-init_dist();
-import { eq as eq24, sql as sql16, desc as desc8, and as and10 } from "drizzle-orm";
+init_src2();
+import { eq as eq24, sql as sql17, desc as desc8, and as and10 } from "drizzle-orm";
 var OPENAI_KEY = process.env["OPENAI_API_KEY"];
 if (OPENAI_KEY) {
   configureOpenAI({ apiKey: OPENAI_KEY, model: "gpt-4o-mini" });
@@ -49499,17 +49498,17 @@ router22.post("/admin/bootstrap", async (req, res) => {
   }
 });
 router22.get("/admin/dashboard", requirePermission("manage_analytics"), async (_req, res) => {
-  const totalUsers = (await db.select({ count: sql16`count(*)` }).from(usersTable))[0]?.count || 0;
-  const onlineNow = (await db.select({ count: sql16`count(*)` }).from(sessionsTable).where(sql16`expires_at > now()`))[0]?.count || 0;
-  const totalMatches = (await db.select({ count: sql16`count(*)` }).from(stageMatchesTable))[0]?.count || 0;
+  const totalUsers = (await db.select({ count: sql17`count(*)` }).from(usersTable))[0]?.count || 0;
+  const onlineNow = (await db.select({ count: sql17`count(*)` }).from(sessionsTable).where(sql17`expires_at > now()`))[0]?.count || 0;
+  const totalMatches = (await db.select({ count: sql17`count(*)` }).from(stageMatchesTable))[0]?.count || 0;
   let xpToday = 0;
   try {
     const { rows } = await getPool().query(`SELECT coalesce(sum(amount),0) as sum FROM xp_log WHERE created_at > now() - interval '24 hours'`);
     xpToday = Number(rows[0]?.sum || 0);
   } catch {
   }
-  const activeMatches = (await db.select({ count: sql16`count(*)` }).from(stageMatchesTable).where(sql16`state->>'phase' != 'ended'`))[0]?.count || 0;
-  const questionsCount = (await db.select({ count: sql16`count(*)` }).from(questionsTable))[0]?.count || 0;
+  const activeMatches = (await db.select({ count: sql17`count(*)` }).from(stageMatchesTable).where(sql17`state->>'phase' != 'ended'`))[0]?.count || 0;
+  const questionsCount = (await db.select({ count: sql17`count(*)` }).from(questionsTable))[0]?.count || 0;
   res.json({
     stats: { totalUsers, onlineNow, totalMatches, xpToday, activeMatches, questionsCount }
   });
@@ -49597,7 +49596,7 @@ router22.get("/admin/questions", requirePermission("manage_questions"), async (r
   const limit = parseInt(req.query.limit) || 50;
   const offset = (page - 1) * limit;
   const category = req.query.category;
-  const where = category ? sql16`WHERE category = ${category}` : sql16``;
+  const where = category ? sql17`WHERE category = ${category}` : sql17``;
   const total = (await getPool().query(`SELECT count(*) FROM questions ${where}`)).rows[0]?.count || 0;
   const { rows } = await getPool().query(
     `SELECT * FROM questions ${where} ORDER BY id DESC LIMIT $1 OFFSET $2`,
@@ -49707,8 +49706,8 @@ router22.post("/admin/questions/generate", requirePermission("manage_questions")
     return;
   }
   const where = [];
-  if (category) where.push(sql16`category = ${category}`);
-  if (difficulty) where.push(sql16`difficulty = ${difficulty}`);
+  if (category) where.push(sql17`category = ${category}`);
+  if (difficulty) where.push(sql17`difficulty = ${difficulty}`);
   const { rows } = await getPool().query(
     `SELECT * FROM questions ${where.length > 0 ? `WHERE ${where.map((w) => w.text).join(" AND ")}` : ""} ORDER BY RANDOM() LIMIT $1`,
     [sampleCount]
@@ -49725,15 +49724,15 @@ router22.get("/admin/users", requirePermission("manage_users"), async (req, res)
   const limit = parseInt(req.query.limit) || 50;
   const offset = (page - 1) * limit;
   const search = req.query.search;
-  let where = sql16`1=1`;
-  if (search) where = sql16`(username ILIKE ${"%" + search + "%"} OR email ILIKE ${"%" + search + "%"})`;
-  const [{ count }] = await db.select({ count: sql16`count(*)` }).from(usersTable).where(where);
+  let where = sql17`1=1`;
+  if (search) where = sql17`(username ILIKE ${"%" + search + "%"} OR email ILIKE ${"%" + search + "%"})`;
+  const [{ count }] = await db.select({ count: sql17`count(*)` }).from(usersTable).where(where);
   const users = await db.select().from(usersTable).where(where).orderBy(desc8(usersTable.id)).limit(limit).offset(offset);
   const usersWithStats = await Promise.all(users.map(async (u) => {
     const [stats] = await db.select().from(userStatsTable).where(eq24(userStatsTable.userId, u.id)).limit(1);
     const [ban] = await db.select().from(bansTable).where(and10(
       eq24(bansTable.userId, u.id),
-      sql16`(expires_at IS NULL OR expires_at > now())`
+      sql17`(expires_at IS NULL OR expires_at > now())`
     )).limit(1);
     return { ...u, stats, banned: !!ban, banReason: ban?.reason, banExpiresAt: ban?.expiresAt };
   }));
@@ -49746,7 +49745,7 @@ router22.get("/admin/users/:id", requirePermission("manage_users"), async (req, 
   const sessions = await db.select().from(sessionsTable).where(eq24(sessionsTable.userId, user.id)).orderBy(desc8(sessionsTable.createdAt)).limit(10);
   const [ban] = await db.select().from(bansTable).where(and10(
     eq24(bansTable.userId, user.id),
-    sql16`(expires_at IS NULL OR expires_at > now())`
+    sql17`(expires_at IS NULL OR expires_at > now())`
   )).limit(1);
   res.json({ ...user, stats, sessions, ban });
 });
@@ -49788,7 +49787,7 @@ router22.post("/admin/users/:id/give-coins", requirePermission("manage_users"), 
   const { amount } = req.body;
   if (!amount || amount < 0) return res.status(400).json({ error: "Valid amount required" });
   await db.update(userStatsTable).set({
-    coins: sql16`coins + ${amount}`
+    coins: sql17`coins + ${amount}`
   }).where(eq24(userStatsTable.userId, userId));
   logAdmin(req.user.id, "ADMIN_GAVE_COINS", "user", String(userId), { amount });
   res.json({ success: true });
@@ -50080,12 +50079,11 @@ router22.post("/admin/settings", requirePermission("manage_settings"), async (re
 });
 router22.get("/admin/teams", requirePermission("manage_teams"), async (_req, res) => {
   const { rows } = await getPool().query(
-    `SELECT t.*, tm.user_id, u.username,
+    `SELECT t.*, u.username,
             (SELECT count(*) FROM team_members WHERE team_id = t.id) as member_count,
             (SELECT count(*) FROM team_matches WHERE team_id = t.id) as match_count
      FROM team_operations t
-     LEFT JOIN team_members tm ON tm.team_id = t.id AND tm.role = 'leader'
-     LEFT JOIN users u ON u.id = tm.user_id
+     LEFT JOIN users u ON u.id = t.captain_id
      ORDER BY t.created_at DESC LIMIT 100`
   );
   res.json({ teams: rows });
@@ -50119,12 +50117,8 @@ router22.post("/admin/teams/:id/transfer", requirePermission("manage_teams"), as
   const { newLeaderUserId } = req.body;
   if (!newLeaderUserId) return res.status(400).json({ error: "newLeaderUserId required" });
   await getPool().query(
-    `UPDATE team_members SET role = 'member' WHERE team_id = $1 AND role = 'leader'`,
-    [id]
-  );
-  await getPool().query(
-    `UPDATE team_members SET role = 'leader' WHERE team_id = $1 AND user_id = $2`,
-    [id, newLeaderUserId]
+    `UPDATE team_operations SET captain_id = $1 WHERE id = $2`,
+    [newLeaderUserId, id]
   );
   logAdmin(req.user.id, "ADMIN_TRANSFERRED_TEAM", "team", String(id), { newLeaderUserId });
   res.json({ success: true });
