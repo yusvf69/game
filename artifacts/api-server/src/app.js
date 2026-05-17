@@ -50080,8 +50080,8 @@ router22.post("/admin/settings", requirePermission("manage_settings"), async (re
 router22.get("/admin/teams", requirePermission("manage_teams"), async (_req, res) => {
   const { rows } = await getPool().query(
     `SELECT t.*, u.username,
-            (SELECT count(*) FROM team_members WHERE team_id = t.id) as member_count,
-            (SELECT count(*) FROM team_matches WHERE team_id = t.id) as match_count
+            (SELECT count(*) FROM team_members tm WHERE tm.team_id = t.id) as member_count,
+            (SELECT count(*) FROM team_match_scores tms WHERE tms.team_id = t.id) as match_count
      FROM team_operations t
      LEFT JOIN users u ON u.id = t.captain_id
      ORDER BY t.created_at DESC LIMIT 100`
@@ -50097,9 +50097,10 @@ router22.get("/admin/teams/:id", requirePermission("manage_teams"), async (req, 
     [id]
   );
   const matches = await getPool().query(
-    `SELECT tm.*, tm2.score FROM team_matches tm
-     LEFT JOIN team_match_scores tm2 ON tm2.match_id = tm.match_id AND tm2.team_id = $1
-     WHERE tm.team_id = $1 ORDER BY tm.created_at DESC LIMIT 10`,
+    `SELECT tms.match_id, tms.score, tms.correct_answers, tm.status, tm.created_at
+     FROM team_match_scores tms
+     LEFT JOIN team_matches tm ON tm.id = tms.match_id
+     WHERE tms.team_id = $1 ORDER BY tm.created_at DESC LIMIT 10`,
     [id]
   );
   res.json({ team: rows[0], members: members.rows, matches: matches.rows });
@@ -50127,7 +50128,6 @@ router22.delete("/admin/teams/:id", requirePermission("manage_teams"), async (re
   const id = parseInt(req.params.id);
   await getPool().query(`DELETE FROM team_members WHERE team_id = $1`, [id]);
   await getPool().query(`DELETE FROM team_match_scores WHERE team_id = $1`, [id]);
-  await getPool().query(`DELETE FROM team_matches WHERE team_id = $1`, [id]);
   await getPool().query(`DELETE FROM team_operations WHERE id = $1`, [id]);
   logAdmin(req.user.id, "ADMIN_DELETED_TEAM", "team", String(id));
   res.json({ success: true });
