@@ -3,12 +3,12 @@ import { db } from "@workspace/db";
 import {
   questionsTable,
   questionOptionsTable,
+  stageMatchesTable,
   usersTable,
   sessionsTable,
 } from "@workspace/db";
 import { getPool } from "@workspace/db";
 import { eq, sql } from "drizzle-orm";
-import { getIO } from "../socket";
 
 const router = Router();
 
@@ -54,7 +54,6 @@ interface StageMatchState {
   timerSeconds: number;
   timerStartedAt: number | null;
   timerDuration: number;
-  timer: ReturnType<typeof setTimeout> | null;
   originalTimerSeconds: number;
   domainOrder: string[];
   currentDomain: string;
@@ -76,7 +75,7 @@ async function ensureMatch(matchId: number, force = false): Promise<StageMatchSt
   try {
     const { rows } = await pool().query(`SELECT state FROM stage_matches WHERE match_id = $1`, [matchId]);
     if (rows.length === 0) return undefined;
-    const state = { ...rows[0].state, timer: null } as StageMatchState;
+    const state = rows[0].state as StageMatchState;
     stageMatchCache.set(matchId, state);
     return state;
   } catch (e: any) {
@@ -90,11 +89,10 @@ function cacheMatch(state: StageMatchState): void {
 }
 
 async function persistMatch(state: StageMatchState): Promise<void> {
-  const { timer: __timer, ...rest } = state;
   const insert = () => pool().query(
     `INSERT INTO stage_matches (match_id, host_id, room_code, state) VALUES ($1, $2, $3, $4)
      ON CONFLICT (match_id) DO UPDATE SET state = $4, updated_at = NOW()`,
-    [state.id, state.hostId, state.roomCode, JSON.stringify(rest)],
+    [state.id, state.hostId, state.roomCode, JSON.stringify(state)],
   );
   try {
     await insert();
@@ -203,7 +201,6 @@ router.post("/stage/create", async (req, res) => {
     timerSeconds: timerSeconds || 30,
     timerStartedAt: null,
     timerDuration: timerSeconds || 30,
-    timer: null,
     originalTimerSeconds: timerSeconds || 30,
     domainOrder: domains || [],
     currentDomain: domains?.[0] || "general",
@@ -243,10 +240,6 @@ router.post("/stage/buzzer-connect", async (req, res) => {
   const team = match.teams.find(t => t.code === teamCode.toUpperCase());
   if (!team) { res.status(404).json({ error: "Team not found" }); return; }
   if (!team.name) { res.status(400).json({ error: "Team not configured yet" }); return; }
-
-  try {
-    getIO().to(`stage:${match.id}`).emit("stage:team-joined", { teamId: team.id, name: team.name, color: team.color });
-  } catch {}
 
   res.json({ matchId: match.id, teamId: team.id, teamName: team.name, teamColor: team.color, teamEmblem: team.emblem, roomCode: match.roomCode, tacticalLoadout: team.tacticalLoadout });
 });
@@ -381,20 +374,7 @@ router.post("/stage/buzz", async (req, res) => {
 
   match.buzzerTeamId = teamId;
   match.phase = "buzzed";
-  stopTimer(match);
   await persistMatch(match);
-
-  try {
-    const q = match.questions[match.currentQuestionIndex];
-    const qWithoutAnswer = q ? stripAnswer(q) : null;
-    getIO().to(`stage:${matchId}`).emit("stage:buzz", {
-      teamId,
-      teamName: match.teams.find(t => t.id === teamId)?.name || "Unknown",
-      questionIndex: match.currentQuestionIndex,
-      question: qWithoutAnswer,
-      isRebuzz: match.wrongAttempts > 0,
-    });
-  } catch {}
 
   res.json({ success: true, teamId });
 });
@@ -433,17 +413,6 @@ router.post("/stage/answer", async (req, res) => {
     match.buzzedOptionId = optionId;
     await persistMatch(match);
 
-    try {
-      getIO().to(`stage:${matchId}`).emit("stage:answer-result", {
-        teamId: team.id,
-        correct: true,
-        pointsGained,
-        newScore: team.score,
-        newStreak: team.streak,
-        correctOptionId: q?.correctOptionId || null,
-      });
-    } catch {}
-
     res.json({ success: true, correct: true, pointsGained, newScore: team.score });
     return;
   }
@@ -458,51 +427,9 @@ router.post("/stage/answer", async (req, res) => {
     match.buzzedOptionId = optionId;
     match.phase = "rebuzz";
 
-    // Half time for rebuzz
-    const rebuzzTime = Math.max(5, Math.floor(match.originalTimerSeconds / 2));
-    match.timerSeconds = rebuzzTime;
     await persistMatch(match);
 
-    try {
-      const io = getIO();
-      io.to(`stage:${matchId}`).emit("stage:answer-result", {
-        teamId: team.id,
-        correct: false,
-        pointsGained: 0,
-        newScore: team.score,
-        newStreak: team.streak,
-        correctOptionId: null,
-        rebuzz: true,
-        rebuzzTime,
-        rebuzzTeamName: team.name,
-      });
-    } catch {}
-
-    // Auto-start rebuzz timer after short delay
-    setTimeout(async () => {
-      if (!stageMatchCache.has(matchId)) return;
-      if (match.phase === "rebuzz") {
-        match.phase = "question";
-        match.timerStartedAt = Date.now();
-        await persistMatch(match).catch(() => {});
-        match.timer = setTimeout(async () => {
-          if (!stageMatchCache.has(matchId)) return;
-          if (match.phase === "question" || match.phase === "rebuzz") {
-            match.phase = "answered";
-            match.wrongAttempts = 0;
-            await persistMatch(match).catch(() => {});
-            try {
-              getIO().to(`stage:${matchId}`).emit("stage:timeout", { questionIndex: match.currentQuestionIndex });
-            } catch {}
-          }
-        }, rebuzzTime * 1000);
-        try {
-          getIO().to(`stage:${matchId}`).emit("stage:rebuzz-open", { rebuzzTime, excludedTeamId: team.id, excludedTeamName: team.name });
-        } catch {}
-      }
-    }, 1500);
-
-    res.json({ success: true, correct: false, pointsGained: 0, rebuzz: true, rebuzzTime });
+    res.json({ success: true, correct: false, pointsGained: 0, rebuzz: true });
     return;
   }
 
@@ -511,17 +438,6 @@ router.post("/stage/answer", async (req, res) => {
   match.wrongAttempts = 0;
   match.buzzedOptionId = optionId;
   await persistMatch(match);
-
-  try {
-    getIO().to(`stage:${matchId}`).emit("stage:answer-result", {
-      teamId: team.id,
-      correct: false,
-      pointsGained: 0,
-      newScore: team.score,
-      newStreak: team.streak,
-      correctOptionId: q?.correctOptionId || null,
-    });
-  } catch {}
 
   res.json({ success: true, correct: false, pointsGained: 0, newScore: team.score });
 });
@@ -544,35 +460,13 @@ router.post("/stage/next", async (req, res) => {
 
   if (match.currentQuestionIndex >= match.questions.length) {
     match.phase = "ended";
-    stopTimer(match);
     await persistMatch(match);
-    try {
-      getIO().to(`stage:${matchId}`).emit("stage:match-ended", {
-        matchId,
-        teams: match.teams.filter(t => t.name).map(t => ({
-          id: t.id, name: t.name, color: t.color, score: t.score, correct: t.correct, total: t.total, streak: t.streak,
-        })),
-      });
-    } catch {}
     res.json({ finished: true });
     return;
   }
 
-  const q = match.questions[match.currentQuestionIndex];
   match.phase = "question";
   await persistMatch(match);
-
-  try {
-    const io = getIO();
-    const qStrip = stripAnswer(q);
-    io.to(`stage:${matchId}`).emit("stage:question", {
-      questionIndex: match.currentQuestionIndex,
-      question: qStrip,
-      totalQuestions: match.totalQuestions,
-      timerSeconds: q.timeLimit || match.timerSeconds,
-    });
-    startTimer(match, io);
-  } catch {}
 
   res.json({ success: true, currentQuestion: match.currentQuestionIndex });
 });
@@ -587,13 +481,8 @@ router.post("/stage/skip", async (req, res) => {
   if (!match) { res.status(404).json({ error: "Match not found" }); return; }
   if (match.hostId !== user.id) { res.status(403).json({ error: "Only host can skip" }); return; }
 
-  stopTimer(match);
   match.buzzerTeamId = null;
   await persistMatch(match);
-
-  try {
-    getIO().to(`stage:${matchId}`).emit("stage:question-skipped", { questionIndex: match.currentQuestionIndex });
-  } catch {}
 
   res.json({ success: true });
 });
@@ -647,30 +536,6 @@ router.post("/stage/timeout", async (req, res) => {
   }
   res.json({ success: true });
 });
-
-function startTimer(match: StageMatchState, io: any) {
-  stopTimer(match);
-  const duration = match.timerSeconds * 1000;
-  match.timerStartedAt = Date.now();
-  match.timerDuration = match.timerSeconds;
-
-  match.timer = setTimeout(async () => {
-    if (!stageMatchCache.has(match.id)) return;
-    if (match.phase === "question") {
-      match.phase = "answered";
-      await persistMatch(match).catch(() => {});
-      io.to(`stage:${match.id}`).emit("stage:timeout", { questionIndex: match.currentQuestionIndex });
-    }
-  }, duration);
-}
-
-function stopTimer(match: StageMatchState) {
-  if (match.timer) {
-    clearTimeout(match.timer);
-    match.timer = null;
-  }
-  match.timerStartedAt = null;
-}
 
 // POST /stage/seed-questions — populate DB with default questions for testing
 router.post("/stage/seed-questions", async (_req, res) => {

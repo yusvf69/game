@@ -1,6 +1,5 @@
 import { createServer } from "http";
 import app from "./main";
-import { createSocketServer } from "./socket";
 import { logger } from "./lib/logger";
 
 const rawPort = process.env["PORT"];
@@ -17,8 +16,6 @@ if (Number.isNaN(port) || port <= 0) {
 
 const httpServer = createServer(app);
 
-createSocketServer(httpServer);
-
 httpServer.listen(port, () => {
-  logger.info({ port }, "Server listening with Socket.IO");
+  logger.info({ port }, "Server listening");
 });
