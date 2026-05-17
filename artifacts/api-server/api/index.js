@@ -1,2 +1,4 @@
-import app from "../src/app.js";
+import express from "express";
+const app = express();
+app.get("/api/healthz", (_req, res) => res.json({ status: "ok" }));
 export default app;
