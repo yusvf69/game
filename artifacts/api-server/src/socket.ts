@@ -47,8 +47,7 @@ async function getUserFromToken(token: string): Promise<{ id: number; username: 
 
 let ioInstance: Server | null = null;
 
-export function getIO(): Server {
-  if (!ioInstance) throw new Error("Socket.IO not initialized");
+export function getIO(): Server | null {
   return ioInstance;
 }
 

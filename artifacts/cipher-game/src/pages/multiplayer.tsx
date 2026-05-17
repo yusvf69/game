@@ -44,6 +44,7 @@ export default function MultiplayerPage() {
   const [timeLeft, setTimeLeft] = useState(30);
   const [result, setResult] = useState<any>(null);
   const [searchTime, setSearchTime] = useState(0);
+  const [socketConnected, setSocketConnected] = useState(false);
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
@@ -55,6 +56,10 @@ export default function MultiplayerPage() {
       transports: ["websocket", "polling"],
     });
     socketRef.current = socket;
+
+    socket.on("connect", () => setSocketConnected(true));
+    socket.on("disconnect", () => setSocketConnected(false));
+    socket.on("connect_error", () => setSocketConnected(false));
 
     socket.on("battle:start", (data) => {
       setMatchId(data.matchId);
@@ -84,7 +89,7 @@ export default function MultiplayerPage() {
     });
 
     return () => { socket.disconnect(); };
-  }, []);
+  }, [questions]);
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
@@ -148,8 +153,13 @@ export default function MultiplayerPage() {
               <div className="text-5xl mb-6">⚔</div>
               <p className="font-mono text-lg font-bold text-zinc-100 mb-2">Enter the Arena</p>
               <p className="font-mono text-xs text-zinc-500 mb-8">Face another agent in real-time intelligence combat. First to crack the code wins.</p>
-              <button onClick={handleSearch} className="w-full py-4 font-mono text-sm tracking-widest text-blue-300 glass cipher-border rounded-lg hover:bg-blue-500/10 transition-all neon-blue" data-testid="find-match-btn">
-                FIND OPPONENT
+              {!socketConnected && (
+                <p className="font-mono text-xs text-zinc-600 mb-4">REAL-TIME ARENA UNAVAILABLE — STAGE MODE ONLY</p>
+              )}
+              <button onClick={handleSearch} disabled={!socketConnected}
+                className={`w-full py-4 font-mono text-sm tracking-widest rounded-lg transition-all ${socketConnected ? "text-blue-300 glass cipher-border hover:bg-blue-500/10 neon-blue" : "text-zinc-700 bg-zinc-900 border border-zinc-800 cursor-not-allowed"}`}
+                data-testid="find-match-btn">
+                {socketConnected ? "FIND OPPONENT" : "NOT AVAILABLE"}
               </button>
             </div>
           )}

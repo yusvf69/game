@@ -25,8 +25,7 @@ export function useAOSSocket() {
         transports: ["websocket", "polling"],
         reconnection: true,
         reconnectionDelay: 5000,
-      });
-    }
+      }).on("connect_error", () => {}); // silent fail on serverless
     listenerCount++;
 
     const handler = (data: { text: string }) => {

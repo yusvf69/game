@@ -67013,7 +67013,6 @@ init_src();
 import { eq as eq4, sql as sql2, and as and2 } from "drizzle-orm";
 var ioInstance = null;
 function getIO() {
-  if (!ioInstance) throw new Error("Socket.IO not initialized");
   return ioInstance;
 }
 
