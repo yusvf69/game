@@ -20,9 +20,10 @@ import missionRouter from "./mission";
 import tacticalRouter from "./tactical";
 import teamOpsRouter from "./teamOps";
 import stageRouter from "./stage";
+import adminRouter from "./admin";
+import { Router, type IRouter } from "express";
 
 const router: IRouter = Router();
-
 router.use(healthRouter);
 router.use(authRouter);
 router.use(usersRouter);
@@ -44,5 +45,6 @@ router.use(missionRouter);
 router.use(tacticalRouter);
 router.use(teamOpsRouter);
 router.use(stageRouter);
+router.use(adminRouter);
 
 export default router;

@@ -25,6 +25,7 @@ import BuzzerPage from "@/pages/BuzzerPage";
 import LocalOperationPage from "@/pages/LocalOperationPage";
 import StagePage from "@/pages/StagePage";
 import HostControl from "@/pages/HostControl";
+import AdminLayout from "@/pages/admin/AdminLayout";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -97,6 +98,9 @@ function Router() {
       <Route path="/stage" component={StagePage} />
       <Route path="/host-control">
         {() => <ProtectedRoute component={HostControl} />}
+      </Route>
+      <Route path="/admin/:rest*">
+        {() => <ProtectedRoute component={AdminLayout} />}
       </Route>
       <Route component={NotFound} />
     </Switch>

@@ -29,11 +29,11 @@ var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, { get: all[name], enumerable: true });
 };
-var __copyProps = (to, from, except, desc8) => {
+var __copyProps = (to, from, except, desc9) => {
   if (from && typeof from === "object" || typeof from === "function") {
     for (let key of __getOwnPropNames(from))
       if (!__hasOwnProp.call(to, key) && key !== except)
-        __defProp(to, key, { get: () => from[key], enumerable: !(desc8 = __getOwnPropDesc(from, key)) || desc8.enumerable });
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc9 = __getOwnPropDesc(from, key)) || desc9.enumerable });
   }
   return to;
 };
@@ -862,8 +862,8 @@ var require_depd = __commonJS({
       return typeName && callSite.getMethodName() ? typeName + "." + funcName : funcName;
     }
     function formatPlain(msg, caller, stack) {
-      var timestamp18 = (/* @__PURE__ */ new Date()).toUTCString();
-      var formatted = timestamp18 + " " + this._namespace + " deprecated " + msg;
+      var timestamp20 = (/* @__PURE__ */ new Date()).toUTCString();
+      var formatted = timestamp20 + " " + this._namespace + " deprecated " + msg;
       if (this._traced) {
         for (var i = 0; i < stack.length; i++) {
           formatted += "\n    at " + stack[i].toString();
@@ -1355,10 +1355,10 @@ var require_http_errors = __commonJS({
       return ServerError;
     }
     function nameFunc(func, name) {
-      var desc8 = Object.getOwnPropertyDescriptor(func, "name");
-      if (desc8 && desc8.configurable) {
-        desc8.value = name;
-        Object.defineProperty(func, "name", desc8);
+      var desc9 = Object.getOwnPropertyDescriptor(func, "name");
+      if (desc9 && desc9.configurable) {
+        desc9.value = name;
+        Object.defineProperty(func, "name", desc9);
       }
     }
     function populateConstructorExports(exports2, codes, HttpError) {
@@ -15736,8 +15736,8 @@ var require_text = __commonJS({
     var debug = require_src()("body-parser:text");
     var read = require_read();
     var { normalizeOptions, passthrough } = require_utils();
-    module.exports = text17;
-    function text17(options) {
+    module.exports = text19;
+    function text19(options) {
       const normalizedOptions = normalizeOptions(options, "text/plain");
       return function textParser(req, res, next) {
         read(req, res, next, passthrough, debug, normalizedOptions);
@@ -16802,14 +16802,14 @@ var require_get = __commonJS({
         throw e;
       }
     }
-    var desc8 = !!hasProtoAccessor && gOPD && gOPD(
+    var desc9 = !!hasProtoAccessor && gOPD && gOPD(
       Object.prototype,
       /** @type {keyof typeof Object.prototype} */
       "__proto__"
     );
     var $Object = Object;
     var $getPrototypeOf = $Object.getPrototypeOf;
-    module.exports = desc8 && typeof desc8.get === "function" ? callBind([desc8.get]) : typeof $getPrototypeOf === "function" ? (
+    module.exports = desc9 && typeof desc9.get === "function" ? callBind([desc9.get]) : typeof $getPrototypeOf === "function" ? (
       /** @type {import('./get')} */
       function getDunder(value) {
         return $getPrototypeOf(value == null ? value : $Object(value));
@@ -17159,10 +17159,10 @@ var require_get_intrinsic = __commonJS({
             return void undefined2;
           }
           if ($gOPD && i + 1 >= parts.length) {
-            var desc8 = $gOPD(value, part);
-            isOwn = !!desc8;
-            if (isOwn && "get" in desc8 && !("originalValue" in desc8.get)) {
-              value = desc8.get;
+            var desc9 = $gOPD(value, part);
+            isOwn = !!desc9;
+            if (isOwn && "get" in desc9 && !("originalValue" in desc9.get)) {
+              value = desc9.get;
             } else {
               value = value[part];
             }
@@ -19880,11 +19880,11 @@ var require_dist = __commonJS({
     exports.TokenData = TokenData;
     var PathError = class extends TypeError {
       constructor(message, originalPath) {
-        let text17 = message;
+        let text19 = message;
         if (originalPath)
-          text17 += `: ${originalPath}`;
-        text17 += `; visit https://git.new/pathToRegexpError for info`;
-        super(text17);
+          text19 += `: ${originalPath}`;
+        text19 += `; visit https://git.new/pathToRegexpError for info`;
+        super(text19);
         this.originalPath = originalPath;
       }
     };
@@ -20502,27 +20502,27 @@ var require_router = __commonJS({
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var methods = METHODS.map((method) => method.toLowerCase());
-    module.exports = Router23;
+    module.exports = Router24;
     module.exports.Route = Route;
-    function Router23(options) {
-      if (!(this instanceof Router23)) {
-        return new Router23(options);
+    function Router24(options) {
+      if (!(this instanceof Router24)) {
+        return new Router24(options);
       }
       const opts = options || {};
-      function router23(req, res, next) {
-        router23.handle(req, res, next);
+      function router24(req, res, next) {
+        router24.handle(req, res, next);
       }
-      Object.setPrototypeOf(router23, this);
-      router23.caseSensitive = opts.caseSensitive;
-      router23.mergeParams = opts.mergeParams;
-      router23.params = {};
-      router23.strict = opts.strict;
-      router23.stack = [];
-      return router23;
+      Object.setPrototypeOf(router24, this);
+      router24.caseSensitive = opts.caseSensitive;
+      router24.mergeParams = opts.mergeParams;
+      router24.params = {};
+      router24.strict = opts.strict;
+      router24.stack = [];
+      return router24;
     }
-    Router23.prototype = function() {
+    Router24.prototype = function() {
     };
-    Router23.prototype.param = function param(name, fn) {
+    Router24.prototype.param = function param(name, fn) {
       if (!name) {
         throw new TypeError("argument name is required");
       }
@@ -20542,7 +20542,7 @@ var require_router = __commonJS({
       params.push(fn);
       return this;
     };
-    Router23.prototype.handle = function handle(req, res, callback) {
+    Router24.prototype.handle = function handle(req, res, callback) {
       if (!callback) {
         throw new TypeError("argument callback is required");
       }
@@ -20669,7 +20669,7 @@ var require_router = __commonJS({
         }
       }
     };
-    Router23.prototype.use = function use(handler) {
+    Router24.prototype.use = function use(handler) {
       let offset = 0;
       let path = "/";
       if (typeof handler !== "function") {
@@ -20702,7 +20702,7 @@ var require_router = __commonJS({
       }
       return this;
     };
-    Router23.prototype.route = function route(path) {
+    Router24.prototype.route = function route(path) {
       const route2 = new Route(path);
       const layer = new Layer(path, {
         sensitive: this.caseSensitive,
@@ -20717,7 +20717,7 @@ var require_router = __commonJS({
       return route2;
     };
     methods.concat("all").forEach(function(method) {
-      Router23.prototype[method] = function(path) {
+      Router24.prototype[method] = function(path) {
         const route = this.route(path);
         route[method].apply(route, slice.call(arguments, 1));
         return this;
@@ -20900,13 +20900,13 @@ var require_application = __commonJS({
     var compileTrust = require_utils3().compileTrust;
     var resolve = __require("node:path").resolve;
     var once = require_once();
-    var Router23 = require_router();
+    var Router24 = require_router();
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var app2 = exports = module.exports = {};
     var trustProxyDefaultSymbol = "@@symbol:trust_proxy_default";
     app2.init = function init2() {
-      var router23 = null;
+      var router24 = null;
       this.cache = /* @__PURE__ */ Object.create(null);
       this.engines = /* @__PURE__ */ Object.create(null);
       this.settings = /* @__PURE__ */ Object.create(null);
@@ -20915,13 +20915,13 @@ var require_application = __commonJS({
         configurable: true,
         enumerable: true,
         get: function getrouter() {
-          if (router23 === null) {
-            router23 = new Router23({
+          if (router24 === null) {
+            router24 = new Router24({
               caseSensitive: this.enabled("case sensitive routing"),
               strict: this.enabled("strict routing")
             });
           }
-          return router23;
+          return router24;
         }
       });
     };
@@ -20992,15 +20992,15 @@ var require_application = __commonJS({
       if (fns.length === 0) {
         throw new TypeError("app.use() requires a middleware function");
       }
-      var router23 = this.router;
+      var router24 = this.router;
       fns.forEach(function(fn2) {
         if (!fn2 || !fn2.handle || !fn2.set) {
-          return router23.use(path, fn2);
+          return router24.use(path, fn2);
         }
         debug(".use app under %s", path);
         fn2.mountpath = path;
         fn2.parent = this;
-        router23.use(path, function mounted_app(req, res, next) {
+        router24.use(path, function mounted_app(req, res, next) {
           var orig = req.app;
           fn2.handle(req, res, function(err) {
             Object.setPrototypeOf(req, orig.request);
@@ -21784,8 +21784,8 @@ var require_fresh = __commonJS({
       return true;
     }
     function parseHttpDate(date5) {
-      var timestamp18 = date5 && Date.parse(date5);
-      return typeof timestamp18 === "number" ? timestamp18 : NaN;
+      var timestamp20 = date5 && Date.parse(date5);
+      return typeof timestamp20 === "number" ? timestamp20 : NaN;
     }
     function parseTokenList(str) {
       var end = 0;
@@ -22878,8 +22878,8 @@ var require_send = __commonJS({
       return list;
     }
     function parseHttpDate(date5) {
-      var timestamp18 = date5 && Date.parse(date5);
-      return typeof timestamp18 === "number" ? timestamp18 : NaN;
+      var timestamp20 = date5 && Date.parse(date5);
+      return typeof timestamp20 === "number" ? timestamp20 : NaN;
     }
     function parseTokenList(str) {
       var end = 0;
@@ -23573,7 +23573,7 @@ var require_express = __commonJS({
     var EventEmitter = __require("node:events").EventEmitter;
     var mixin = require_merge_descriptors();
     var proto = require_application();
-    var Router23 = require_router();
+    var Router24 = require_router();
     var req = require_request();
     var res = require_response();
     exports = module.exports = createApplication;
@@ -23595,8 +23595,8 @@ var require_express = __commonJS({
     exports.application = proto;
     exports.request = req;
     exports.response = res;
-    exports.Route = Router23.Route;
-    exports.Router = Router23;
+    exports.Route = Router24.Route;
+    exports.Router = Router24;
     exports.json = bodyParser.json;
     exports.raw = bodyParser.raw;
     exports.static = require_serve_static();
@@ -35563,11 +35563,11 @@ function numberColumnToSchema(column, z, coerce2) {
   let unsigned = column.getSQLType().includes("unsigned");
   let min;
   let max;
-  let integer19 = false;
+  let integer21 = false;
   if (isColumnType(column, ["MySqlTinyInt", "SingleStoreTinyInt"])) {
     min = unsigned ? 0 : CONSTANTS.INT8_MIN;
     max = unsigned ? CONSTANTS.INT8_UNSIGNED_MAX : CONSTANTS.INT8_MAX;
-    integer19 = true;
+    integer21 = true;
   } else if (isColumnType(column, [
     "PgSmallInt",
     "PgSmallSerial",
@@ -35576,7 +35576,7 @@ function numberColumnToSchema(column, z, coerce2) {
   ])) {
     min = unsigned ? 0 : CONSTANTS.INT16_MIN;
     max = unsigned ? CONSTANTS.INT16_UNSIGNED_MAX : CONSTANTS.INT16_MAX;
-    integer19 = true;
+    integer21 = true;
   } else if (isColumnType(column, [
     "PgReal",
     "MySqlFloat",
@@ -35586,7 +35586,7 @@ function numberColumnToSchema(column, z, coerce2) {
   ])) {
     min = unsigned ? 0 : CONSTANTS.INT24_MIN;
     max = unsigned ? CONSTANTS.INT24_UNSIGNED_MAX : CONSTANTS.INT24_MAX;
-    integer19 = isColumnType(column, ["MySqlMediumInt", "SingleStoreMediumInt"]);
+    integer21 = isColumnType(column, ["MySqlMediumInt", "SingleStoreMediumInt"]);
   } else if (isColumnType(column, [
     "PgInteger",
     "PgSerial",
@@ -35595,7 +35595,7 @@ function numberColumnToSchema(column, z, coerce2) {
   ])) {
     min = unsigned ? 0 : CONSTANTS.INT32_MIN;
     max = unsigned ? CONSTANTS.INT32_UNSIGNED_MAX : CONSTANTS.INT32_MAX;
-    integer19 = true;
+    integer21 = true;
   } else if (isColumnType(column, [
     "PgDoublePrecision",
     "MySqlReal",
@@ -35618,16 +35618,16 @@ function numberColumnToSchema(column, z, coerce2) {
     unsigned = unsigned || isColumnType(column, ["MySqlSerial", "SingleStoreSerial"]);
     min = unsigned ? 0 : Number.MIN_SAFE_INTEGER;
     max = Number.MAX_SAFE_INTEGER;
-    integer19 = true;
+    integer21 = true;
   } else if (isColumnType(column, ["MySqlYear", "SingleStoreYear"])) {
     min = 1901;
     max = 2155;
-    integer19 = true;
+    integer21 = true;
   } else {
     min = Number.MIN_SAFE_INTEGER;
     max = Number.MAX_SAFE_INTEGER;
   }
-  let schema = coerce2 === true || coerce2?.number ? integer19 ? z.coerce.number() : z.coerce.number().int() : integer19 ? z.int() : z.number();
+  let schema = coerce2 === true || coerce2?.number ? integer21 ? z.coerce.number() : z.coerce.number().int() : integer21 ? z.int() : z.number();
   schema = schema.gte(min).lte(max);
   return schema;
 }
@@ -35767,6 +35767,7 @@ var init_users = __esm({
       email: text("email").unique(),
       passwordHash: text("password_hash"),
       avatarUrl: text("avatar_url"),
+      role: text("role").notNull().default("player"),
       isGuest: boolean4("is_guest").notNull().default(false),
       createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
       lastLogin: timestamp("last_login", { withTimezone: true })
@@ -35798,603 +35799,657 @@ var init_users = __esm({
   }
 });
 
-// ../../lib/db/src/schema/questions.ts
-import { pgTable as pgTable2, text as text2, serial as serial2, timestamp as timestamp2, integer as integer3 } from "drizzle-orm/pg-core";
-var questionsTable, insertQuestionSchema, questionOptionsTable;
-var init_questions = __esm({
-  "../../lib/db/src/schema/questions.ts"() {
+// ../../lib/db/src/schema/admin.ts
+import { pgTable as pgTable2, serial as serial2, text as text2, integer as integer3, jsonb, timestamp as timestamp2 } from "drizzle-orm/pg-core";
+var adminLogsTable, bansTable;
+var init_admin = __esm({
+  "../../lib/db/src/schema/admin.ts"() {
     "use strict";
-    init_drizzle_zod();
-    questionsTable = pgTable2("questions", {
+    init_users();
+    adminLogsTable = pgTable2("admin_logs", {
       id: serial2("id").primaryKey(),
-      type: text2("type").notNull().default("text"),
-      questionText: text2("question_text").notNull(),
-      difficulty: integer3("difficulty").notNull().default(1),
-      category: text2("category").notNull().default("general"),
-      mediaUrl: text2("media_url"),
-      correctAnswer: text2("correct_answer").notNull(),
-      timeLimitSeconds: integer3("time_limit_seconds").notNull().default(30),
-      explanation: text2("explanation").notNull().default(""),
-      createdAt: timestamp2("created_at", { withTimezone: true }).notNull().defaultNow()
+      adminId: integer3("admin_id").notNull().references(() => usersTable.id),
+      action: text2("action").notNull(),
+      targetType: text2("target_type"),
+      targetId: text2("target_id"),
+      data: jsonb("data"),
+      ip: text2("ip"),
+      createdAt: timestamp2("created_at").defaultNow().notNull()
     });
-    insertQuestionSchema = createInsertSchema(questionsTable).omit({ id: true, createdAt: true });
-    questionOptionsTable = pgTable2("question_options", {
+    bansTable = pgTable2("bans", {
       id: serial2("id").primaryKey(),
-      questionId: integer3("question_id").notNull().references(() => questionsTable.id),
-      optionText: text2("option_text").notNull(),
-      isCorrect: integer3("is_correct").notNull().default(0)
+      userId: integer3("user_id").notNull().references(() => usersTable.id),
+      reason: text2("reason"),
+      bannedBy: integer3("banned_by").references(() => usersTable.id),
+      expiresAt: timestamp2("expires_at"),
+      createdAt: timestamp2("created_at").defaultNow().notNull()
     });
   }
 });
 
-// ../../lib/db/src/schema/story.ts
-import { pgTable as pgTable3, text as text3, serial as serial3, timestamp as timestamp3, integer as integer4, boolean as boolean5, jsonb } from "drizzle-orm/pg-core";
-var chaptersTable, storyNodesTable, storyChoicesTable, playerProgressTable, loreEntriesTable, userLoreUnlocksTable;
-var init_story = __esm({
-  "../../lib/db/src/schema/story.ts"() {
+// ../../lib/db/src/schema/ai_characters.ts
+import { pgTable as pgTable3, text as text3, serial as serial3, timestamp as timestamp3, integer as integer4, boolean as boolean5, jsonb as jsonb2 } from "drizzle-orm/pg-core";
+var aiCharactersTable, characterMemoryTable;
+var init_ai_characters = __esm({
+  "../../lib/db/src/schema/ai_characters.ts"() {
     "use strict";
     init_users();
-    chaptersTable = pgTable3("chapters", {
+    aiCharactersTable = pgTable3("ai_characters", {
       id: serial3("id").primaryKey(),
+      name: text3("name").notNull(),
       title: text3("title").notNull(),
-      description: text3("description").notNull(),
-      orderIndex: integer4("order_index").notNull().default(0),
-      unlockLevel: integer4("unlock_level").notNull().default(1),
-      coverImageUrl: text3("cover_image_url"),
-      createdAt: timestamp3("created_at", { withTimezone: true }).notNull().defaultNow()
+      personality: text3("personality").notNull(),
+      backstory: text3("backstory").notNull(),
+      avatarUrl: text3("avatar_url"),
+      voiceStyle: text3("voice_style").notNull().default("neutral"),
+      greeting: text3("greeting").notNull(),
+      mood: text3("mood").notNull().default("neutral"),
+      isActive: boolean5("is_active").notNull().default(true)
     });
-    storyNodesTable = pgTable3("story_nodes", {
+    characterMemoryTable = pgTable3("character_memory", {
       id: serial3("id").primaryKey(),
-      chapterId: integer4("chapter_id").notNull().references(() => chaptersTable.id),
-      type: text3("type").notNull().default("dialogue"),
-      content: text3("content").notNull(),
-      speakerName: text3("speaker_name"),
-      mediaUrl: text3("media_url"),
-      orderIndex: integer4("order_index").notNull().default(0)
-    });
-    storyChoicesTable = pgTable3("story_choices", {
-      id: serial3("id").primaryKey(),
-      nodeId: integer4("node_id").notNull().references(() => storyNodesTable.id),
-      text: text3("text").notNull(),
-      nextNodeId: integer4("next_node_id"),
-      consequenceFlag: text3("consequence_flag")
-    });
-    playerProgressTable = pgTable3("player_progress", {
-      id: serial3("id").primaryKey(),
-      userId: integer4("user_id").notNull().references(() => usersTable.id).unique(),
-      currentChapterId: integer4("current_chapter_id").notNull().default(1),
-      currentNodeId: integer4("current_node_id").notNull().default(1),
-      reputationScore: integer4("reputation_score").notNull().default(0),
-      storyFlags: jsonb("story_flags").default({}),
-      updatedAt: timestamp3("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
-    });
-    loreEntriesTable = pgTable3("lore_entries", {
-      id: serial3("id").primaryKey(),
-      title: text3("title").notNull(),
-      content: text3("content").notNull(),
-      category: text3("category").notNull().default("world"),
-      isSecret: boolean5("is_secret").notNull().default(false),
-      unlockCondition: text3("unlock_condition"),
-      createdAt: timestamp3("created_at", { withTimezone: true }).notNull().defaultNow()
-    });
-    userLoreUnlocksTable = pgTable3("user_lore_unlocks", {
-      id: serial3("id").primaryKey(),
+      characterId: integer4("character_id").notNull().references(() => aiCharactersTable.id),
       userId: integer4("user_id").notNull().references(() => usersTable.id),
-      loreId: integer4("lore_id").notNull().references(() => loreEntriesTable.id),
-      unlockedAt: timestamp3("unlocked_at", { withTimezone: true }).notNull().defaultNow()
+      memoryKey: text3("memory_key").notNull(),
+      memoryValue: jsonb2("memory_value").notNull(),
+      importance: integer4("importance").notNull().default(1),
+      createdAt: timestamp3("created_at", { withTimezone: true }).notNull().defaultNow(),
+      lastAccessedAt: timestamp3("last_accessed_at", { withTimezone: true }).notNull().defaultNow()
     });
   }
 });
 
-// ../../lib/db/src/schema/matches.ts
-import { pgTable as pgTable4, text as text4, serial as serial4, timestamp as timestamp4, integer as integer5, jsonb as jsonb2 } from "drizzle-orm/pg-core";
-var matchesTable, matchPlayersTable, matchEventsTable, xpLogTable;
-var init_matches = __esm({
-  "../../lib/db/src/schema/matches.ts"() {
+// ../../lib/db/src/schema/analytics.ts
+import { pgTable as pgTable4, text as text4, serial as serial4, timestamp as timestamp4, integer as integer5, jsonb as jsonb3 } from "drizzle-orm/pg-core";
+var analyticsEventsTable;
+var init_analytics = __esm({
+  "../../lib/db/src/schema/analytics.ts"() {
     "use strict";
     init_users();
-    matchesTable = pgTable4("matches", {
+    analyticsEventsTable = pgTable4("analytics_events", {
       id: serial4("id").primaryKey(),
-      type: text4("type").notNull().default("pvp"),
-      status: text4("status").notNull().default("active"),
-      createdAt: timestamp4("created_at", { withTimezone: true }).notNull().defaultNow(),
-      finishedAt: timestamp4("finished_at", { withTimezone: true })
-    });
-    matchPlayersTable = pgTable4("match_players", {
-      id: serial4("id").primaryKey(),
-      matchId: integer5("match_id").notNull().references(() => matchesTable.id),
-      userId: integer5("user_id").notNull().references(() => usersTable.id),
-      score: integer5("score").notNull().default(0),
-      rankChange: integer5("rank_change").notNull().default(0),
-      isWinner: integer5("is_winner").notNull().default(0),
-      correctAnswers: integer5("correct_answers").notNull().default(0),
-      totalQuestions: integer5("total_questions").notNull().default(0),
-      timeMs: integer5("time_ms").notNull().default(0)
-    });
-    matchEventsTable = pgTable4("match_events", {
-      id: serial4("id").primaryKey(),
-      matchId: integer5("match_id").notNull().references(() => matchesTable.id),
-      type: text4("type").notNull(),
-      payload: jsonb2("payload").default({}),
-      timestamp: timestamp4("timestamp", { withTimezone: true }).notNull().defaultNow()
-    });
-    xpLogTable = pgTable4("xp_log", {
-      id: serial4("id").primaryKey(),
-      userId: integer5("user_id").notNull().references(() => usersTable.id),
-      action: text4("action").notNull(),
-      amount: integer5("amount").notNull(),
+      eventType: text4("event_type").notNull(),
+      userId: integer5("user_id").references(() => usersTable.id),
+      sessionId: text4("session_id"),
+      payload: jsonb3("payload").default({}),
       createdAt: timestamp4("created_at", { withTimezone: true }).notNull().defaultNow()
     });
   }
 });
 
+// ../../lib/db/src/schema/anti_cheat.ts
+import { pgTable as pgTable5, text as text5, serial as serial5, timestamp as timestamp5, integer as integer6, boolean as boolean6, jsonb as jsonb4 } from "drizzle-orm/pg-core";
+var antiCheatLogsTable, rateLimitTable;
+var init_anti_cheat = __esm({
+  "../../lib/db/src/schema/anti_cheat.ts"() {
+    "use strict";
+    init_users();
+    antiCheatLogsTable = pgTable5("anti_cheat_logs", {
+      id: serial5("id").primaryKey(),
+      userId: integer6("user_id").notNull().references(() => usersTable.id),
+      action: text5("action").notNull(),
+      details: jsonb4("details").default({}),
+      severity: integer6("severity").notNull().default(0),
+      flagged: boolean6("flagged").notNull().default(false),
+      createdAt: timestamp5("created_at", { withTimezone: true }).notNull().defaultNow()
+    });
+    rateLimitTable = pgTable5("rate_limit", {
+      id: serial5("id").primaryKey(),
+      userId: integer6("user_id").references(() => usersTable.id),
+      ip: text5("ip"),
+      endpoint: text5("endpoint").notNull(),
+      requestCount: integer6("request_count").notNull().default(1),
+      windowStart: timestamp5("window_start", { withTimezone: true }).notNull()
+    });
+  }
+});
+
+// ../../lib/db/src/schema/behavior.ts
+import { pgTable as pgTable6, text as text6, serial as serial6, timestamp as timestamp6, integer as integer7 } from "drizzle-orm/pg-core";
+var answerLogsTable;
+var init_behavior = __esm({
+  "../../lib/db/src/schema/behavior.ts"() {
+    "use strict";
+    init_users();
+    answerLogsTable = pgTable6("answer_logs", {
+      id: serial6("id").primaryKey(),
+      userId: integer7("user_id").notNull().references(() => usersTable.id),
+      questionId: integer7("question_id").notNull(),
+      category: text6("category").notNull().default("general"),
+      difficulty: integer7("difficulty").notNull().default(1),
+      correct: integer7("correct").notNull().default(0),
+      timeSpentMs: integer7("time_spent_ms").notNull().default(0),
+      createdAt: timestamp6("created_at", { withTimezone: true }).notNull().defaultNow()
+    });
+  }
+});
+
+// ../../lib/db/src/schema/matches.ts
+import { pgTable as pgTable7, text as text7, serial as serial7, timestamp as timestamp7, integer as integer8, jsonb as jsonb5 } from "drizzle-orm/pg-core";
+var matchesTable, matchPlayersTable, matchEventsTable, xpLogTable;
+var init_matches = __esm({
+  "../../lib/db/src/schema/matches.ts"() {
+    "use strict";
+    init_users();
+    matchesTable = pgTable7("matches", {
+      id: serial7("id").primaryKey(),
+      type: text7("type").notNull().default("pvp"),
+      status: text7("status").notNull().default("active"),
+      createdAt: timestamp7("created_at", { withTimezone: true }).notNull().defaultNow(),
+      finishedAt: timestamp7("finished_at", { withTimezone: true })
+    });
+    matchPlayersTable = pgTable7("match_players", {
+      id: serial7("id").primaryKey(),
+      matchId: integer8("match_id").notNull().references(() => matchesTable.id),
+      userId: integer8("user_id").notNull().references(() => usersTable.id),
+      score: integer8("score").notNull().default(0),
+      rankChange: integer8("rank_change").notNull().default(0),
+      isWinner: integer8("is_winner").notNull().default(0),
+      correctAnswers: integer8("correct_answers").notNull().default(0),
+      totalQuestions: integer8("total_questions").notNull().default(0),
+      timeMs: integer8("time_ms").notNull().default(0)
+    });
+    matchEventsTable = pgTable7("match_events", {
+      id: serial7("id").primaryKey(),
+      matchId: integer8("match_id").notNull().references(() => matchesTable.id),
+      type: text7("type").notNull(),
+      payload: jsonb5("payload").default({}),
+      timestamp: timestamp7("timestamp", { withTimezone: true }).notNull().defaultNow()
+    });
+    xpLogTable = pgTable7("xp_log", {
+      id: serial7("id").primaryKey(),
+      userId: integer8("user_id").notNull().references(() => usersTable.id),
+      action: text7("action").notNull(),
+      amount: integer8("amount").notNull(),
+      createdAt: timestamp7("created_at", { withTimezone: true }).notNull().defaultNow()
+    });
+  }
+});
+
+// ../../lib/db/src/schema/missions.ts
+import { pgTable as pgTable8, text as text8, serial as serial8, timestamp as timestamp8, integer as integer9, boolean as boolean7, jsonb as jsonb6 } from "drizzle-orm/pg-core";
+var userAnsweredQuestionsTable, missionLogsTable;
+var init_missions = __esm({
+  "../../lib/db/src/schema/missions.ts"() {
+    "use strict";
+    init_users();
+    userAnsweredQuestionsTable = pgTable8("user_answered_questions", {
+      id: serial8("id").primaryKey(),
+      userId: integer9("user_id").notNull().references(() => usersTable.id),
+      questionId: integer9("question_id").notNull(),
+      answeredAt: timestamp8("answered_at", { withTimezone: true }).notNull().defaultNow(),
+      correct: boolean7("correct").notNull().default(false)
+    });
+    missionLogsTable = pgTable8("mission_logs", {
+      id: serial8("id").primaryKey(),
+      userId: integer9("user_id").notNull().references(() => usersTable.id),
+      domains: text8("domains").array().notNull().default([]),
+      difficulty: text8("difficulty").notNull().default("agent"),
+      modifiers: jsonb6("modifiers").notNull().default([]),
+      threatLevel: text8("threat_level").notNull().default("moderate"),
+      estimatedXp: integer9("estimated_xp").notNull().default(0),
+      totalXpGained: integer9("total_xp_gained").notNull().default(0),
+      questionsAnswered: integer9("questions_answered").notNull().default(0),
+      questionsCorrect: integer9("questions_correct").notNull().default(0),
+      completedAt: timestamp8("completed_at", { withTimezone: true }),
+      createdAt: timestamp8("created_at", { withTimezone: true }).notNull().defaultNow()
+    });
+  }
+});
+
+// ../../lib/db/src/schema/questions.ts
+import { pgTable as pgTable9, text as text9, serial as serial9, timestamp as timestamp9, integer as integer10 } from "drizzle-orm/pg-core";
+var questionsTable, insertQuestionSchema, questionOptionsTable;
+var init_questions = __esm({
+  "../../lib/db/src/schema/questions.ts"() {
+    "use strict";
+    init_drizzle_zod();
+    questionsTable = pgTable9("questions", {
+      id: serial9("id").primaryKey(),
+      type: text9("type").notNull().default("text"),
+      questionText: text9("question_text").notNull(),
+      difficulty: integer10("difficulty").notNull().default(1),
+      category: text9("category").notNull().default("general"),
+      mediaUrl: text9("media_url"),
+      correctAnswer: text9("correct_answer").notNull(),
+      timeLimitSeconds: integer10("time_limit_seconds").notNull().default(30),
+      explanation: text9("explanation").notNull().default(""),
+      createdAt: timestamp9("created_at", { withTimezone: true }).notNull().defaultNow()
+    });
+    insertQuestionSchema = createInsertSchema(questionsTable).omit({ id: true, createdAt: true });
+    questionOptionsTable = pgTable9("question_options", {
+      id: serial9("id").primaryKey(),
+      questionId: integer10("question_id").notNull().references(() => questionsTable.id),
+      optionText: text9("option_text").notNull(),
+      isCorrect: integer10("is_correct").notNull().default(0)
+    });
+  }
+});
+
 // ../../lib/db/src/schema/ranking.ts
-import { pgTable as pgTable5, text as text5, serial as serial5, timestamp as timestamp5, integer as integer6, boolean as boolean6 } from "drizzle-orm/pg-core";
+import { pgTable as pgTable10, text as text10, serial as serial10, timestamp as timestamp10, integer as integer11, boolean as boolean8 } from "drizzle-orm/pg-core";
 var seasonsTable, rankingsTable, achievementsTable, userAchievementsTable, friendsTable, aiPlayerProfilesTable;
 var init_ranking = __esm({
   "../../lib/db/src/schema/ranking.ts"() {
     "use strict";
     init_users();
-    seasonsTable = pgTable5("seasons", {
-      id: serial5("id").primaryKey(),
-      name: text5("name").notNull(),
-      theme: text5("theme").notNull(),
-      startDate: text5("start_date").notNull(),
-      endDate: text5("end_date").notNull(),
-      isActive: boolean6("is_active").notNull().default(false),
-      createdAt: timestamp5("created_at", { withTimezone: true }).notNull().defaultNow()
+    seasonsTable = pgTable10("seasons", {
+      id: serial10("id").primaryKey(),
+      name: text10("name").notNull(),
+      theme: text10("theme").notNull(),
+      startDate: text10("start_date").notNull(),
+      endDate: text10("end_date").notNull(),
+      isActive: boolean8("is_active").notNull().default(false),
+      createdAt: timestamp10("created_at", { withTimezone: true }).notNull().defaultNow()
     });
-    rankingsTable = pgTable5("rankings", {
-      id: serial5("id").primaryKey(),
-      userId: integer6("user_id").notNull().references(() => usersTable.id),
-      seasonId: integer6("season_id").notNull().references(() => seasonsTable.id),
-      mmr: integer6("mmr").notNull().default(1e3),
-      rankTier: text5("rank_tier").notNull().default("Bronze"),
-      rankPoints: integer6("rank_points").notNull().default(0),
-      updatedAt: timestamp5("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
+    rankingsTable = pgTable10("rankings", {
+      id: serial10("id").primaryKey(),
+      userId: integer11("user_id").notNull().references(() => usersTable.id),
+      seasonId: integer11("season_id").notNull().references(() => seasonsTable.id),
+      mmr: integer11("mmr").notNull().default(1e3),
+      rankTier: text10("rank_tier").notNull().default("Bronze"),
+      rankPoints: integer11("rank_points").notNull().default(0),
+      updatedAt: timestamp10("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
     });
-    achievementsTable = pgTable5("achievements", {
-      id: serial5("id").primaryKey(),
-      name: text5("name").notNull(),
-      description: text5("description").notNull(),
-      rewardXp: integer6("reward_xp").notNull().default(50),
-      iconUrl: text5("icon_url"),
-      condition: text5("condition").notNull().default("")
+    achievementsTable = pgTable10("achievements", {
+      id: serial10("id").primaryKey(),
+      name: text10("name").notNull(),
+      description: text10("description").notNull(),
+      rewardXp: integer11("reward_xp").notNull().default(50),
+      iconUrl: text10("icon_url"),
+      condition: text10("condition").notNull().default("")
     });
-    userAchievementsTable = pgTable5("user_achievements", {
-      id: serial5("id").primaryKey(),
-      userId: integer6("user_id").notNull().references(() => usersTable.id),
-      achievementId: integer6("achievement_id").notNull().references(() => achievementsTable.id),
-      unlockedAt: timestamp5("unlocked_at", { withTimezone: true }).notNull().defaultNow()
+    userAchievementsTable = pgTable10("user_achievements", {
+      id: serial10("id").primaryKey(),
+      userId: integer11("user_id").notNull().references(() => usersTable.id),
+      achievementId: integer11("achievement_id").notNull().references(() => achievementsTable.id),
+      unlockedAt: timestamp10("unlocked_at", { withTimezone: true }).notNull().defaultNow()
     });
-    friendsTable = pgTable5("friends", {
-      id: serial5("id").primaryKey(),
-      userId: integer6("user_id").notNull().references(() => usersTable.id),
-      friendId: integer6("friend_id").notNull().references(() => usersTable.id),
-      status: text5("status").notNull().default("pending"),
-      createdAt: timestamp5("created_at", { withTimezone: true }).notNull().defaultNow()
+    friendsTable = pgTable10("friends", {
+      id: serial10("id").primaryKey(),
+      userId: integer11("user_id").notNull().references(() => usersTable.id),
+      friendId: integer11("friend_id").notNull().references(() => usersTable.id),
+      status: text10("status").notNull().default("pending"),
+      createdAt: timestamp10("created_at", { withTimezone: true }).notNull().defaultNow()
     });
-    aiPlayerProfilesTable = pgTable5("ai_player_profiles", {
-      id: serial5("id").primaryKey(),
-      userId: integer6("user_id").notNull().references(() => usersTable.id).unique(),
-      strengths: text5("strengths").array().notNull().default([]),
-      weaknesses: text5("weaknesses").array().notNull().default([]),
-      behaviorType: text5("behavior_type").notNull().default("explorer"),
-      intelligenceScore: integer6("intelligence_score").notNull().default(50),
-      learningCurve: text5("learning_curve").notNull().default("steady"),
-      recommendedDifficulty: integer6("recommended_difficulty").notNull().default(3),
-      tacticalIQ: integer6("tactical_iq").notNull().default(50),
-      riskIndex: integer6("risk_index").notNull().default(50),
-      loyaltyScore: integer6("loyalty_score").notNull().default(50),
-      updatedAt: timestamp5("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
-    });
-  }
-});
-
-// ../../lib/db/src/schema/skill_trees.ts
-import { pgTable as pgTable6, text as text6, serial as serial6, timestamp as timestamp6, integer as integer7, boolean as boolean7, jsonb as jsonb3 } from "drizzle-orm/pg-core";
-var skillTreesTable, playerSkillsTable;
-var init_skill_trees = __esm({
-  "../../lib/db/src/schema/skill_trees.ts"() {
-    "use strict";
-    init_users();
-    skillTreesTable = pgTable6("skill_trees", {
-      id: serial6("id").primaryKey(),
-      name: text6("name").notNull(),
-      description: text6("description").notNull(),
-      branch: text6("branch").notNull(),
-      level: integer7("level").notNull(),
-      maxLevel: integer7("max_level").notNull(),
-      iconUrl: text6("icon_url").notNull(),
-      parentSkillId: integer7("parent_skill_id"),
-      xpCost: integer7("xp_cost").notNull(),
-      statBonus: jsonb3("stat_bonus").default({})
-    });
-    playerSkillsTable = pgTable6("player_skills", {
-      id: serial6("id").primaryKey(),
-      userId: integer7("user_id").notNull().references(() => usersTable.id),
-      skillId: integer7("skill_id").notNull().references(() => skillTreesTable.id),
-      currentLevel: integer7("current_level").notNull().default(0),
-      unlocked: boolean7("unlocked").notNull().default(false),
-      unlockedAt: timestamp6("unlocked_at", { withTimezone: true })
+    aiPlayerProfilesTable = pgTable10("ai_player_profiles", {
+      id: serial10("id").primaryKey(),
+      userId: integer11("user_id").notNull().references(() => usersTable.id).unique(),
+      strengths: text10("strengths").array().notNull().default([]),
+      weaknesses: text10("weaknesses").array().notNull().default([]),
+      behaviorType: text10("behavior_type").notNull().default("explorer"),
+      intelligenceScore: integer11("intelligence_score").notNull().default(50),
+      learningCurve: text10("learning_curve").notNull().default("steady"),
+      recommendedDifficulty: integer11("recommended_difficulty").notNull().default(3),
+      tacticalIQ: integer11("tactical_iq").notNull().default(50),
+      riskIndex: integer11("risk_index").notNull().default(50),
+      loyaltyScore: integer11("loyalty_score").notNull().default(50),
+      updatedAt: timestamp10("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
     });
   }
 });
 
-// ../../lib/db/src/schema/tournaments.ts
-import { pgTable as pgTable7, text as text7, serial as serial7, timestamp as timestamp7, integer as integer8, boolean as boolean8 } from "drizzle-orm/pg-core";
-var tournamentsTable, tournamentParticipantsTable, tournamentMatchesTable;
-var init_tournaments = __esm({
-  "../../lib/db/src/schema/tournaments.ts"() {
+// ../../lib/db/src/schema/roles.ts
+import { pgTable as pgTable11, serial as serial11, text as text11, integer as integer12, timestamp as timestamp11 } from "drizzle-orm/pg-core";
+var rolesTable, permissionsTable, rolePermissionsTable;
+var init_roles = __esm({
+  "../../lib/db/src/schema/roles.ts"() {
     "use strict";
-    init_users();
-    tournamentsTable = pgTable7("tournaments", {
-      id: serial7("id").primaryKey(),
-      name: text7("name").notNull(),
-      description: text7("description").notNull(),
-      type: text7("type").notNull(),
-      status: text7("status").notNull().default("registration"),
-      maxParticipants: integer8("max_participants").notNull(),
-      minLevel: integer8("min_level").notNull().default(1),
-      entryFee: integer8("entry_fee").notNull().default(0),
-      rewardXp: integer8("reward_xp").notNull(),
-      rewardCoins: integer8("reward_coins").notNull(),
-      rewardItem: text7("reward_item"),
-      startDate: timestamp7("start_date", { withTimezone: true }).notNull(),
-      endDate: timestamp7("end_date", { withTimezone: true }).notNull(),
-      createdAt: timestamp7("created_at", { withTimezone: true }).notNull().defaultNow()
+    rolesTable = pgTable11("roles", {
+      id: serial11("id").primaryKey(),
+      name: text11("name").notNull().unique(),
+      description: text11("description"),
+      createdAt: timestamp11("created_at").defaultNow().notNull()
     });
-    tournamentParticipantsTable = pgTable7("tournament_participants", {
-      id: serial7("id").primaryKey(),
-      tournamentId: integer8("tournament_id").notNull().references(() => tournamentsTable.id),
-      userId: integer8("user_id").notNull().references(() => usersTable.id),
-      seed: integer8("seed").notNull().default(0),
-      currentRound: integer8("current_round").notNull().default(0),
-      isEliminated: boolean8("is_eliminated").notNull().default(false),
-      finalPosition: integer8("final_position"),
-      joinedAt: timestamp7("joined_at", { withTimezone: true }).notNull().defaultNow()
+    permissionsTable = pgTable11("permissions", {
+      id: serial11("id").primaryKey(),
+      key: text11("key").notNull().unique(),
+      description: text11("description"),
+      createdAt: timestamp11("created_at").defaultNow().notNull()
     });
-    tournamentMatchesTable = pgTable7("tournament_matches", {
-      id: serial7("id").primaryKey(),
-      tournamentId: integer8("tournament_id").notNull().references(() => tournamentsTable.id),
-      round: integer8("round").notNull(),
-      matchIndex: integer8("match_index").notNull(),
-      player1Id: integer8("player1_id").references(() => usersTable.id),
-      player2Id: integer8("player2_id").references(() => usersTable.id),
-      winnerId: integer8("winner_id").references(() => usersTable.id),
-      status: text7("status").notNull().default("pending"),
-      scheduledAt: timestamp7("scheduled_at", { withTimezone: true }),
-      completedAt: timestamp7("completed_at", { withTimezone: true })
+    rolePermissionsTable = pgTable11("role_permissions", {
+      id: serial11("id").primaryKey(),
+      roleId: integer12("role_id").notNull().references(() => rolesTable.id),
+      permissionId: integer12("permission_id").notNull().references(() => permissionsTable.id)
     });
   }
 });
 
 // ../../lib/db/src/schema/shop.ts
-import { pgTable as pgTable8, text as text8, serial as serial8, timestamp as timestamp8, integer as integer9, boolean as boolean9, jsonb as jsonb4 } from "drizzle-orm/pg-core";
+import { pgTable as pgTable12, text as text12, serial as serial12, timestamp as timestamp12, integer as integer13, boolean as boolean9, jsonb as jsonb7 } from "drizzle-orm/pg-core";
 var shopItemsTable, userInventoryTable, battlePassTable, userBattlePassTable;
 var init_shop = __esm({
   "../../lib/db/src/schema/shop.ts"() {
     "use strict";
     init_users();
     init_ranking();
-    shopItemsTable = pgTable8("shop_items", {
-      id: serial8("id").primaryKey(),
-      name: text8("name").notNull(),
-      description: text8("description").notNull(),
-      type: text8("type").notNull(),
-      priceCoins: integer9("price_coins").notNull().default(0),
-      pricePremium: integer9("price_premium").notNull().default(0),
-      rarity: text8("rarity").notNull().default("common"),
-      iconUrl: text8("icon_url"),
-      isLimited: boolean9("is_limited").notNull().default(false),
-      availableUntil: timestamp8("available_until", { withTimezone: true }),
-      createdAt: timestamp8("created_at", { withTimezone: true }).notNull().defaultNow()
-    });
-    userInventoryTable = pgTable8("user_inventory", {
-      id: serial8("id").primaryKey(),
-      userId: integer9("user_id").notNull().references(() => usersTable.id),
-      itemId: integer9("item_id").notNull().references(() => shopItemsTable.id),
-      quantity: integer9("quantity").notNull().default(1),
-      equipped: boolean9("equipped").notNull().default(false),
-      purchasedAt: timestamp8("purchased_at", { withTimezone: true }).notNull().defaultNow()
-    });
-    battlePassTable = pgTable8("battle_pass", {
-      id: serial8("id").primaryKey(),
-      seasonId: integer9("season_id").notNull().references(() => seasonsTable.id),
-      name: text8("name").notNull(),
-      level: integer9("level").notNull(),
-      xpRequired: integer9("xp_required").notNull(),
-      freeReward: jsonb4("free_reward"),
-      premiumReward: jsonb4("premium_reward")
-    });
-    userBattlePassTable = pgTable8("user_battle_pass", {
-      id: serial8("id").primaryKey(),
-      userId: integer9("user_id").notNull().references(() => usersTable.id),
-      battlePassId: integer9("battle_pass_id").notNull().references(() => battlePassTable.id),
-      currentLevel: integer9("current_level").notNull().default(0),
-      currentXp: integer9("current_xp").notNull().default(0),
-      isPremium: boolean9("is_premium").notNull().default(false),
-      claimedRewards: jsonb4("claimed_rewards").default([])
-    });
-  }
-});
-
-// ../../lib/db/src/schema/world_events.ts
-import { pgTable as pgTable9, text as text9, serial as serial9, timestamp as timestamp9, integer as integer10, boolean as boolean10, jsonb as jsonb5 } from "drizzle-orm/pg-core";
-var worldEventsTable, worldEventParticipantsTable, worldStateTable;
-var init_world_events = __esm({
-  "../../lib/db/src/schema/world_events.ts"() {
-    "use strict";
-    init_users();
-    worldEventsTable = pgTable9("world_events", {
-      id: serial9("id").primaryKey(),
-      title: text9("title").notNull(),
-      description: text9("description").notNull(),
-      type: text9("type").notNull(),
-      status: text9("status").notNull().default("upcoming"),
-      startAt: timestamp9("start_at", { withTimezone: true }).notNull(),
-      endAt: timestamp9("end_at", { withTimezone: true }).notNull(),
-      conditions: jsonb5("conditions").default({}),
-      rewards: jsonb5("rewards").default({}),
-      narrative: text9("narrative"),
-      createdAt: timestamp9("created_at", { withTimezone: true }).notNull().defaultNow()
-    });
-    worldEventParticipantsTable = pgTable9("world_event_participants", {
-      id: serial9("id").primaryKey(),
-      eventId: integer10("event_id").notNull().references(() => worldEventsTable.id),
-      userId: integer10("user_id").notNull().references(() => usersTable.id),
-      contribution: integer10("contribution").notNull().default(0),
-      rewardsClaimed: boolean10("rewards_claimed").notNull().default(false),
-      joinedAt: timestamp9("joined_at", { withTimezone: true }).notNull().defaultNow()
-    });
-    worldStateTable = pgTable9("world_state", {
-      id: serial9("id").primaryKey(),
-      key: text9("key").notNull().unique(),
-      value: jsonb5("value").notNull(),
-      updatedAt: timestamp9("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
-    });
-  }
-});
-
-// ../../lib/db/src/schema/ai_characters.ts
-import { pgTable as pgTable10, text as text10, serial as serial10, timestamp as timestamp10, integer as integer11, boolean as boolean11, jsonb as jsonb6 } from "drizzle-orm/pg-core";
-var aiCharactersTable, characterMemoryTable;
-var init_ai_characters = __esm({
-  "../../lib/db/src/schema/ai_characters.ts"() {
-    "use strict";
-    init_users();
-    aiCharactersTable = pgTable10("ai_characters", {
-      id: serial10("id").primaryKey(),
-      name: text10("name").notNull(),
-      title: text10("title").notNull(),
-      personality: text10("personality").notNull(),
-      backstory: text10("backstory").notNull(),
-      avatarUrl: text10("avatar_url"),
-      voiceStyle: text10("voice_style").notNull().default("neutral"),
-      greeting: text10("greeting").notNull(),
-      mood: text10("mood").notNull().default("neutral"),
-      isActive: boolean11("is_active").notNull().default(true)
-    });
-    characterMemoryTable = pgTable10("character_memory", {
-      id: serial10("id").primaryKey(),
-      characterId: integer11("character_id").notNull().references(() => aiCharactersTable.id),
-      userId: integer11("user_id").notNull().references(() => usersTable.id),
-      memoryKey: text10("memory_key").notNull(),
-      memoryValue: jsonb6("memory_value").notNull(),
-      importance: integer11("importance").notNull().default(1),
-      createdAt: timestamp10("created_at", { withTimezone: true }).notNull().defaultNow(),
-      lastAccessedAt: timestamp10("last_accessed_at", { withTimezone: true }).notNull().defaultNow()
-    });
-  }
-});
-
-// ../../lib/db/src/schema/anti_cheat.ts
-import { pgTable as pgTable11, text as text11, serial as serial11, timestamp as timestamp11, integer as integer12, boolean as boolean12, jsonb as jsonb7 } from "drizzle-orm/pg-core";
-var antiCheatLogsTable, rateLimitTable;
-var init_anti_cheat = __esm({
-  "../../lib/db/src/schema/anti_cheat.ts"() {
-    "use strict";
-    init_users();
-    antiCheatLogsTable = pgTable11("anti_cheat_logs", {
-      id: serial11("id").primaryKey(),
-      userId: integer12("user_id").notNull().references(() => usersTable.id),
-      action: text11("action").notNull(),
-      details: jsonb7("details").default({}),
-      severity: integer12("severity").notNull().default(0),
-      flagged: boolean12("flagged").notNull().default(false),
-      createdAt: timestamp11("created_at", { withTimezone: true }).notNull().defaultNow()
-    });
-    rateLimitTable = pgTable11("rate_limit", {
-      id: serial11("id").primaryKey(),
-      userId: integer12("user_id").references(() => usersTable.id),
-      ip: text11("ip"),
-      endpoint: text11("endpoint").notNull(),
-      requestCount: integer12("request_count").notNull().default(1),
-      windowStart: timestamp11("window_start", { withTimezone: true }).notNull()
-    });
-  }
-});
-
-// ../../lib/db/src/schema/analytics.ts
-import { pgTable as pgTable12, text as text12, serial as serial12, timestamp as timestamp12, integer as integer13, jsonb as jsonb8 } from "drizzle-orm/pg-core";
-var analyticsEventsTable;
-var init_analytics = __esm({
-  "../../lib/db/src/schema/analytics.ts"() {
-    "use strict";
-    init_users();
-    analyticsEventsTable = pgTable12("analytics_events", {
+    shopItemsTable = pgTable12("shop_items", {
       id: serial12("id").primaryKey(),
-      eventType: text12("event_type").notNull(),
-      userId: integer13("user_id").references(() => usersTable.id),
-      sessionId: text12("session_id"),
-      payload: jsonb8("payload").default({}),
+      name: text12("name").notNull(),
+      description: text12("description").notNull(),
+      type: text12("type").notNull(),
+      priceCoins: integer13("price_coins").notNull().default(0),
+      pricePremium: integer13("price_premium").notNull().default(0),
+      rarity: text12("rarity").notNull().default("common"),
+      iconUrl: text12("icon_url"),
+      isLimited: boolean9("is_limited").notNull().default(false),
+      availableUntil: timestamp12("available_until", { withTimezone: true }),
       createdAt: timestamp12("created_at", { withTimezone: true }).notNull().defaultNow()
     });
+    userInventoryTable = pgTable12("user_inventory", {
+      id: serial12("id").primaryKey(),
+      userId: integer13("user_id").notNull().references(() => usersTable.id),
+      itemId: integer13("item_id").notNull().references(() => shopItemsTable.id),
+      quantity: integer13("quantity").notNull().default(1),
+      equipped: boolean9("equipped").notNull().default(false),
+      purchasedAt: timestamp12("purchased_at", { withTimezone: true }).notNull().defaultNow()
+    });
+    battlePassTable = pgTable12("battle_pass", {
+      id: serial12("id").primaryKey(),
+      seasonId: integer13("season_id").notNull().references(() => seasonsTable.id),
+      name: text12("name").notNull(),
+      level: integer13("level").notNull(),
+      xpRequired: integer13("xp_required").notNull(),
+      freeReward: jsonb7("free_reward"),
+      premiumReward: jsonb7("premium_reward")
+    });
+    userBattlePassTable = pgTable12("user_battle_pass", {
+      id: serial12("id").primaryKey(),
+      userId: integer13("user_id").notNull().references(() => usersTable.id),
+      battlePassId: integer13("battle_pass_id").notNull().references(() => battlePassTable.id),
+      currentLevel: integer13("current_level").notNull().default(0),
+      currentXp: integer13("current_xp").notNull().default(0),
+      isPremium: boolean9("is_premium").notNull().default(false),
+      claimedRewards: jsonb7("claimed_rewards").default([])
+    });
   }
 });
 
-// ../../lib/db/src/schema/behavior.ts
-import { pgTable as pgTable13, text as text13, serial as serial13, timestamp as timestamp13, integer as integer14 } from "drizzle-orm/pg-core";
-var answerLogsTable;
-var init_behavior = __esm({
-  "../../lib/db/src/schema/behavior.ts"() {
+// ../../lib/db/src/schema/skill_trees.ts
+import { pgTable as pgTable13, text as text13, serial as serial13, timestamp as timestamp13, integer as integer14, boolean as boolean10, jsonb as jsonb8 } from "drizzle-orm/pg-core";
+var skillTreesTable, playerSkillsTable;
+var init_skill_trees = __esm({
+  "../../lib/db/src/schema/skill_trees.ts"() {
     "use strict";
     init_users();
-    answerLogsTable = pgTable13("answer_logs", {
+    skillTreesTable = pgTable13("skill_trees", {
+      id: serial13("id").primaryKey(),
+      name: text13("name").notNull(),
+      description: text13("description").notNull(),
+      branch: text13("branch").notNull(),
+      level: integer14("level").notNull(),
+      maxLevel: integer14("max_level").notNull(),
+      iconUrl: text13("icon_url").notNull(),
+      parentSkillId: integer14("parent_skill_id"),
+      xpCost: integer14("xp_cost").notNull(),
+      statBonus: jsonb8("stat_bonus").default({})
+    });
+    playerSkillsTable = pgTable13("player_skills", {
       id: serial13("id").primaryKey(),
       userId: integer14("user_id").notNull().references(() => usersTable.id),
-      questionId: integer14("question_id").notNull(),
-      category: text13("category").notNull().default("general"),
-      difficulty: integer14("difficulty").notNull().default(1),
-      correct: integer14("correct").notNull().default(0),
-      timeSpentMs: integer14("time_spent_ms").notNull().default(0),
-      createdAt: timestamp13("created_at", { withTimezone: true }).notNull().defaultNow()
-    });
-  }
-});
-
-// ../../lib/db/src/schema/missions.ts
-import { pgTable as pgTable14, text as text14, serial as serial14, timestamp as timestamp14, integer as integer15, boolean as boolean13, jsonb as jsonb9 } from "drizzle-orm/pg-core";
-var userAnsweredQuestionsTable, missionLogsTable;
-var init_missions = __esm({
-  "../../lib/db/src/schema/missions.ts"() {
-    "use strict";
-    init_users();
-    userAnsweredQuestionsTable = pgTable14("user_answered_questions", {
-      id: serial14("id").primaryKey(),
-      userId: integer15("user_id").notNull().references(() => usersTable.id),
-      questionId: integer15("question_id").notNull(),
-      answeredAt: timestamp14("answered_at", { withTimezone: true }).notNull().defaultNow(),
-      correct: boolean13("correct").notNull().default(false)
-    });
-    missionLogsTable = pgTable14("mission_logs", {
-      id: serial14("id").primaryKey(),
-      userId: integer15("user_id").notNull().references(() => usersTable.id),
-      domains: text14("domains").array().notNull().default([]),
-      difficulty: text14("difficulty").notNull().default("agent"),
-      modifiers: jsonb9("modifiers").notNull().default([]),
-      threatLevel: text14("threat_level").notNull().default("moderate"),
-      estimatedXp: integer15("estimated_xp").notNull().default(0),
-      totalXpGained: integer15("total_xp_gained").notNull().default(0),
-      questionsAnswered: integer15("questions_answered").notNull().default(0),
-      questionsCorrect: integer15("questions_correct").notNull().default(0),
-      completedAt: timestamp14("completed_at", { withTimezone: true }),
-      createdAt: timestamp14("created_at", { withTimezone: true }).notNull().defaultNow()
-    });
-  }
-});
-
-// ../../lib/db/src/schema/tactical.ts
-import { pgTable as pgTable15, text as text15, serial as serial15, timestamp as timestamp15, integer as integer16, jsonb as jsonb10 } from "drizzle-orm/pg-core";
-var tacticalModulesTable, userTacticalModulesTable;
-var init_tactical = __esm({
-  "../../lib/db/src/schema/tactical.ts"() {
-    "use strict";
-    init_users();
-    tacticalModulesTable = pgTable15("tactical_modules", {
-      id: serial15("id").primaryKey(),
-      moduleId: text15("module_id").notNull().unique(),
-      name: text15("name").notNull(),
-      description: text15("description").notNull(),
-      energyCost: integer16("energy_cost").notNull().default(1),
-      category: text15("category").notNull().default("assist"),
-      rarity: text15("rarity").notNull().default("common"),
-      createdAt: timestamp15("created_at", { withTimezone: true }).notNull().defaultNow()
-    });
-    userTacticalModulesTable = pgTable15("user_tactical_modules", {
-      id: serial15("id").primaryKey(),
-      userId: integer16("user_id").notNull().references(() => usersTable.id).unique(),
-      tacticalEnergy: integer16("tactical_energy").notNull().default(10),
-      maxEnergy: integer16("max_energy").notNull().default(10),
-      modules: jsonb10("modules").notNull().default({}),
-      lastEnergyRegen: timestamp15("last_energy_regen", { withTimezone: true }).notNull().defaultNow(),
-      updatedAt: timestamp15("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
-    });
-  }
-});
-
-// ../../lib/db/src/schema/team_ops.ts
-import { pgTable as pgTable16, text as text16, serial as serial16, timestamp as timestamp16, integer as integer17, boolean as boolean14, jsonb as jsonb11 } from "drizzle-orm/pg-core";
-var teamOperationsTable, teamMembersTable, teamMatchesTable, teamMatchScoresTable, teamMatchQuestionsTable;
-var init_team_ops = __esm({
-  "../../lib/db/src/schema/team_ops.ts"() {
-    "use strict";
-    init_users();
-    teamOperationsTable = pgTable16("team_operations", {
-      id: serial16("id").primaryKey(),
-      name: text16("name").notNull(),
-      emblem: text16("emblem").notNull().default("default"),
-      color: text16("color").notNull().default("blue"),
-      maxPlayers: integer17("max_players").notNull().default(4),
-      captainId: integer17("captain_id").notNull().references(() => usersTable.id),
-      tacticalLoadout: jsonb11("tactical_loadout").notNull().default([]),
-      createdAt: timestamp16("created_at", { withTimezone: true }).notNull().defaultNow()
-    });
-    teamMembersTable = pgTable16("team_members", {
-      id: serial16("id").primaryKey(),
-      teamId: integer17("team_id").notNull().references(() => teamOperationsTable.id),
-      userId: integer17("user_id").notNull().references(() => usersTable.id),
-      isReady: boolean14("is_ready").notNull().default(false),
-      joinedAt: timestamp16("joined_at", { withTimezone: true }).notNull().defaultNow()
-    });
-    teamMatchesTable = pgTable16("team_matches", {
-      id: serial16("id").primaryKey(),
-      roomCode: text16("room_code").notNull().unique(),
-      type: text16("type").notNull().default("battle"),
-      status: text16("status").notNull().default("lobby"),
-      mode: text16("mode").notNull().default("live"),
-      domainOrder: jsonb11("domain_order").notNull().default([]),
-      domainMode: text16("domain_mode").notNull().default("randomized"),
-      difficulty: text16("difficulty").notNull().default("agent"),
-      hostId: integer17("host_id").references(() => usersTable.id),
-      currentDomain: text16("current_domain"),
-      currentQuestion: integer17("current_question").notNull().default(0),
-      totalQuestions: integer17("total_questions").notNull().default(10),
-      createdAt: timestamp16("created_at", { withTimezone: true }).notNull().defaultNow(),
-      startedAt: timestamp16("started_at", { withTimezone: true }),
-      finishedAt: timestamp16("finished_at", { withTimezone: true })
-    });
-    teamMatchScoresTable = pgTable16("team_match_scores", {
-      id: serial16("id").primaryKey(),
-      matchId: integer17("match_id").notNull().references(() => teamMatchesTable.id),
-      teamId: integer17("team_id").notNull().references(() => teamOperationsTable.id),
-      score: integer17("score").notNull().default(0),
-      correctAnswers: integer17("correct_answers").notNull().default(0),
-      totalAnswers: integer17("total_answers").notNull().default(0),
-      fastestAnswer: boolean14("fastest_answer").notNull().default(false),
-      assistsUsed: jsonb11("assists_used").notNull().default([]),
-      currentStreak: integer17("current_streak").notNull().default(0),
-      perfectCategories: jsonb11("perfect_categories").notNull().default([])
-    });
-    teamMatchQuestionsTable = pgTable16("team_match_questions", {
-      id: serial16("id").primaryKey(),
-      matchId: integer17("match_id").notNull().references(() => teamMatchesTable.id),
-      questionIndex: integer17("question_index").notNull(),
-      questionId: integer17("question_id").notNull(),
-      domain: text16("domain").notNull(),
-      answeredBy: integer17("answered_by").references(() => teamOperationsTable.id),
-      isCorrect: boolean14("is_correct"),
-      responseTimeMs: integer17("response_time_ms"),
-      buzzerTeam: integer17("buzzer_team").references(() => teamOperationsTable.id),
-      createdAt: timestamp16("created_at", { withTimezone: true }).notNull().defaultNow()
+      skillId: integer14("skill_id").notNull().references(() => skillTreesTable.id),
+      currentLevel: integer14("current_level").notNull().default(0),
+      unlocked: boolean10("unlocked").notNull().default(false),
+      unlockedAt: timestamp13("unlocked_at", { withTimezone: true })
     });
   }
 });
 
 // ../../lib/db/src/schema/stage_matches.ts
-import { pgTable as pgTable17, serial as serial17, integer as integer18, jsonb as jsonb12, timestamp as timestamp17, varchar } from "drizzle-orm/pg-core";
+import { pgTable as pgTable14, serial as serial14, integer as integer15, jsonb as jsonb9, timestamp as timestamp14, varchar } from "drizzle-orm/pg-core";
 var stageMatchesTable;
 var init_stage_matches = __esm({
   "../../lib/db/src/schema/stage_matches.ts"() {
     "use strict";
-    stageMatchesTable = pgTable17("stage_matches", {
-      id: serial17("id").primaryKey(),
-      matchId: integer18("match_id").notNull().unique(),
-      hostId: integer18("host_id").notNull(),
+    stageMatchesTable = pgTable14("stage_matches", {
+      id: serial14("id").primaryKey(),
+      matchId: integer15("match_id").notNull().unique(),
+      hostId: integer15("host_id").notNull(),
       roomCode: varchar("room_code", { length: 10 }).notNull(),
-      state: jsonb12("state").notNull(),
-      createdAt: timestamp17("created_at").defaultNow().notNull(),
-      updatedAt: timestamp17("updated_at").defaultNow().notNull()
+      state: jsonb9("state").notNull(),
+      createdAt: timestamp14("created_at").defaultNow().notNull(),
+      updatedAt: timestamp14("updated_at").defaultNow().notNull()
+    });
+  }
+});
+
+// ../../lib/db/src/schema/story.ts
+import { pgTable as pgTable15, text as text14, serial as serial15, timestamp as timestamp15, integer as integer16, boolean as boolean11, jsonb as jsonb10 } from "drizzle-orm/pg-core";
+var chaptersTable, storyNodesTable, storyChoicesTable, playerProgressTable, loreEntriesTable, userLoreUnlocksTable;
+var init_story = __esm({
+  "../../lib/db/src/schema/story.ts"() {
+    "use strict";
+    init_users();
+    chaptersTable = pgTable15("chapters", {
+      id: serial15("id").primaryKey(),
+      title: text14("title").notNull(),
+      description: text14("description").notNull(),
+      orderIndex: integer16("order_index").notNull().default(0),
+      unlockLevel: integer16("unlock_level").notNull().default(1),
+      coverImageUrl: text14("cover_image_url"),
+      createdAt: timestamp15("created_at", { withTimezone: true }).notNull().defaultNow()
+    });
+    storyNodesTable = pgTable15("story_nodes", {
+      id: serial15("id").primaryKey(),
+      chapterId: integer16("chapter_id").notNull().references(() => chaptersTable.id),
+      type: text14("type").notNull().default("dialogue"),
+      content: text14("content").notNull(),
+      speakerName: text14("speaker_name"),
+      mediaUrl: text14("media_url"),
+      orderIndex: integer16("order_index").notNull().default(0)
+    });
+    storyChoicesTable = pgTable15("story_choices", {
+      id: serial15("id").primaryKey(),
+      nodeId: integer16("node_id").notNull().references(() => storyNodesTable.id),
+      text: text14("text").notNull(),
+      nextNodeId: integer16("next_node_id"),
+      consequenceFlag: text14("consequence_flag")
+    });
+    playerProgressTable = pgTable15("player_progress", {
+      id: serial15("id").primaryKey(),
+      userId: integer16("user_id").notNull().references(() => usersTable.id).unique(),
+      currentChapterId: integer16("current_chapter_id").notNull().default(1),
+      currentNodeId: integer16("current_node_id").notNull().default(1),
+      reputationScore: integer16("reputation_score").notNull().default(0),
+      storyFlags: jsonb10("story_flags").default({}),
+      updatedAt: timestamp15("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
+    });
+    loreEntriesTable = pgTable15("lore_entries", {
+      id: serial15("id").primaryKey(),
+      title: text14("title").notNull(),
+      content: text14("content").notNull(),
+      category: text14("category").notNull().default("world"),
+      isSecret: boolean11("is_secret").notNull().default(false),
+      unlockCondition: text14("unlock_condition"),
+      createdAt: timestamp15("created_at", { withTimezone: true }).notNull().defaultNow()
+    });
+    userLoreUnlocksTable = pgTable15("user_lore_unlocks", {
+      id: serial15("id").primaryKey(),
+      userId: integer16("user_id").notNull().references(() => usersTable.id),
+      loreId: integer16("lore_id").notNull().references(() => loreEntriesTable.id),
+      unlockedAt: timestamp15("unlocked_at", { withTimezone: true }).notNull().defaultNow()
+    });
+  }
+});
+
+// ../../lib/db/src/schema/tactical.ts
+import { pgTable as pgTable16, text as text15, serial as serial16, timestamp as timestamp16, integer as integer17, jsonb as jsonb11 } from "drizzle-orm/pg-core";
+var tacticalModulesTable, userTacticalModulesTable;
+var init_tactical = __esm({
+  "../../lib/db/src/schema/tactical.ts"() {
+    "use strict";
+    init_users();
+    tacticalModulesTable = pgTable16("tactical_modules", {
+      id: serial16("id").primaryKey(),
+      moduleId: text15("module_id").notNull().unique(),
+      name: text15("name").notNull(),
+      description: text15("description").notNull(),
+      energyCost: integer17("energy_cost").notNull().default(1),
+      category: text15("category").notNull().default("assist"),
+      rarity: text15("rarity").notNull().default("common"),
+      createdAt: timestamp16("created_at", { withTimezone: true }).notNull().defaultNow()
+    });
+    userTacticalModulesTable = pgTable16("user_tactical_modules", {
+      id: serial16("id").primaryKey(),
+      userId: integer17("user_id").notNull().references(() => usersTable.id).unique(),
+      tacticalEnergy: integer17("tactical_energy").notNull().default(10),
+      maxEnergy: integer17("max_energy").notNull().default(10),
+      modules: jsonb11("modules").notNull().default({}),
+      lastEnergyRegen: timestamp16("last_energy_regen", { withTimezone: true }).notNull().defaultNow(),
+      updatedAt: timestamp16("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
+    });
+  }
+});
+
+// ../../lib/db/src/schema/team_ops.ts
+import { pgTable as pgTable17, text as text16, serial as serial17, timestamp as timestamp17, integer as integer18, boolean as boolean12, jsonb as jsonb12 } from "drizzle-orm/pg-core";
+var teamOperationsTable, teamMembersTable, teamMatchesTable, teamMatchScoresTable, teamMatchQuestionsTable;
+var init_team_ops = __esm({
+  "../../lib/db/src/schema/team_ops.ts"() {
+    "use strict";
+    init_users();
+    teamOperationsTable = pgTable17("team_operations", {
+      id: serial17("id").primaryKey(),
+      name: text16("name").notNull(),
+      emblem: text16("emblem").notNull().default("default"),
+      color: text16("color").notNull().default("blue"),
+      maxPlayers: integer18("max_players").notNull().default(4),
+      captainId: integer18("captain_id").notNull().references(() => usersTable.id),
+      tacticalLoadout: jsonb12("tactical_loadout").notNull().default([]),
+      createdAt: timestamp17("created_at", { withTimezone: true }).notNull().defaultNow()
+    });
+    teamMembersTable = pgTable17("team_members", {
+      id: serial17("id").primaryKey(),
+      teamId: integer18("team_id").notNull().references(() => teamOperationsTable.id),
+      userId: integer18("user_id").notNull().references(() => usersTable.id),
+      isReady: boolean12("is_ready").notNull().default(false),
+      joinedAt: timestamp17("joined_at", { withTimezone: true }).notNull().defaultNow()
+    });
+    teamMatchesTable = pgTable17("team_matches", {
+      id: serial17("id").primaryKey(),
+      roomCode: text16("room_code").notNull().unique(),
+      type: text16("type").notNull().default("battle"),
+      status: text16("status").notNull().default("lobby"),
+      mode: text16("mode").notNull().default("live"),
+      domainOrder: jsonb12("domain_order").notNull().default([]),
+      domainMode: text16("domain_mode").notNull().default("randomized"),
+      difficulty: text16("difficulty").notNull().default("agent"),
+      hostId: integer18("host_id").references(() => usersTable.id),
+      currentDomain: text16("current_domain"),
+      currentQuestion: integer18("current_question").notNull().default(0),
+      totalQuestions: integer18("total_questions").notNull().default(10),
+      createdAt: timestamp17("created_at", { withTimezone: true }).notNull().defaultNow(),
+      startedAt: timestamp17("started_at", { withTimezone: true }),
+      finishedAt: timestamp17("finished_at", { withTimezone: true })
+    });
+    teamMatchScoresTable = pgTable17("team_match_scores", {
+      id: serial17("id").primaryKey(),
+      matchId: integer18("match_id").notNull().references(() => teamMatchesTable.id),
+      teamId: integer18("team_id").notNull().references(() => teamOperationsTable.id),
+      score: integer18("score").notNull().default(0),
+      correctAnswers: integer18("correct_answers").notNull().default(0),
+      totalAnswers: integer18("total_answers").notNull().default(0),
+      fastestAnswer: boolean12("fastest_answer").notNull().default(false),
+      assistsUsed: jsonb12("assists_used").notNull().default([]),
+      currentStreak: integer18("current_streak").notNull().default(0),
+      perfectCategories: jsonb12("perfect_categories").notNull().default([])
+    });
+    teamMatchQuestionsTable = pgTable17("team_match_questions", {
+      id: serial17("id").primaryKey(),
+      matchId: integer18("match_id").notNull().references(() => teamMatchesTable.id),
+      questionIndex: integer18("question_index").notNull(),
+      questionId: integer18("question_id").notNull(),
+      domain: text16("domain").notNull(),
+      answeredBy: integer18("answered_by").references(() => teamOperationsTable.id),
+      isCorrect: boolean12("is_correct"),
+      responseTimeMs: integer18("response_time_ms"),
+      buzzerTeam: integer18("buzzer_team").references(() => teamOperationsTable.id),
+      createdAt: timestamp17("created_at", { withTimezone: true }).notNull().defaultNow()
+    });
+  }
+});
+
+// ../../lib/db/src/schema/tournaments.ts
+import { pgTable as pgTable18, text as text17, serial as serial18, timestamp as timestamp18, integer as integer19, boolean as boolean13 } from "drizzle-orm/pg-core";
+var tournamentsTable, tournamentParticipantsTable, tournamentMatchesTable;
+var init_tournaments = __esm({
+  "../../lib/db/src/schema/tournaments.ts"() {
+    "use strict";
+    init_users();
+    tournamentsTable = pgTable18("tournaments", {
+      id: serial18("id").primaryKey(),
+      name: text17("name").notNull(),
+      description: text17("description").notNull(),
+      type: text17("type").notNull(),
+      status: text17("status").notNull().default("registration"),
+      maxParticipants: integer19("max_participants").notNull(),
+      minLevel: integer19("min_level").notNull().default(1),
+      entryFee: integer19("entry_fee").notNull().default(0),
+      rewardXp: integer19("reward_xp").notNull(),
+      rewardCoins: integer19("reward_coins").notNull(),
+      rewardItem: text17("reward_item"),
+      startDate: timestamp18("start_date", { withTimezone: true }).notNull(),
+      endDate: timestamp18("end_date", { withTimezone: true }).notNull(),
+      createdAt: timestamp18("created_at", { withTimezone: true }).notNull().defaultNow()
+    });
+    tournamentParticipantsTable = pgTable18("tournament_participants", {
+      id: serial18("id").primaryKey(),
+      tournamentId: integer19("tournament_id").notNull().references(() => tournamentsTable.id),
+      userId: integer19("user_id").notNull().references(() => usersTable.id),
+      seed: integer19("seed").notNull().default(0),
+      currentRound: integer19("current_round").notNull().default(0),
+      isEliminated: boolean13("is_eliminated").notNull().default(false),
+      finalPosition: integer19("final_position"),
+      joinedAt: timestamp18("joined_at", { withTimezone: true }).notNull().defaultNow()
+    });
+    tournamentMatchesTable = pgTable18("tournament_matches", {
+      id: serial18("id").primaryKey(),
+      tournamentId: integer19("tournament_id").notNull().references(() => tournamentsTable.id),
+      round: integer19("round").notNull(),
+      matchIndex: integer19("match_index").notNull(),
+      player1Id: integer19("player1_id").references(() => usersTable.id),
+      player2Id: integer19("player2_id").references(() => usersTable.id),
+      winnerId: integer19("winner_id").references(() => usersTable.id),
+      status: text17("status").notNull().default("pending"),
+      scheduledAt: timestamp18("scheduled_at", { withTimezone: true }),
+      completedAt: timestamp18("completed_at", { withTimezone: true })
+    });
+  }
+});
+
+// ../../lib/db/src/schema/world_events.ts
+import { pgTable as pgTable19, text as text18, serial as serial19, timestamp as timestamp19, integer as integer20, boolean as boolean14, jsonb as jsonb13 } from "drizzle-orm/pg-core";
+var worldEventsTable, worldEventParticipantsTable, worldStateTable;
+var init_world_events = __esm({
+  "../../lib/db/src/schema/world_events.ts"() {
+    "use strict";
+    init_users();
+    worldEventsTable = pgTable19("world_events", {
+      id: serial19("id").primaryKey(),
+      title: text18("title").notNull(),
+      description: text18("description").notNull(),
+      type: text18("type").notNull(),
+      status: text18("status").notNull().default("upcoming"),
+      startAt: timestamp19("start_at", { withTimezone: true }).notNull(),
+      endAt: timestamp19("end_at", { withTimezone: true }).notNull(),
+      conditions: jsonb13("conditions").default({}),
+      rewards: jsonb13("rewards").default({}),
+      narrative: text18("narrative"),
+      createdAt: timestamp19("created_at", { withTimezone: true }).notNull().defaultNow()
+    });
+    worldEventParticipantsTable = pgTable19("world_event_participants", {
+      id: serial19("id").primaryKey(),
+      eventId: integer20("event_id").notNull().references(() => worldEventsTable.id),
+      userId: integer20("user_id").notNull().references(() => usersTable.id),
+      contribution: integer20("contribution").notNull().default(0),
+      rewardsClaimed: boolean14("rewards_claimed").notNull().default(false),
+      joinedAt: timestamp19("joined_at", { withTimezone: true }).notNull().defaultNow()
+    });
+    worldStateTable = pgTable19("world_state", {
+      id: serial19("id").primaryKey(),
+      key: text18("key").notNull().unique(),
+      value: jsonb13("value").notNull(),
+      updatedAt: timestamp19("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
     });
   }
 });
@@ -36403,11 +36458,13 @@ var init_stage_matches = __esm({
 var schema_exports = {};
 __export(schema_exports, {
   achievementsTable: () => achievementsTable,
+  adminLogsTable: () => adminLogsTable,
   aiCharactersTable: () => aiCharactersTable,
   aiPlayerProfilesTable: () => aiPlayerProfilesTable,
   analyticsEventsTable: () => analyticsEventsTable,
   answerLogsTable: () => answerLogsTable,
   antiCheatLogsTable: () => antiCheatLogsTable,
+  bansTable: () => bansTable,
   battlePassTable: () => battlePassTable,
   chaptersTable: () => chaptersTable,
   characterMemoryTable: () => characterMemoryTable,
@@ -36420,12 +36477,15 @@ __export(schema_exports, {
   matchPlayersTable: () => matchPlayersTable,
   matchesTable: () => matchesTable,
   missionLogsTable: () => missionLogsTable,
+  permissionsTable: () => permissionsTable,
   playerProgressTable: () => playerProgressTable,
   playerSkillsTable: () => playerSkillsTable,
   questionOptionsTable: () => questionOptionsTable,
   questionsTable: () => questionsTable,
   rankingsTable: () => rankingsTable,
   rateLimitTable: () => rateLimitTable,
+  rolePermissionsTable: () => rolePermissionsTable,
+  rolesTable: () => rolesTable,
   seasonsTable: () => seasonsTable,
   sessionsTable: () => sessionsTable,
   shopItemsTable: () => shopItemsTable,
@@ -36458,23 +36518,25 @@ __export(schema_exports, {
 var init_schema = __esm({
   "../../lib/db/src/schema/index.ts"() {
     "use strict";
-    init_users();
-    init_questions();
-    init_story();
-    init_matches();
-    init_ranking();
-    init_skill_trees();
-    init_tournaments();
-    init_shop();
-    init_world_events();
+    init_admin();
     init_ai_characters();
-    init_anti_cheat();
     init_analytics();
+    init_anti_cheat();
     init_behavior();
+    init_matches();
     init_missions();
+    init_questions();
+    init_ranking();
+    init_roles();
+    init_shop();
+    init_skill_trees();
+    init_stage_matches();
+    init_story();
     init_tactical();
     init_team_ops();
-    init_stage_matches();
+    init_tournaments();
+    init_users();
+    init_world_events();
   }
 });
 
@@ -36482,11 +36544,13 @@ var init_schema = __esm({
 var src_exports = {};
 __export(src_exports, {
   achievementsTable: () => achievementsTable,
+  adminLogsTable: () => adminLogsTable,
   aiCharactersTable: () => aiCharactersTable,
   aiPlayerProfilesTable: () => aiPlayerProfilesTable,
   analyticsEventsTable: () => analyticsEventsTable,
   answerLogsTable: () => answerLogsTable,
   antiCheatLogsTable: () => antiCheatLogsTable,
+  bansTable: () => bansTable,
   battlePassTable: () => battlePassTable,
   chaptersTable: () => chaptersTable,
   characterMemoryTable: () => characterMemoryTable,
@@ -36502,12 +36566,15 @@ __export(src_exports, {
   matchPlayersTable: () => matchPlayersTable,
   matchesTable: () => matchesTable,
   missionLogsTable: () => missionLogsTable,
+  permissionsTable: () => permissionsTable,
   playerProgressTable: () => playerProgressTable,
   playerSkillsTable: () => playerSkillsTable,
   questionOptionsTable: () => questionOptionsTable,
   questionsTable: () => questionsTable,
   rankingsTable: () => rankingsTable,
   rateLimitTable: () => rateLimitTable,
+  rolePermissionsTable: () => rolePermissionsTable,
+  rolesTable: () => rolesTable,
   seasonsTable: () => seasonsTable,
   sessionsTable: () => sessionsTable,
   shopItemsTable: () => shopItemsTable,
@@ -40767,7 +40834,7 @@ var require_pino = __commonJS({
         redact,
         crlf,
         serializers: serializers2,
-        timestamp: timestamp18,
+        timestamp: timestamp20,
         messageKey,
         errorKey,
         nestedKey,
@@ -40817,7 +40884,7 @@ var require_pino = __commonJS({
           chindings = coreChindings(Object.assign({}, base, { name }));
         }
       }
-      const time4 = timestamp18 instanceof Function ? timestamp18 : timestamp18 ? epochTime : nullTime;
+      const time4 = timestamp20 instanceof Function ? timestamp20 : timestamp20 ? epochTime : nullTime;
       const timeSliceIndex = time4().indexOf(":") + 1;
       if (useOnlyCustomLevels && !customLevels) throw Error("customLevels is required if useOnlyCustomLevels is set true");
       if (mixin && typeof mixin !== "function") throw Error(`Unknown mixin type "${typeof mixin}" - expected "function"`);
@@ -40883,11 +40950,8 @@ var require_pino = __commonJS({
 });
 
 // src/main.ts
-var import_express23 = __toESM(require_express2(), 1);
+var import_express24 = __toESM(require_express2(), 1);
 var import_cors = __toESM(require_lib3(), 1);
-
-// src/routes/index.ts
-var import_express22 = __toESM(require_express2(), 1);
 
 // src/routes/health.ts
 var import_express = __toESM(require_express2(), 1);
@@ -46246,8 +46310,8 @@ var narrationTemplates = {
 router8.post("/ai/narrate", async (req, res) => {
   const { context, mood, characterName } = req.body;
   const templates = narrationTemplates[mood] || narrationTemplates.mysterious;
-  const text17 = templates[Math.floor(Math.random() * templates.length)];
-  const finalText = characterName ? `[${characterName}]: ${text17}` : text17;
+  const text19 = templates[Math.floor(Math.random() * templates.length)];
+  const finalText = characterName ? `[${characterName}]: ${text19}` : text19;
   res.json({ text: finalText, mood });
 });
 router8.post("/ai/explain", async (req, res) => {
@@ -46429,8 +46493,8 @@ router8.post("/ai/director-report", async (req, res) => {
       "Continue your operations. The Director will issue further observations as patterns emerge."
     ];
   }
-  const text17 = templates[Math.floor(Math.random() * templates.length)];
-  const finalText = `[AI DIRECTOR]: ${text17}`;
+  const text19 = templates[Math.floor(Math.random() * templates.length)];
+  const finalText = `[AI DIRECTOR]: ${text19}`;
   try {
     getIO().to(`user:${user.id}`).emit("director:message", { text: finalText });
   } catch {
@@ -48845,36 +48909,607 @@ router21.post("/stage/seed-questions", async (_req, res) => {
 });
 var stage_default = router21;
 
-// src/routes/index.ts
+// src/routes/admin.ts
+var import_express22 = __toESM(require_express2(), 1);
+init_src();
+init_src();
+
+// src/middleware/auth.ts
+init_src();
+import { eq as eq21 } from "drizzle-orm";
+async function authenticate(req, _res, next) {
+  const token = req.headers.authorization?.replace("Bearer ", "");
+  if (!token) {
+    req.user = void 0;
+    next();
+    return;
+  }
+  try {
+    const [session] = await db.select().from(sessionsTable).where(eq21(sessionsTable.token, token)).limit(1);
+    if (!session || session.expiresAt < /* @__PURE__ */ new Date()) {
+      req.user = void 0;
+      next();
+      return;
+    }
+    const [user] = await db.select().from(usersTable).where(eq21(usersTable.id, session.userId)).limit(1);
+    if (!user) {
+      req.user = void 0;
+      next();
+      return;
+    }
+    const role = user.role || "player";
+    const perms = await db.select({ key: permissionsTable.key }).from(rolePermissionsTable).innerJoin(rolesTable, eq21(rolePermissionsTable.roleId, rolesTable.id)).innerJoin(permissionsTable, eq21(rolePermissionsTable.permissionId, permissionsTable.id)).where(eq21(rolesTable.name, role));
+    req.user = {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role,
+      permissions: perms.map((p) => p.key)
+    };
+  } catch {
+    req.user = void 0;
+  }
+  next();
+}
+function requirePermission(...permissions) {
+  return (req, res, next) => {
+    if (!req.user) {
+      res.status(401).json({ error: "Not authenticated" });
+      return;
+    }
+    const hasAll = permissions.every((p) => req.user.permissions.includes(p));
+    if (!hasAll) {
+      res.status(403).json({ error: "Forbidden", required: permissions });
+      return;
+    }
+    next();
+  };
+}
+function requireRole(...roles) {
+  return (req, res, next) => {
+    if (!req.user) {
+      res.status(401).json({ error: "Not authenticated" });
+      return;
+    }
+    if (!roles.includes(req.user.role)) {
+      res.status(403).json({ error: "Forbidden", requiredRole: roles });
+      return;
+    }
+    next();
+  };
+}
+
+// src/routes/admin.ts
+import { eq as eq22, sql as sql15, desc as desc8, and as and9 } from "drizzle-orm";
 var router22 = (0, import_express22.Router)();
-router22.use(health_default);
-router22.use(auth_default);
-router22.use(users_default);
-router22.use(gameplay_default);
-router22.use(story_default);
-router22.use(ranking_default);
-router22.use(social_default);
-router22.use(ai_default);
-router22.use(aiQuestions_default);
-router22.use(aiCharacters_default);
-router22.use(prestige_default);
-router22.use(skillTree_default);
-router22.use(tournaments_default);
-router22.use(shop_default);
-router22.use(worldEvents_default);
-router22.use(analytics_default);
-router22.use(antiCheat_default);
-router22.use(mission_default);
-router22.use(tactical_default);
-router22.use(teamOps_default);
-router22.use(stage_default);
-var routes_default = router22;
+router22.use(authenticate);
+function logAdmin(adminId, action, targetType, targetId, data) {
+  db.insert(adminLogsTable).values({ adminId, action, targetType, targetId, data }).catch(() => {
+  });
+}
+router22.get("/admin/dashboard", requirePermission("manage_analytics"), async (_req, res) => {
+  const totalUsers = (await db.select({ count: sql15`count(*)` }).from(usersTable))[0]?.count || 0;
+  const onlineNow = (await db.select({ count: sql15`count(*)` }).from(sessionsTable).where(sql15`expires_at > now()`))[0]?.count || 0;
+  const totalMatches = (await db.select({ count: sql15`count(*)` }).from(stageMatchesTable))[0]?.count || 0;
+  const xpToday = (await db.select({ sum: sql15`coalesce(sum(amount),0)` }).from(sessionsTable).where(sql15`created_at > now() - interval '24 hours'`))[0]?.sum || 0;
+  const activeMatches = (await db.select({ count: sql15`count(*)` }).from(stageMatchesTable).where(sql15`state->>'phase' != 'ended'`))[0]?.count || 0;
+  const questionsCount = (await db.select({ count: sql15`count(*)` }).from(questionsTable))[0]?.count || 0;
+  res.json({
+    stats: { totalUsers, onlineNow, totalMatches, xpToday, activeMatches, questionsCount }
+  });
+});
+router22.get("/admin/matches", requirePermission("manage_matches"), async (_req, res) => {
+  const { rows } = await getPool().query(
+    `SELECT match_id, host_id, room_code, state, created_at, updated_at FROM stage_matches ORDER BY updated_at DESC LIMIT 100`
+  );
+  res.json({ matches: rows });
+});
+router22.get("/admin/matches/:id", requirePermission("manage_matches"), async (req, res) => {
+  const { rows } = await getPool().query(`SELECT * FROM stage_matches WHERE match_id = $1`, [req.params.id]);
+  if (rows.length === 0) return res.status(404).json({ error: "Match not found" });
+  res.json(rows[0]);
+});
+router22.post("/admin/matches/:id/pause", requirePermission("manage_matches"), async (req, res) => {
+  const { rows } = await getPool().query(`SELECT state FROM stage_matches WHERE match_id = $1`, [req.params.id]);
+  if (rows.length === 0) return res.status(404).json({ error: "Match not found" });
+  const state = rows[0].state;
+  state.adminPaused = true;
+  state.previousPhase = state.phase;
+  state.phase = "paused";
+  await getPool().query(`UPDATE stage_matches SET state = $1 WHERE match_id = $2`, [JSON.stringify(state), req.params.id]);
+  logAdmin(req.user.id, "ADMIN_PAUSED_MATCH", "match", req.params.id);
+  res.json({ success: true });
+});
+router22.post("/admin/matches/:id/resume", requirePermission("manage_matches"), async (req, res) => {
+  const { rows } = await getPool().query(`SELECT state FROM stage_matches WHERE match_id = $1`, [req.params.id]);
+  if (rows.length === 0) return res.status(404).json({ error: "Match not found" });
+  const state = rows[0].state;
+  state.phase = state.previousPhase || "question";
+  delete state.adminPaused;
+  delete state.previousPhase;
+  await getPool().query(`UPDATE stage_matches SET state = $1 WHERE match_id = $2`, [JSON.stringify(state), req.params.id]);
+  logAdmin(req.user.id, "ADMIN_RESUMED_MATCH", "match", req.params.id);
+  res.json({ success: true });
+});
+router22.post("/admin/matches/:id/end", requirePermission("manage_matches"), async (req, res) => {
+  const { rows } = await getPool().query(`SELECT state FROM stage_matches WHERE match_id = $1`, [req.params.id]);
+  if (rows.length === 0) return res.status(404).json({ error: "Match not found" });
+  const state = rows[0].state;
+  state.phase = "ended";
+  await getPool().query(`UPDATE stage_matches SET state = $1 WHERE match_id = $2`, [JSON.stringify(state), req.params.id]);
+  logAdmin(req.user.id, "ADMIN_ENDED_MATCH", "match", req.params.id);
+  res.json({ success: true });
+});
+router22.post("/admin/matches/:id/score", requirePermission("manage_matches"), async (req, res) => {
+  const { teamId, score } = req.body;
+  const { rows } = await getPool().query(`SELECT state FROM stage_matches WHERE match_id = $1`, [req.params.id]);
+  if (rows.length === 0) return res.status(404).json({ error: "Match not found" });
+  const state = rows[0].state;
+  const team = state.teams?.find((t) => t.id === teamId);
+  if (!team) return res.status(404).json({ error: "Team not found" });
+  team.score = score;
+  await getPool().query(`UPDATE stage_matches SET state = $1 WHERE match_id = $2`, [JSON.stringify(state), req.params.id]);
+  logAdmin(req.user.id, "ADMIN_EDITED_SCORE", "match", req.params.id, { teamId, score });
+  res.json({ success: true });
+});
+router22.post("/admin/matches/:id/kick-team", requirePermission("manage_matches"), async (req, res) => {
+  const { teamId } = req.body;
+  const { rows } = await getPool().query(`SELECT state FROM stage_matches WHERE match_id = $1`, [req.params.id]);
+  if (rows.length === 0) return res.status(404).json({ error: "Match not found" });
+  const state = rows[0].state;
+  state.teams = state.teams?.filter((t) => t.id !== teamId) || [];
+  await getPool().query(`UPDATE stage_matches SET state = $1 WHERE match_id = $2`, [JSON.stringify(state), req.params.id]);
+  logAdmin(req.user.id, "ADMIN_KICKED_TEAM", "match", req.params.id, { teamId });
+  res.json({ success: true });
+});
+router22.post("/admin/matches/:id/force-next", requirePermission("manage_matches"), async (req, res) => {
+  const { rows } = await getPool().query(`SELECT state FROM stage_matches WHERE match_id = $1`, [req.params.id]);
+  if (rows.length === 0) return res.status(404).json({ error: "Match not found" });
+  const state = rows[0].state;
+  state.currentQuestionIndex = (state.currentQuestionIndex || 0) + 1;
+  state.phase = "question";
+  state.buzzerTeamId = null;
+  if (state.currentQuestionIndex >= (state.questions?.length || 0)) {
+    state.phase = "ended";
+  }
+  await getPool().query(`UPDATE stage_matches SET state = $1 WHERE match_id = $2`, [JSON.stringify(state), req.params.id]);
+  logAdmin(req.user.id, "ADMIN_FORCE_NEXT", "match", req.params.id);
+  res.json({ success: true, questionIndex: state.currentQuestionIndex });
+});
+router22.get("/admin/questions", requirePermission("manage_questions"), async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 50;
+  const offset = (page - 1) * limit;
+  const category = req.query.category;
+  const where = category ? sql15`WHERE category = ${category}` : sql15``;
+  const total = (await getPool().query(`SELECT count(*) FROM questions ${where}`)).rows[0]?.count || 0;
+  const { rows } = await getPool().query(
+    `SELECT * FROM questions ${where} ORDER BY id DESC LIMIT $1 OFFSET $2`,
+    [limit, offset]
+  );
+  const questionsWithOptions = await Promise.all(rows.map(async (q) => {
+    const opts = await db.select().from(questionOptionsTable).where(eq22(questionOptionsTable.questionId, q.id));
+    return { ...q, options: opts };
+  }));
+  res.json({ questions: questionsWithOptions, total, page, limit });
+});
+router22.get("/admin/questions/:id", requirePermission("manage_questions"), async (req, res) => {
+  const [q] = await db.select().from(questionsTable).where(eq22(questionsTable.id, parseInt(req.params.id))).limit(1);
+  if (!q) return res.status(404).json({ error: "Question not found" });
+  const opts = await db.select().from(questionOptionsTable).where(eq22(questionOptionsTable.questionId, q.id));
+  res.json({ ...q, options: opts });
+});
+router22.post("/admin/questions", requirePermission("manage_questions"), async (req, res) => {
+  const { type, questionText, difficulty, category, correctAnswer, timeLimitSeconds, explanation, options } = req.body;
+  if (!questionText || !options || options.length < 2) {
+    return res.status(400).json({ error: "questionText and at least 2 options required" });
+  }
+  const [question] = await db.insert(questionsTable).values({
+    type: type || "multiple_choice",
+    questionText,
+    difficulty: difficulty || 3,
+    category: category || "general",
+    correctAnswer,
+    timeLimitSeconds: timeLimitSeconds || 30,
+    explanation
+  }).returning();
+  for (let i = 0; i < options.length; i++) {
+    await db.insert(questionOptionsTable).values({
+      questionId: question.id,
+      optionText: options[i].text,
+      isCorrect: options[i].isCorrect ? 1 : 0
+    });
+  }
+  logAdmin(req.user.id, "ADMIN_CREATED_QUESTION", "question", String(question.id));
+  res.status(201).json({ success: true, questionId: question.id });
+});
+router22.put("/admin/questions/:id", requirePermission("manage_questions"), async (req, res) => {
+  const id = parseInt(req.params.id);
+  const [existing] = await db.select().from(questionsTable).where(eq22(questionsTable.id, id)).limit(1);
+  if (!existing) return res.status(404).json({ error: "Question not found" });
+  const { type, questionText, difficulty, category, correctAnswer, timeLimitSeconds, explanation } = req.body;
+  await db.update(questionsTable).set({
+    ...type && { type },
+    ...questionText && { questionText },
+    ...difficulty && { difficulty },
+    ...category && { category },
+    ...correctAnswer && { correctAnswer },
+    ...timeLimitSeconds && { timeLimitSeconds },
+    ...explanation && { explanation }
+  }).where(eq22(questionsTable.id, id));
+  if (req.body.options) {
+    await db.delete(questionOptionsTable).where(eq22(questionOptionsTable.questionId, id));
+    for (let i = 0; i < req.body.options.length; i++) {
+      await db.insert(questionOptionsTable).values({
+        questionId: id,
+        optionText: req.body.options[i].text,
+        isCorrect: req.body.options[i].isCorrect ? 1 : 0
+      });
+    }
+  }
+  logAdmin(req.user.id, "ADMIN_EDITED_QUESTION", "question", String(id));
+  res.json({ success: true });
+});
+router22.delete("/admin/questions/:id", requirePermission("manage_questions"), async (req, res) => {
+  const id = parseInt(req.params.id);
+  await db.delete(questionOptionsTable).where(eq22(questionOptionsTable.questionId, id));
+  await db.delete(questionsTable).where(eq22(questionsTable.id, id));
+  logAdmin(req.user.id, "ADMIN_DELETED_QUESTION", "question", String(id));
+  res.json({ success: true });
+});
+router22.post("/admin/questions/generate", requirePermission("manage_questions"), async (req, res) => {
+  const { count, category, difficulty } = req.body;
+  const sampleCount = Math.min(count || 5, 20);
+  const where = [];
+  if (category) where.push(sql15`category = ${category}`);
+  if (difficulty) where.push(sql15`difficulty = ${difficulty}`);
+  const { rows } = await getPool().query(
+    `SELECT * FROM questions ${where.length > 0 ? `WHERE ${where.map((w) => w.text).join(" AND ")}` : ""} ORDER BY RANDOM() LIMIT $1`,
+    [sampleCount]
+  );
+  const questionsWithOptions = await Promise.all(rows.map(async (q) => {
+    const opts = await db.select().from(questionOptionsTable).where(eq22(questionOptionsTable.questionId, q.id));
+    return { ...q, options: opts };
+  }));
+  res.json({ questions: questionsWithOptions });
+});
+router22.get("/admin/users", requirePermission("manage_users"), async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 50;
+  const offset = (page - 1) * limit;
+  const search = req.query.search;
+  let where = sql15`1=1`;
+  if (search) where = sql15`(username ILIKE ${"%" + search + "%"} OR email ILIKE ${"%" + search + "%"})`;
+  const [{ count }] = await db.select({ count: sql15`count(*)` }).from(usersTable).where(where);
+  const users = await db.select().from(usersTable).where(where).orderBy(desc8(usersTable.id)).limit(limit).offset(offset);
+  const usersWithStats = await Promise.all(users.map(async (u) => {
+    const [stats] = await db.select().from(userStatsTable).where(eq22(userStatsTable.userId, u.id)).limit(1);
+    const [ban] = await db.select().from(bansTable).where(and9(
+      eq22(bansTable.userId, u.id),
+      sql15`(expires_at IS NULL OR expires_at > now())`
+    )).limit(1);
+    return { ...u, stats, banned: !!ban, banReason: ban?.reason, banExpiresAt: ban?.expiresAt };
+  }));
+  res.json({ users: usersWithStats, total: Number(count), page, limit });
+});
+router22.get("/admin/users/:id", requirePermission("manage_users"), async (req, res) => {
+  const [user] = await db.select().from(usersTable).where(eq22(usersTable.id, parseInt(req.params.id))).limit(1);
+  if (!user) return res.status(404).json({ error: "User not found" });
+  const [stats] = await db.select().from(userStatsTable).where(eq22(userStatsTable.userId, user.id)).limit(1);
+  const sessions = await db.select().from(sessionsTable).where(eq22(sessionsTable.userId, user.id)).orderBy(desc8(sessionsTable.createdAt)).limit(10);
+  const [ban] = await db.select().from(bansTable).where(and9(
+    eq22(bansTable.userId, user.id),
+    sql15`(expires_at IS NULL OR expires_at > now())`
+  )).limit(1);
+  res.json({ ...user, stats, sessions, ban });
+});
+router22.post("/admin/users/:id/ban", requirePermission("manage_users"), async (req, res) => {
+  const userId = parseInt(req.params.id);
+  const { reason, expiresInHours } = req.body;
+  await db.insert(bansTable).values({
+    userId,
+    reason: reason || "No reason provided",
+    bannedBy: req.user.id,
+    expiresAt: expiresInHours ? new Date(Date.now() + expiresInHours * 60 * 60 * 1e3) : void 0
+  });
+  await db.delete(sessionsTable).where(eq22(sessionsTable.userId, userId));
+  logAdmin(req.user.id, "ADMIN_BANNED_USER", "user", String(userId), { reason, expiresInHours });
+  res.json({ success: true });
+});
+router22.post("/admin/users/:id/unban", requirePermission("manage_users"), async (req, res) => {
+  const userId = parseInt(req.params.id);
+  await db.delete(bansTable).where(eq22(bansTable.userId, userId));
+  logAdmin(req.user.id, "ADMIN_UNBANNED_USER", "user", String(userId));
+  res.json({ success: true });
+});
+router22.post("/admin/users/:id/role", requirePermission("manage_users"), async (req, res) => {
+  const userId = parseInt(req.params.id);
+  const { role } = req.body;
+  if (!role) return res.status(400).json({ error: "Role required" });
+  await db.update(usersTable).set({ role }).where(eq22(usersTable.id, userId));
+  logAdmin(req.user.id, "ADMIN_CHANGED_ROLE", "user", String(userId), { role });
+  res.json({ success: true });
+});
+router22.post("/admin/users/:id/reset-xp", requirePermission("manage_users"), async (req, res) => {
+  const userId = parseInt(req.params.id);
+  await db.update(userStatsTable).set({ xp: 0, level: 1 }).where(eq22(userStatsTable.userId, userId));
+  logAdmin(req.user.id, "ADMIN_RESET_XP", "user", String(userId));
+  res.json({ success: true });
+});
+router22.post("/admin/users/:id/give-coins", requirePermission("manage_users"), async (req, res) => {
+  const userId = parseInt(req.params.id);
+  const { amount } = req.body;
+  if (!amount || amount < 0) return res.status(400).json({ error: "Valid amount required" });
+  await db.update(userStatsTable).set({
+    coins: sql15`coins + ${amount}`
+  }).where(eq22(userStatsTable.userId, userId));
+  logAdmin(req.user.id, "ADMIN_GAVE_COINS", "user", String(userId), { amount });
+  res.json({ success: true });
+});
+router22.get("/admin/story/chapters", requirePermission("manage_story"), async (_req, res) => {
+  const chapters = await db.select().from(chaptersTable).orderBy(chaptersTable.orderIndex);
+  res.json({ chapters });
+});
+router22.post("/admin/story/chapters", requirePermission("manage_story"), async (req, res) => {
+  const { title, description, orderIndex, unlockLevel, coverImageUrl } = req.body;
+  const [chapter] = await db.insert(chaptersTable).values({
+    title,
+    description,
+    orderIndex,
+    unlockLevel,
+    coverImageUrl
+  }).returning();
+  logAdmin(req.user.id, "ADMIN_CREATED_CHAPTER", "story", String(chapter.id));
+  res.status(201).json(chapter);
+});
+router22.put("/admin/story/chapters/:id", requirePermission("manage_story"), async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { title, description, orderIndex, unlockLevel, coverImageUrl } = req.body;
+  await db.update(chaptersTable).set({
+    ...title && { title },
+    ...description && { description },
+    ...orderIndex && { orderIndex },
+    ...unlockLevel && { unlockLevel },
+    ...coverImageUrl && { coverImageUrl }
+  }).where(eq22(chaptersTable.id, id));
+  logAdmin(req.user.id, "ADMIN_EDITED_CHAPTER", "story", String(id));
+  res.json({ success: true });
+});
+router22.delete("/admin/story/chapters/:id", requirePermission("manage_story"), async (req, res) => {
+  const id = parseInt(req.params.id);
+  await db.delete(chaptersTable).where(eq22(chaptersTable.id, id));
+  await db.delete(storyNodesTable).where(eq22(storyNodesTable.chapterId, id));
+  logAdmin(req.user.id, "ADMIN_DELETED_CHAPTER", "story", String(id));
+  res.json({ success: true });
+});
+router22.get("/admin/story/nodes", requirePermission("manage_story"), async (req, res) => {
+  const chapterId = req.query.chapterId ? parseInt(req.query.chapterId) : void 0;
+  const where = chapterId ? eq22(storyNodesTable.chapterId, chapterId) : void 0;
+  const nodes = await db.select().from(storyNodesTable).where(where).orderBy(storyNodesTable.orderIndex);
+  res.json({ nodes });
+});
+router22.get("/admin/story/lore", requirePermission("manage_story"), async (_req, res) => {
+  const lore = await db.select().from(loreEntriesTable).orderBy(desc8(loreEntriesTable.createdAt));
+  res.json({ lore });
+});
+router22.get("/admin/shop/items", requirePermission("manage_shop"), async (_req, res) => {
+  const items = await db.select().from(shopItemsTable).orderBy(desc8(shopItemsTable.createdAt));
+  res.json({ items });
+});
+router22.post("/admin/shop/items", requirePermission("manage_shop"), async (req, res) => {
+  const { name, description, type, priceCoins, pricePremium, rarity, iconUrl, isLimited } = req.body;
+  const [item] = await db.insert(shopItemsTable).values({
+    name,
+    description,
+    type,
+    priceCoins,
+    pricePremium,
+    rarity,
+    iconUrl,
+    isLimited
+  }).returning();
+  logAdmin(req.user.id, "ADMIN_CREATED_SHOP_ITEM", "shop", String(item.id));
+  res.status(201).json(item);
+});
+router22.put("/admin/shop/items/:id", requirePermission("manage_shop"), async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { name, description, type, priceCoins, pricePremium, rarity, iconUrl, isLimited, availableUntil } = req.body;
+  await db.update(shopItemsTable).set({
+    ...name && { name },
+    ...description && { description },
+    ...type && { type },
+    ...priceCoins !== void 0 && { priceCoins },
+    ...pricePremium !== void 0 && { pricePremium },
+    ...rarity && { rarity },
+    ...iconUrl && { iconUrl },
+    ...isLimited !== void 0 && { isLimited },
+    ...availableUntil && { availableUntil }
+  }).where(eq22(shopItemsTable.id, id));
+  logAdmin(req.user.id, "ADMIN_EDITED_SHOP_ITEM", "shop", String(id));
+  res.json({ success: true });
+});
+router22.delete("/admin/shop/items/:id", requirePermission("manage_shop"), async (req, res) => {
+  await db.delete(shopItemsTable).where(eq22(shopItemsTable.id, parseInt(req.params.id)));
+  logAdmin(req.user.id, "ADMIN_DELETED_SHOP_ITEM", "shop", req.params.id);
+  res.json({ success: true });
+});
+router22.get("/admin/battle-pass", requirePermission("manage_battlepass"), async (_req, res) => {
+  const bp = await db.select().from(battlePassTable).orderBy(battlePassTable.level);
+  res.json({ battlePass: bp });
+});
+router22.post("/admin/battle-pass", requirePermission("manage_battlepass"), async (req, res) => {
+  const { seasonId, name, level, xpRequired, freeReward, premiumReward } = req.body;
+  const [entry] = await db.insert(battlePassTable).values({ seasonId, name, level, xpRequired, freeReward, premiumReward }).returning();
+  logAdmin(req.user.id, "ADMIN_CREATED_BATTLE_PASS", "battlepass", String(entry.id));
+  res.status(201).json(entry);
+});
+router22.get("/admin/prestige", requirePermission("manage_matches"), async (_req, res) => {
+  const { rows } = await getPool().query(
+    `SELECT u.id, u.username, us.prestige_level, us.xp, us.level
+     FROM users u JOIN user_stats us ON u.id = us.user_id
+     WHERE us.prestige_level > 0 ORDER BY us.prestige_level DESC LIMIT 100`
+  );
+  res.json({ prestigeUsers: rows });
+});
+router22.get("/admin/skills", requirePermission("manage_skills"), async (_req, res) => {
+  const skills = await db.select().from(skillTreesTable).orderBy(skillTreesTable.branch, skillTreesTable.level);
+  res.json({ skills });
+});
+router22.get("/admin/events", requirePermission("manage_events"), async (_req, res) => {
+  const events = await db.select().from(worldEventsTable).orderBy(desc8(worldEventsTable.createdAt));
+  res.json({ events });
+});
+router22.post("/admin/events", requirePermission("manage_events"), async (req, res) => {
+  const { title, description, type, status, startAt, endAt, conditions, rewards, narrative } = req.body;
+  const [event] = await db.insert(worldEventsTable).values({
+    title,
+    description,
+    type,
+    status: status || "upcoming",
+    startAt,
+    endAt,
+    conditions,
+    rewards,
+    narrative
+  }).returning();
+  logAdmin(req.user.id, "ADMIN_CREATED_EVENT", "event", String(event.id));
+  res.status(201).json(event);
+});
+router22.get("/admin/analytics", requirePermission("manage_analytics"), async (_req, res) => {
+  const { rows: dailyUsers } = await getPool().query(
+    `SELECT date_trunc('day', created_at) as day, count(*) as registrations
+     FROM users WHERE created_at > now() - interval '30 days'
+     GROUP BY day ORDER BY day`
+  );
+  const { rows: eventCounts } = await getPool().query(
+    `SELECT event_type, count(*) as count FROM analytics_events
+     WHERE created_at > now() - interval '7 days'
+     GROUP BY event_type ORDER BY count DESC LIMIT 20`
+  );
+  const { rows: categoryStats } = await getPool().query(
+    `SELECT category, count(*) as total,
+     sum(CASE WHEN correct THEN 1 ELSE 0 END) as correct
+     FROM answer_logs WHERE created_at > now() - interval '30 days'
+     GROUP BY category`
+  );
+  const { rows: hourlyActivity } = await getPool().query(
+    `SELECT extract(hour from created_at) as hour, count(*) as actions
+     FROM analytics_events WHERE created_at > now() - interval '7 days'
+     GROUP BY hour ORDER BY hour`
+  );
+  res.json({
+    dailyUsers,
+    eventCounts,
+    categoryStats,
+    hourlyActivity
+  });
+});
+router22.get("/admin/logs", requirePermission("manage_analytics"), async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 50;
+  const offset = (page - 1) * limit;
+  const { rows } = await getPool().query(
+    `SELECT l.*, u.username as admin_name
+     FROM admin_logs l LEFT JOIN users u ON l.admin_id = u.id
+     ORDER BY l.created_at DESC LIMIT $1 OFFSET $2`,
+    [limit, offset]
+  );
+  const [{ count }] = await getPool().query(`SELECT count(*) FROM admin_logs`);
+  res.json({ logs: rows, total: Number(count), page, limit });
+});
+router22.post("/admin/seed/defaults", requireRole("super_admin"), async (_req, res) => {
+  const allPermissions = [
+    "manage_users",
+    "manage_matches",
+    "manage_questions",
+    "manage_story",
+    "manage_shop",
+    "manage_events",
+    "manage_analytics",
+    "manage_rankings",
+    "manage_teams",
+    "manage_battlepass",
+    "manage_skills",
+    "manage_modules",
+    "manage_seasons",
+    "manage_settings"
+  ];
+  for (const key of allPermissions) {
+    await db.insert(permissionsTable).values({ key }).onConflictDoNothing();
+  }
+  const roles = [
+    { name: "player", permissions: [] },
+    { name: "moderator", permissions: ["manage_matches", "manage_teams"] },
+    { name: "content_manager", permissions: ["manage_questions", "manage_story"] },
+    { name: "analyst", permissions: ["manage_analytics"] },
+    { name: "admin", permissions: allPermissions.filter((p) => p !== "manage_settings") },
+    { name: "super_admin", permissions: allPermissions }
+  ];
+  for (const role of roles) {
+    const [inserted] = await db.insert(rolesTable).values({ name: role.name }).onConflictDoNothing().returning();
+    if (!inserted) continue;
+    for (const permKey of role.permissions) {
+      const [perm] = await db.select().from(permissionsTable).where(eq22(permissionsTable.key, permKey)).limit(1);
+      if (perm) {
+        await db.insert(rolePermissionsTable).values({ roleId: inserted.id, permissionId: perm.id }).onConflictDoNothing();
+      }
+    }
+  }
+  try {
+    await getPool().query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'player'`);
+  } catch {
+  }
+  logAdmin(0, "ADMIN_SEEDED_DEFAULTS", "system", "seed");
+  res.json({ success: true, permissionsCreated: allPermissions.length, rolesCreated: roles.length });
+});
+router22.get("/admin/settings", requirePermission("manage_settings"), async (_req, res) => {
+  const { rows } = await getPool().query(`SELECT * FROM world_state ORDER BY key`);
+  res.json({ settings: rows });
+});
+router22.post("/admin/settings", requirePermission("manage_settings"), async (req, res) => {
+  const { key, value } = req.body;
+  if (!key) return res.status(400).json({ error: "Key required" });
+  await getPool().query(
+    `INSERT INTO world_state (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = $2`,
+    [key, JSON.stringify(value)]
+  );
+  logAdmin(req.user.id, "ADMIN_UPDATED_SETTINGS", "settings", key, { value });
+  res.json({ success: true });
+});
+var admin_default = router22;
+
+// src/routes/index.ts
+var import_express23 = __toESM(require_express2(), 1);
+var router23 = (0, import_express23.Router)();
+router23.use(health_default);
+router23.use(auth_default);
+router23.use(users_default);
+router23.use(gameplay_default);
+router23.use(story_default);
+router23.use(ranking_default);
+router23.use(social_default);
+router23.use(ai_default);
+router23.use(aiQuestions_default);
+router23.use(aiCharacters_default);
+router23.use(prestige_default);
+router23.use(skillTree_default);
+router23.use(tournaments_default);
+router23.use(shop_default);
+router23.use(worldEvents_default);
+router23.use(analytics_default);
+router23.use(antiCheat_default);
+router23.use(mission_default);
+router23.use(tactical_default);
+router23.use(teamOps_default);
+router23.use(stage_default);
+router23.use(admin_default);
+var routes_default = router23;
 
 // src/main.ts
-var app = (0, import_express23.default)();
+var app = (0, import_express24.default)();
 app.use((0, import_cors.default)());
-app.use(import_express23.default.json());
-app.use(import_express23.default.urlencoded({ extended: true }));
+app.use(import_express24.default.json());
+app.use(import_express24.default.urlencoded({ extended: true }));
 app.use("/api", routes_default);
 app.use((req, res) => {
   res.status(404).json({ error: "not_found", path: req.path, originalUrl: req.originalUrl, baseUrl: req.baseUrl });
