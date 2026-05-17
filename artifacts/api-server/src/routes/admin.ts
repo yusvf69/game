@@ -546,6 +546,18 @@ router.post("/admin/seed/defaults", async (req, res) => {
     res.status(401).json({ error: "Not authenticated" });
     return;
   }
+  // Ensure tables exist
+  try {
+    await getPool().query(`CREATE TABLE IF NOT EXISTS roles (id SERIAL PRIMARY KEY, name TEXT UNIQUE, description TEXT, created_at TIMESTAMP DEFAULT NOW())`);
+    await getPool().query(`CREATE TABLE IF NOT EXISTS permissions (id SERIAL PRIMARY KEY, key TEXT UNIQUE, description TEXT, created_at TIMESTAMP DEFAULT NOW())`);
+    await getPool().query(`CREATE TABLE IF NOT EXISTS role_permissions (id SERIAL PRIMARY KEY, role_id INTEGER REFERENCES roles(id), permission_id INTEGER REFERENCES permissions(id))`);
+    await getPool().query(`CREATE TABLE IF NOT EXISTS admin_logs (id SERIAL PRIMARY KEY, admin_id INTEGER NOT NULL, action TEXT NOT NULL, target_type TEXT, target_id TEXT, data JSONB, ip TEXT, created_at TIMESTAMP DEFAULT NOW())`);
+    await getPool().query(`CREATE TABLE IF NOT EXISTS bans (id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id), reason TEXT, banned_by INTEGER REFERENCES users(id), expires_at TIMESTAMP, created_at TIMESTAMP DEFAULT NOW())`);
+  } catch (e: any) {
+    res.status(500).json({ error: "Failed to create tables", detail: e.message });
+    return;
+  }
+
   const allPermissions = [
     "manage_users", "manage_matches", "manage_questions", "manage_story",
     "manage_shop", "manage_events", "manage_analytics", "manage_rankings",
@@ -582,7 +594,7 @@ router.post("/admin/seed/defaults", async (req, res) => {
     await getPool().query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'player'`);
   } catch {}
 
-  logAdmin(0, "ADMIN_SEEDED_DEFAULTS", "system", "seed");
+  try { logAdmin(req.user!.id, "ADMIN_SEEDED_DEFAULTS", "system", "seed"); } catch {}
   res.json({ success: true, permissionsCreated: allPermissions.length, rolesCreated: roles.length });
 });
 
