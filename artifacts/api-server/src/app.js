@@ -48993,6 +48993,36 @@ function logAdmin(adminId, action, targetType, targetId, data) {
   db.insert(adminLogsTable).values({ adminId, action, targetType, targetId, data }).catch(() => {
   });
 }
+router22.post("/admin/bootstrap", async (req, res) => {
+  if (!req.user) {
+    res.status(401).json({ error: "Not authenticated" });
+    return;
+  }
+  try {
+    await getPool().query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'player'`);
+    await getPool().query(`CREATE TABLE IF NOT EXISTS roles (id SERIAL PRIMARY KEY, name TEXT UNIQUE, description TEXT, created_at TIMESTAMP DEFAULT NOW())`);
+    await getPool().query(`CREATE TABLE IF NOT EXISTS permissions (id SERIAL PRIMARY KEY, key TEXT UNIQUE, description TEXT, created_at TIMESTAMP DEFAULT NOW())`);
+    await getPool().query(`CREATE TABLE IF NOT EXISTS role_permissions (id SERIAL PRIMARY KEY, role_id INTEGER REFERENCES roles(id), permission_id INTEGER REFERENCES permissions(id))`);
+    const allPermissions = ["manage_users", "manage_matches", "manage_questions", "manage_story", "manage_shop", "manage_events", "manage_analytics", "manage_rankings", "manage_teams", "manage_battlepass", "manage_skills", "manage_modules", "manage_seasons", "manage_settings"];
+    for (const key of allPermissions) {
+      await getPool().query(`INSERT INTO permissions (key) VALUES ($1) ON CONFLICT (key) DO NOTHING`, [key]);
+    }
+    const permRows = (await getPool().query(`SELECT id, key FROM permissions`)).rows;
+    for (const r of [{ name: "super_admin", perms: allPermissions }, { name: "admin", perms: allPermissions.filter((p) => p !== "manage_settings") }]) {
+      const { rows: [roleRow] } = await getPool().query(`INSERT INTO roles (name) VALUES ($1) ON CONFLICT (name) DO UPDATE SET name=EXCLUDED.name RETURNING id`, [r.name]);
+      for (const permKey of r.perms) {
+        const perm = permRows.find((p) => p.key === permKey);
+        if (perm) {
+          await getPool().query(`INSERT INTO role_permissions (role_id, permission_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`, [roleRow.id, perm.id]);
+        }
+      }
+    }
+    await getPool().query(`UPDATE users SET role = 'super_admin' WHERE id = $1`, [req.user.id]);
+    res.json({ success: true, message: "User elevated to super_admin" });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
 router22.get("/admin/dashboard", requirePermission("manage_analytics"), async (_req, res) => {
   const totalUsers = (await db.select({ count: sql15`count(*)` }).from(usersTable))[0]?.count || 0;
   const onlineNow = (await db.select({ count: sql15`count(*)` }).from(sessionsTable).where(sql15`expires_at > now()`))[0]?.count || 0;
