@@ -1,4 +1,8 @@
-import express from "express";
-const app = express();
-app.get("/api/healthz", (_req, res) => res.json({ status: "ok" }));
-export default app;
+export default function handler(req, res) {
+  res.status(200).json({
+    ok: true,
+    url: req.url,
+    method: req.method,
+    headers: req.headers,
+  });
+}
