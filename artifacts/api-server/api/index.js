@@ -1,9 +1,3 @@
-let cachedApp;
+import app from "../src/app.js";
 
-export default async function handler(req, res) {
-  if (!cachedApp) {
-    const { default: app } = await import("../src/app.js");
-    cachedApp = app;
-  }
-  return cachedApp(req, res);
-}
+export default app;
