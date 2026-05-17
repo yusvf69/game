@@ -25,8 +25,7 @@ async function buildAll() {
     sourcemap: false,
     plugins: [],
     banner: {
-      js: `import express from "express";
-import { createRequire as __bannerCrReq } from 'node:module';
+      js: `import { createRequire as __bannerCrReq } from 'node:module';
 import __bannerPath from 'node:path';
 import __bannerUrl from 'node:url';
 
