@@ -1,3 +1,4 @@
+import express from "express";
 import { createRequire as __bannerCrReq } from 'node:module';
 import __bannerPath from 'node:path';
 import __bannerUrl from 'node:url';
@@ -70121,6 +70122,9 @@ app.use((0, import_cors.default)());
 app.use(import_express23.default.json());
 app.use(import_express23.default.urlencoded({ extended: true }));
 app.use("/api", routes_default);
+app.use((req, res) => {
+  res.status(404).json({ error: "not_found", path: req.path, originalUrl: req.originalUrl, baseUrl: req.baseUrl });
+});
 var main_default = app;
 export {
   main_default as default
