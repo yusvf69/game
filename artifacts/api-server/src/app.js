@@ -70161,6 +70161,12 @@ router21.get("/stage/:id", async (req, res) => {
     res.status(404).json({ error: "Match not found" });
     return;
   }
+  if (match.phase === "rebuzz" && match.buzzerTeamId === null) {
+    match.phase = "question";
+    match.timerStartedAt = Date.now();
+    await persistMatch(match).catch(() => {
+    });
+  }
   const q = match.questions[match.currentQuestionIndex];
   const qStrip = q ? stripAnswer(q) : null;
   res.json({

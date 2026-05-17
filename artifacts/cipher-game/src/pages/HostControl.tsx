@@ -132,6 +132,8 @@ export default function HostControl() {
       if (d.phase === "buzzed" && d.buzzerTeamId) {
         const bt = d.teams?.find((t: any) => t.id === d.buzzerTeamId);
         if (bt) setBuzzerTeamName(bt.name);
+        setAnswerResult(null);
+        setSelectedOptionId(null);
       }
 
       if (d.phase === "ended") setStep("ended");

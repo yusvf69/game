@@ -48,10 +48,11 @@ export default function BuzzerPage() {
         setPhase(d.phase);
 
         if (d.phase === "question" || d.phase === "rebuzz") {
-          if (!locked && !buzzed) setLocked(false);
+          setLocked(false);
         }
         if (d.phase === "buzzed" && d.buzzerTeamId === teamId) {
           setBuzzed(true);
+          setLocked(true);
         }
         if (d.phase === "buzzed" && d.buzzerTeamId !== teamId) {
           setLocked(true);
