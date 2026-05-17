@@ -89,7 +89,7 @@ export default function MultiplayerPage() {
     });
 
     return () => { socket.disconnect(); };
-  }, [questions]);
+  }, []);
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
