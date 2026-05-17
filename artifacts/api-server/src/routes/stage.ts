@@ -89,20 +89,21 @@ function cacheMatch(state: StageMatchState): void {
 
 async function persistMatch(state: StageMatchState): Promise<void> {
   const { timer: __timer, ...rest } = state;
+  const insert = () => pool().query(
+    `INSERT INTO stage_matches (match_id, host_id, room_code, state) VALUES ($1, $2, $3, $4)
+     ON CONFLICT (match_id) DO UPDATE SET state = $4, updated_at = NOW()`,
+    [state.id, state.hostId, state.roomCode, JSON.stringify(rest)],
+  );
   try {
-    await pool().query(
-      `INSERT INTO stage_matches (match_id, host_id, room_code, state) VALUES ($1, $2, $3, $4)
-       ON CONFLICT (match_id) DO UPDATE SET state = $4, updated_at = NOW()`,
-      [state.id, state.hostId, state.roomCode, JSON.stringify(rest)],
-    );
+    await insert();
   } catch (e: any) {
-    // Table might not exist yet — create it and retry
     if (e?.code === "42P01") {
+      // Table doesn't exist — create it and retry
       try {
         await pool().query(`
           CREATE TABLE IF NOT EXISTS stage_matches (
             id SERIAL PRIMARY KEY,
-            match_id INTEGER NOT NULL UNIQUE,
+            match_id BIGINT NOT NULL UNIQUE,
             host_id INTEGER NOT NULL,
             room_code VARCHAR(10) NOT NULL,
             state JSONB NOT NULL,
@@ -110,15 +111,20 @@ async function persistMatch(state: StageMatchState): Promise<void> {
             updated_at TIMESTAMP DEFAULT NOW() NOT NULL
           )
         `);
-        await pool().query(
-          `INSERT INTO stage_matches (match_id, host_id, room_code, state) VALUES ($1, $2, $3, $4)
-           ON CONFLICT (match_id) DO UPDATE SET state = $4, updated_at = NOW()`,
-          [state.id, state.hostId, state.roomCode, JSON.stringify(rest)],
-        );
       } catch (e2: any) {
-        console.error("[stage] persist failed after table creation:", e2);
-        throw new Error(`Failed to persist match: ${e2?.message || "unknown"}`);
+        console.error("[stage] create table failed:", e2);
+        throw new Error(`Failed to create stage_matches table: ${e2?.message || "unknown"}`);
       }
+      await insert();
+    } else if (e?.code === "22003") {
+      // match_id too large for INTEGER → migrate to BIGINT
+      try {
+        await pool().query(`ALTER TABLE stage_matches ALTER COLUMN match_id TYPE BIGINT`);
+      } catch (e2: any) {
+        console.error("[stage] alter column failed:", e2);
+        throw new Error(`Failed to migrate match_id column: ${e2?.message || "unknown"}`);
+      }
+      await insert();
     } else {
       console.error("[stage] persist failed:", e);
       throw new Error(`Failed to persist match: ${e?.message || "unknown"}`);
