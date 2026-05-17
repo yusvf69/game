@@ -354,34 +354,11 @@ router.post("/stage/start", async (req, res) => {
   match.questions = fullQs;
   match.totalQuestions = fullQs.length;
   match.currentQuestionIndex = 0;
-  match.phase = "intro";
+  match.phase = "question";
+  match.timerStartedAt = Date.now();
   match.currentDomain = match.domainOrder[0] || "general";
   match.buzzedOptionId = null;
   await persistMatch(match);
-
-  try {
-    const io = getIO();
-    io.to(`stage:${matchId}`).emit("stage:match-started", {
-      matchId,
-      totalQuestions: fullQs.length,
-      teams: match.teams.filter(t => t.name).map(t => ({ id: t.id, name: t.name, color: t.color, emblem: t.emblem })),
-    });
-
-    if (fullQs.length > 0) {
-      setTimeout(() => {
-        if (!stageMatchCache.has(matchId)) return;
-        match.phase = "question";
-        const q = stripAnswer(fullQs[0]);
-        io.to(`stage:${matchId}`).emit("stage:question", {
-          questionIndex: 0,
-          question: q,
-          totalQuestions: fullQs.length,
-          timerSeconds: fullQs[0].timeLimit || match.timerSeconds,
-        });
-        startTimer(match, io);
-      }, 3000);
-    }
-  } catch {}
 
   res.json({ success: true, totalQuestions: fullQs.length });
 });
@@ -624,13 +601,6 @@ router.get("/stage/:id", async (req, res) => {
   const matchId = parseInt(req.params.id);
   const match = await ensureMatch(matchId);
   if (!match) { res.status(404).json({ error: "Match not found" }); return; }
-
-  // Auto-advance from intro → question on first poll (serverless-safe, no setTimeout needed)
-  if (match.phase === "intro" && match.questions.length > 0) {
-    match.phase = "question";
-    match.timerStartedAt = Date.now();
-    await persistMatch(match).catch(() => {});
-  }
 
   const q = match.questions[match.currentQuestionIndex];
   const qStrip = q ? stripAnswer(q) : null;

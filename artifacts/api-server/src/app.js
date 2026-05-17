@@ -69900,33 +69900,11 @@ router21.post("/stage/start", async (req, res) => {
   match.questions = fullQs;
   match.totalQuestions = fullQs.length;
   match.currentQuestionIndex = 0;
-  match.phase = "intro";
+  match.phase = "question";
+  match.timerStartedAt = Date.now();
   match.currentDomain = match.domainOrder[0] || "general";
   match.buzzedOptionId = null;
   await persistMatch(match);
-  try {
-    const io2 = getIO();
-    io2.to(`stage:${matchId}`).emit("stage:match-started", {
-      matchId,
-      totalQuestions: fullQs.length,
-      teams: match.teams.filter((t) => t.name).map((t) => ({ id: t.id, name: t.name, color: t.color, emblem: t.emblem }))
-    });
-    if (fullQs.length > 0) {
-      setTimeout(() => {
-        if (!stageMatchCache.has(matchId)) return;
-        match.phase = "question";
-        const q = stripAnswer(fullQs[0]);
-        io2.to(`stage:${matchId}`).emit("stage:question", {
-          questionIndex: 0,
-          question: q,
-          totalQuestions: fullQs.length,
-          timerSeconds: fullQs[0].timeLimit || match.timerSeconds
-        });
-        startTimer(match, io2);
-      }, 3e3);
-    }
-  } catch {
-  }
   res.json({ success: true, totalQuestions: fullQs.length });
 });
 function stripAnswer(q) {
@@ -70182,12 +70160,6 @@ router21.get("/stage/:id", async (req, res) => {
   if (!match) {
     res.status(404).json({ error: "Match not found" });
     return;
-  }
-  if (match.phase === "intro" && match.questions.length > 0) {
-    match.phase = "question";
-    match.timerStartedAt = Date.now();
-    await persistMatch(match).catch(() => {
-    });
   }
   const q = match.questions[match.currentQuestionIndex];
   const qStrip = q ? stripAnswer(q) : null;
