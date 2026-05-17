@@ -167,7 +167,12 @@ export function useAOSAudio() {
   useEffect(() => {
     const stored = localStorage.getItem("aos_audio_enabled");
     if (stored !== null) enabledRef.current = stored === "true";
-    if (enabledRef.current) startAudio();
+    if (enabledRef.current) {
+      const handler = () => startAudio();
+      document.addEventListener("click", handler, { once: true });
+      document.addEventListener("keydown", handler, { once: true });
+      document.addEventListener("touchstart", handler, { once: true });
+    }
     activeListeners++;
     return () => {
       activeListeners--;
