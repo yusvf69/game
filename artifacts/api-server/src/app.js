@@ -48982,6 +48982,20 @@ function requireRole(...roles) {
 // src/routes/admin.ts
 import { eq as eq22, sql as sql15, desc as desc8, and as and9 } from "drizzle-orm";
 var router22 = (0, import_express22.Router)();
+(async () => {
+  try {
+    await getPool().query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'player'`);
+  } catch {
+  }
+})();
+router22.post("/admin/migrate", async (_req, res) => {
+  try {
+    await getPool().query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'player'`);
+    res.json({ success: true });
+  } catch (e) {
+    res.json({ success: false, error: e.message });
+  }
+});
 router22.use(authenticate);
 function logAdmin(adminId, action, targetType, targetId, data) {
   db.insert(adminLogsTable).values({ adminId, action, targetType, targetId, data }).catch(() => {

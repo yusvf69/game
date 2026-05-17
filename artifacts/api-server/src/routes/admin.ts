@@ -27,6 +27,21 @@ import { eq, sql, desc, and } from "drizzle-orm";
 
 const router = Router();
 
+(async () => {
+  try {
+    await getPool().query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'player'`);
+  } catch {}
+})();
+
+router.post("/admin/migrate", async (_req, res) => {
+  try {
+    await getPool().query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'player'`);
+    res.json({ success: true });
+  } catch (e: any) {
+    res.json({ success: false, error: e.message });
+  }
+});
+
 router.use(authenticate);
 
 function logAdmin(adminId: number, action: string, targetType?: string, targetId?: string, data?: any) {
