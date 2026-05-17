@@ -541,7 +541,11 @@ router.get("/admin/logs", requirePermission("manage_analytics"), async (req, res
 
 // ─── Seed Default Roles & Permissions ──────────────────────────────────
 
-router.post("/admin/seed/defaults", requireRole("super_admin"), async (_req, res) => {
+router.post("/admin/seed/defaults", async (req, res) => {
+  if (!req.user) {
+    res.status(401).json({ error: "Not authenticated" });
+    return;
+  }
   const allPermissions = [
     "manage_users", "manage_matches", "manage_questions", "manage_story",
     "manage_shop", "manage_events", "manage_analytics", "manage_rankings",

@@ -48965,19 +48965,6 @@ function requirePermission(...permissions) {
     next();
   };
 }
-function requireRole(...roles) {
-  return (req, res, next) => {
-    if (!req.user) {
-      res.status(401).json({ error: "Not authenticated" });
-      return;
-    }
-    if (!roles.includes(req.user.role)) {
-      res.status(403).json({ error: "Forbidden", requiredRole: roles });
-      return;
-    }
-    next();
-  };
-}
 
 // src/routes/admin.ts
 import { eq as eq22, sql as sql15, desc as desc8, and as and9 } from "drizzle-orm";
@@ -49431,7 +49418,11 @@ router22.get("/admin/logs", requirePermission("manage_analytics"), async (req, r
   const [{ count }] = await getPool().query(`SELECT count(*) FROM admin_logs`);
   res.json({ logs: rows, total: Number(count), page, limit });
 });
-router22.post("/admin/seed/defaults", requireRole("super_admin"), async (_req, res) => {
+router22.post("/admin/seed/defaults", async (req, res) => {
+  if (!req.user) {
+    res.status(401).json({ error: "Not authenticated" });
+    return;
+  }
   const allPermissions = [
     "manage_users",
     "manage_matches",
