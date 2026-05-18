@@ -864,6 +864,21 @@ router.post("/admin/seed/defaults", async (req, res) => {
     await getPool().query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'player'`);
   } catch {}
 
+  // Seed built-in shop items so user_inventory FK constraint is satisfied
+  const BUILTIN_SHOP_ITEMS = [
+    { id: 1, name: "Neon Agent Tag", description: "Custom nameplate with neon glow effect", type: "cosmetic", priceCoins: 500, rarity: "rare" },
+    { id: 2, name: "XP Boost x2", description: "Double XP for next 10 questions", type: "boost", priceCoins: 200, rarity: "common" },
+    { id: 3, name: "Analyst Title", description: "Unlock the 'Analyst' title", type: "title", priceCoins: 1000, rarity: "rare" },
+    { id: 4, name: "Holographic Theme", description: "Cyber hologram UI theme", type: "theme", priceCoins: 2000, rarity: "epic" },
+    { id: 5, name: "Legendary Frame", description: "Legendary avatar border", type: "cosmetic", priceCoins: 5000, rarity: "legendary" },
+    { id: 6, name: "Streak Shield", description: "Protect your streak from one break", type: "boost", priceCoins: 300, rarity: "common" },
+    { id: 7, name: "Master Title", description: "Unlock the 'Master' title", type: "title", priceCoins: 5000, rarity: "epic" },
+    { id: 8, name: "Neon Purple Theme", description: "Purple neon UI theme variant", type: "theme", priceCoins: 1500, rarity: "rare" },
+  ];
+  for (const si of BUILTIN_SHOP_ITEMS) {
+    await db.insert(shopItemsTable).values({ ...si, pricePremium: 0 }).onConflictDoNothing();
+  }
+
   try { logAdmin(req.user!.id, "ADMIN_SEEDED_DEFAULTS", "system", "seed"); } catch {}
   res.json({ success: true, permissionsCreated: allPermissions.length, rolesCreated: roles.length });
 });

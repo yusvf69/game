@@ -81,7 +81,15 @@ router.post("/shop/buy", async (req, res) => {
     const newCoins = stats.coins - item.priceCoins;
     await db.update(userStatsTable).set({ coins: newCoins }).where(eq(userStatsTable.userId, user.id));
 
-    await db.execute(sql`INSERT INTO user_inventory (user_id, item_id, quantity, equipped) VALUES (${user.id}, ${itemId}, 1, false)`);
+    await db.execute(sql`INSERT INTO user_inventory (user_id, item_id, quantity, equipped) VALUES (${user.id}, ${itemId}, 1, false)`)
+      .catch(async () => {
+        await db.insert(shopItemsTable).values({
+          id: itemId, name: item.name, description: item.description,
+          type: item.type, priceCoins: item.priceCoins, pricePremium: item.pricePremium || 0,
+          rarity: item.rarity, iconUrl: item.iconUrl,
+        }).onConflictDoNothing();
+        await db.execute(sql`INSERT INTO user_inventory (user_id, item_id, quantity, equipped) VALUES (${user.id}, ${itemId}, 1, false)`);
+      });
 
     eventBus.emitSync("XP_EARNED", {
       userId: user.id,
