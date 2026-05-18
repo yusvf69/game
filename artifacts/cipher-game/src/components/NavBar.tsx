@@ -21,6 +21,7 @@ const NAV_ITEMS = [
   { path: "/local-operation", label: "LOCAL" },
   { path: "/stage", label: "STAGE" },
   { path: "/host-control", label: "HOST" },
+  { path: "/admin", label: "ADMIN" },
 ];
 
 export function NavBar() {
