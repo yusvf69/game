@@ -166,7 +166,6 @@ export default function AchievementsPage() {
           ) : (
             <div className="glass cipher-border rounded-lg p-10 text-center">
               <p className="font-mono text-xs text-zinc-600">NO ACHIEVEMENTS AVAILABLE</p>
-              <p className="font-mono text-xs text-zinc-700 mt-2">The commendation system will be populated with seed data</p>
             </div>
           )}
         </div>

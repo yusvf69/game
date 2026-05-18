@@ -1,25 +1,30 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AdminPage, AdminTable, AdminBadge, adminFetch } from "./AdminLayout";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { RefreshCw, Pause, Play, SkipForward, XCircle, Trophy, Swords } from "lucide-react";
+import { RefreshCw, Pause, Play, SkipForward, XCircle, Trophy, Swords, ArrowLeft, Gamepad2, UserMinus } from "lucide-react";
 
 export default function AdminMatches() {
   const [matches, setMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<any>(null);
   const [scoreTeamId, setScoreTeamId] = useState("");
   const [scoreValue, setScoreValue] = useState("");
+  const [kickTeamId, setKickTeamId] = useState("");
 
   function loadMatches() {
     setLoading(true);
+    setError(null);
     adminFetch("/admin/matches").then(r => r.json()).then(d => {
-      if (d.matches) setMatches(d.matches);
-    }).catch(() => {}).finally(() => setLoading(false));
+      if (d.error) setError(d.error);
+      else setMatches(d.matches || []);
+    }).catch(() => setError("Failed to load matches")).finally(() => setLoading(false));
   }
 
   useEffect(() => { loadMatches(); const i = setInterval(loadMatches, 5000); return () => clearInterval(i); }, []);
@@ -48,29 +53,29 @@ export default function AdminMatches() {
     return (
       <AdminPage title={`Match ${selected.room_code}`} description={`ID: ${selected.match_id}`}>
         <Button variant="outline" size="sm" onClick={() => setSelected(null)} className="mb-4 gap-2">
-          <RefreshCw className="w-4 h-4" /> Back to list
+          <ArrowLeft className="w-4 h-4" /> Back to list
         </Button>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <Card className="border-border">
+          <Card className="border-zinc-800/60 bg-zinc-900/50">
             <CardContent className="p-4">
               <span className="text-xs text-muted-foreground uppercase tracking-wider">Status</span>
-              <AdminBadge variant={getPhaseColor(state.phase)}>{state.phase || "unknown"}</AdminBadge>
+              <div className="mt-1"><AdminBadge variant={getPhaseColor(state.phase)}>{state.phase || "unknown"}</AdminBadge></div>
             </CardContent>
           </Card>
-          <Card className="border-border">
+          <Card className="border-zinc-800/60 bg-zinc-900/50">
             <CardContent className="p-4">
               <span className="text-xs text-muted-foreground uppercase tracking-wider">Teams</span>
               <p className="text-lg font-bold text-foreground">{state.teams?.filter((t: any) => t.name).length || 0}</p>
             </CardContent>
           </Card>
-          <Card className="border-border">
+          <Card className="border-zinc-800/60 bg-zinc-900/50">
             <CardContent className="p-4">
               <span className="text-xs text-muted-foreground uppercase tracking-wider">Question</span>
               <p className="text-lg font-bold text-foreground">{(state.currentQuestionIndex || 0) + 1}/{state.totalQuestions || "?"}</p>
             </CardContent>
           </Card>
-          <Card className="border-border">
+          <Card className="border-zinc-800/60 bg-zinc-900/50">
             <CardContent className="p-4">
               <span className="text-xs text-muted-foreground uppercase tracking-wider">Buzzed</span>
               <p className="text-lg font-bold text-foreground">{state.buzzerTeamId ? `Team ${state.buzzerTeamId}` : "None"}</p>
@@ -80,7 +85,7 @@ export default function AdminMatches() {
 
         {state.teams?.filter((t: any) => t.name).map((team: any) => (
           <motion.div key={team.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-            className="flex items-center justify-between p-3 mb-2 rounded-lg border border-border bg-card/50"
+            className="flex items-center justify-between p-3 mb-2 rounded-lg border border-zinc-800/60 bg-zinc-900/30"
           >
             <div className="flex items-center gap-3">
               <Swords className="w-5 h-5" style={{ color: team.color }} />
@@ -89,11 +94,19 @@ export default function AdminMatches() {
                 <span className="text-xs text-muted-foreground ml-2">Score: {team.score}</span>
               </div>
             </div>
-            <Badge variant="outline" className="text-xs">{team.correct}/{team.total} correct</Badge>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono text-muted-foreground bg-zinc-800/50 px-2 py-1 rounded">{team.correct}/{team.total} correct</span>
+              {state.phase !== "ended" && (
+                <Button size="sm" variant="destructive" className="h-7 text-[10px] px-2"
+                  onClick={() => { doAction("kick-team", { teamId: team.id }); }}>
+                  <UserMinus className="w-3 h-3" />
+                </Button>
+              )}
+            </div>
           </motion.div>
         ))}
 
-        <div className="flex flex-wrap gap-2 mt-6 p-4 rounded-lg border border-border bg-card/30">
+        <div className="flex flex-wrap gap-2 mt-6 p-4 rounded-lg border border-zinc-800/60 bg-zinc-900/30">
           <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider w-full mb-2">Controls</span>
           {state.phase !== "paused" ? (
             <Button size="sm" variant="outline" onClick={() => doAction("pause")}><Pause className="w-4 h-4 mr-1" /> Pause</Button>
@@ -102,6 +115,12 @@ export default function AdminMatches() {
           )}
           <Button size="sm" variant="outline" onClick={() => doAction("force-next")}><SkipForward className="w-4 h-4 mr-1" /> Force Next</Button>
           <Button size="sm" variant="destructive" onClick={() => doAction("end")}><XCircle className="w-4 h-4 mr-1" /> End Match</Button>
+          <div className="flex items-center gap-2">
+            <Input placeholder="Team ID" value={kickTeamId} onChange={e => setKickTeamId(e.target.value)} className="w-20 h-8 text-xs" />
+            <Button size="sm" variant="destructive" onClick={() => { doAction("kick-team", { teamId: parseInt(kickTeamId) }); setKickTeamId(""); }}>
+              <UserMinus className="w-4 h-4 mr-1" /> Kick Team
+            </Button>
+          </div>
           <div className="flex items-center gap-2 ml-auto">
             <Input placeholder="Team ID" value={scoreTeamId} onChange={e => setScoreTeamId(e.target.value)} className="w-20 h-8 text-xs" />
             <Input placeholder="Score" value={scoreValue} onChange={e => setScoreValue(e.target.value)} className="w-20 h-8 text-xs" />
@@ -122,25 +141,44 @@ export default function AdminMatches() {
         </Button>
         <span className="text-xs text-muted-foreground">{matches.length} matches</span>
       </div>
-      <AdminTable
-        headers={["Room", "Host", "Status", "Phase", "Teams", "Created", ""]}
-        rows={matches.map(m => {
-          const state = m.state || {};
-          return [
-            m.room_code || "—",
-            m.host_id || "—",
-            <AdminBadge variant={getPhaseColor(state.phase)}>{state.phase || "unknown"}</AdminBadge>,
-            state.phase || "—",
-            state.teams?.filter((t: any) => t.name).length || 0,
-            new Date(m.created_at).toLocaleDateString(),
-            <Button size="sm" variant="outline" onClick={() => setSelected(m)}>Manage</Button>,
-          ];
-        })}
-      />
+
+      {error && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+          className="text-xs text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3 mb-4">
+          {error}
+          <button onClick={loadMatches} className="ml-3 text-blue-400 hover:text-blue-300">RETRY</button>
+        </motion.div>
+      )}
+
+      {loading ? (
+        <div className="space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-12 rounded-xl bg-zinc-800/50" />
+          ))}
+        </div>
+      ) : matches.length === 0 ? (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+          className="text-center py-16 text-sm text-muted-foreground flex flex-col items-center gap-2">
+          <Gamepad2 className="w-8 h-8 text-muted-foreground/30" />
+          No active matches right now.
+        </motion.div>
+      ) : (
+        <AdminTable
+          headers={["Room", "Host", "Status", "Phase", "Teams", "Created", ""]}
+          rows={matches.map(m => {
+            const state = m.state || {};
+            return [
+              <span className="font-mono text-sm text-foreground">{m.room_code || "—"}</span>,
+              <span className="text-xs text-muted-foreground">{m.host_id ? `#${m.host_id}` : "—"}</span>,
+              <AdminBadge variant={getPhaseColor(state.phase)}>{state.phase || "unknown"}</AdminBadge>,
+              <span className="text-xs text-muted-foreground capitalize">{state.phase || "—"}</span>,
+              <span className="font-mono text-xs">{state.teams?.filter((t: any) => t.name).length || 0}</span>,
+              <span className="text-xs text-muted-foreground">{new Date(m.created_at).toLocaleDateString()}</span>,
+              <Button size="sm" variant="outline" onClick={() => setSelected(m)}>Manage</Button>,
+            ];
+          })}
+        />
+      )}
     </AdminPage>
   );
 }
-
-import { cn } from "@/lib/utils";
-
-

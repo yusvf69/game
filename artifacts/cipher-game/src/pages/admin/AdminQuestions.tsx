@@ -4,7 +4,7 @@ import { AdminPage, AdminTable, AdminButton, AdminInput, AdminSelect, adminFetch
 import {
   ListChecks, ToggleLeft, CheckSquare, Shield, Image, Music, Video,
   GripVertical, Eye, X, Trash2, ChevronUp, ChevronDown, Plus,
-  Download, Upload,
+  Download, Upload, Sparkles,
 } from "lucide-react";
 
 interface QuestionOption {
@@ -191,6 +191,10 @@ export default function AdminQuestions() {
   const [editing, setEditing] = useState<any>(null);
   const [msg, setMsg] = useState("");
   const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [showAiPanel, setShowAiPanel] = useState(false);
+  const [aiCount, setAiCount] = useState("5");
+  const [aiCategory, setAiCategory] = useState("");
   const previewRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -423,8 +427,50 @@ export default function AdminQuestions() {
             e.target.value = "";
           }}
         />
+        <AdminButton onClick={() => setShowAiPanel(!showAiPanel)}>
+          <Sparkles className="w-4 h-4 inline mr-1" /> AI Generate
+        </AdminButton>
         {msg && <span className="text-cyan-400 text-xs">{msg}</span>}
       </div>
+
+      <AnimatePresence>
+        {showAiPanel && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden mb-4">
+            <div className="bg-zinc-900/50 border border-zinc-800/60 rounded-xl p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-primary flex items-center gap-2"><Sparkles className="w-4 h-4" /> AI Question Generator</h3>
+                <button onClick={() => setShowAiPanel(false)} className="text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
+              </div>
+              <div className="flex gap-3 items-end">
+                <div>
+                  <label className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider block mb-1">Count</label>
+                  <AdminInput value={aiCount} onChange={setAiCount} placeholder="5" type="number" style={{ width: "80px" }} />
+                </div>
+                <div>
+                  <label className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider block mb-1">Category (optional)</label>
+                  <AdminInput value={aiCategory} onChange={setAiCategory} placeholder="e.g. technology" style={{ width: "160px" }} />
+                </div>
+                <AdminButton onClick={async () => {
+                  setAiGenerating(true);
+                  try {
+                    const r = await adminFetch("/admin/questions/generate", {
+                      method: "POST", body: JSON.stringify({ count: parseInt(aiCount) || 5, category: aiCategory || undefined, useAI: true }),
+                    });
+                    const d = await r.json();
+                    setMsg(d.error || `AI generated ${d.questionsGenerated} questions`);
+                    if (d.questionsGenerated > 0) loadQuestions();
+                  } catch { setMsg("Failed to generate"); }
+                  setAiGenerating(false);
+                  setShowAiPanel(false);
+                }} disabled={aiGenerating}>
+                  <Sparkles className="w-4 h-4 mr-1" /> {aiGenerating ? "Generating..." : "Generate"}
+                </AdminButton>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence mode="wait">
         {editing && (

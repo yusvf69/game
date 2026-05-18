@@ -162,7 +162,6 @@ export default function LorePage() {
               ) : (
                 <div className="col-span-2 glass cipher-border rounded-lg p-10 text-center">
                   <p className="font-mono text-xs text-zinc-600">NO LORE ENTRIES FOUND</p>
-                  <p className="font-mono text-xs text-zinc-700 mt-2">The codex will be populated with seed data</p>
                 </div>
               )}
             </div>

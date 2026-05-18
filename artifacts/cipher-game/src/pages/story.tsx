@@ -310,7 +310,6 @@ export default function StoryPage() {
               ) : (
                 <div className="glass cipher-border rounded-lg p-6 text-center">
                   <p className="font-mono text-xs text-zinc-600">NO CHAPTERS AVAILABLE</p>
-                  <p className="font-mono text-xs text-zinc-700 mt-2">The narrative begins with seed data</p>
                 </div>
               )}
             </div>
