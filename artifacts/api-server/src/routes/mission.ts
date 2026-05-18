@@ -10,6 +10,7 @@ import {
   userAnsweredQuestionsTable,
   missionLogsTable,
   answerLogsTable,
+  categoriesTable,
 } from "@workspace/db";
 import { eq, and, notInArray, desc, sql } from "drizzle-orm";
 
@@ -33,24 +34,27 @@ function getRankTier(rp: number): string {
   return "Bronze";
 }
 
-// Domain lookup: in-game name -> DB category
-const DOMAIN_CATEGORIES: Record<string, string[]> = {
-  "cyber_systems": ["technology", "cybersecurity"],
-  "cognitive_analysis": ["logic", "reasoning"],
-  "historical_archives": ["history"],
-  "threat_intelligence": ["security", "defense"],
-  "scientific_division": ["science", "physics", "biology", "chemistry"],
-  "behavioral_analysis": ["psychology"],
-  "global_mapping": ["geography"],
-  "quantitative_operations": ["mathematics"],
-  "ethical_protocols": ["philosophy", "ethics"],
-  "linguistic_decoding": ["languages"],
-  "orbital_intelligence": ["space", "astronomy"],
-  "geopolitical_affairs": ["politics"],
-  "cultural_archives": ["art", "culture"],
-  "ancient_records": ["mythology"],
-  "cipher_division": ["cryptography"],
-};
+// Domain lookup: in-game name -> DB category (loaded from DB categories table)
+let domainCategoriesCache: Record<string, string[]> | null = null;
+let domainCategoriesCacheTime = 0;
+const CACHE_TTL = 60_000; // 1 minute
+
+async function loadDomainCategories(): Promise<Record<string, string[]>> {
+  const now = Date.now();
+  if (domainCategoriesCache && now - domainCategoriesCacheTime < CACHE_TTL) {
+    return domainCategoriesCache;
+  }
+  const all = await db.select().from(categoriesTable);
+  const map: Record<string, string[]> = {};
+  for (const cat of all) {
+    const domain = cat.domain || "general";
+    if (!map[domain]) map[domain] = [];
+    if (!map[domain].includes(cat.name)) map[domain].push(cat.name);
+  }
+  domainCategoriesCache = map;
+  domainCategoriesCacheTime = now;
+  return map;
+}
 
 const DIFFICULTY_CONFIG: Record<string, { timerMult: number; xpMult: number; label: string; diffRange: number[] }> = {
   recruit: { timerMult: 1.5, xpMult: 0.5, label: "RECRUIT", diffRange: [1, 3] },
@@ -96,41 +100,44 @@ function estimateXp(domainCount: number, difficulty: string, modifiers: string[]
 router.get("/mission/domains", async (req, res) => {
   const user = await getUserFromToken(req.headers.authorization);
 
-  const domains = Object.entries(DOMAIN_CATEGORIES).map(([key, cats]) => {
-    const displayNames: Record<string, string> = {
-      cyber_systems: "Cyber Systems",
-      cognitive_analysis: "Cognitive Analysis",
-      historical_archives: "Historical Archives",
-      threat_intelligence: "Threat Intelligence",
-      scientific_division: "Scientific Division",
-      behavioral_analysis: "Behavioral Analysis",
-      global_mapping: "Global Mapping",
-      quantitative_operations: "Quantitative Operations",
-      ethical_protocols: "Ethical Protocols",
-      linguistic_decoding: "Linguistic Decoding",
-      orbital_intelligence: "Orbital Intelligence",
-      geopolitical_affairs: "Geopolitical Affairs",
-      cultural_archives: "Cultural Archives",
-      ancient_records: "Ancient Records",
-      cipher_division: "Cipher Division",
-    };
-    const descriptions: Record<string, string> = {
-      cyber_systems: "Network penetration and digital forensics",
-      cognitive_analysis: "Pattern recognition and abstract reasoning",
-      historical_archives: "Past events and their strategic implications",
-      threat_intelligence: "Security protocols and threat assessment",
-      scientific_division: "Technical and scientific knowledge",
-      behavioral_analysis: "Human psychology and motive prediction",
-      global_mapping: "Geographic and spatial intelligence",
-      quantitative_operations: "Mathematical modeling and calculation",
-      ethical_protocols: "Philosophical judgement and ethics",
-      linguistic_decoding: "Language analysis and translation",
-      orbital_intelligence: "Satellite and space-based reconnaissance",
-      geopolitical_affairs: "Political structures and international relations",
-      cultural_archives: "Art, media, and cultural artifacts",
-      ancient_records: "Mythology and ancient civilizations",
-      cipher_division: "Encryption, codes, and cryptographic analysis",
-    };
+  const domainCategories = await loadDomainCategories();
+
+  const displayNames: Record<string, string> = {
+    cyber_systems: "Cyber Systems",
+    cognitive_analysis: "Cognitive Analysis",
+    historical_archives: "Historical Archives",
+    threat_intelligence: "Threat Intelligence",
+    scientific_division: "Scientific Division",
+    behavioral_analysis: "Behavioral Analysis",
+    global_mapping: "Global Mapping",
+    quantitative_operations: "Quantitative Operations",
+    ethical_protocols: "Ethical Protocols",
+    linguistic_decoding: "Linguistic Decoding",
+    orbital_intelligence: "Orbital Intelligence",
+    geopolitical_affairs: "Geopolitical Affairs",
+    cultural_archives: "Cultural Archives",
+    ancient_records: "Ancient Records",
+    cipher_division: "Cipher Division",
+  };
+  const descriptions: Record<string, string> = {
+    cyber_systems: "Network penetration and digital forensics",
+    cognitive_analysis: "Pattern recognition and abstract reasoning",
+    historical_archives: "Past events and their strategic implications",
+    threat_intelligence: "Security protocols and threat assessment",
+    scientific_division: "Technical and scientific knowledge",
+    behavioral_analysis: "Human psychology and motive prediction",
+    global_mapping: "Geographic and spatial intelligence",
+    quantitative_operations: "Mathematical modeling and calculation",
+    ethical_protocols: "Philosophical judgement and ethics",
+    linguistic_decoding: "Language analysis and translation",
+    orbital_intelligence: "Satellite and space-based reconnaissance",
+    geopolitical_affairs: "Political structures and international relations",
+    cultural_archives: "Art, media, and cultural artifacts",
+    ancient_records: "Mythology and ancient civilizations",
+    cipher_division: "Encryption, codes, and cryptographic analysis",
+  };
+
+  const domains = Object.entries(domainCategories).map(([key, cats]) => {
     return { id: key, name: displayNames[key] || key, description: descriptions[key] || "", categories: cats };
   });
 
@@ -168,9 +175,10 @@ router.post("/mission/start", async (req, res) => {
   const diffCfg = DIFFICULTY_CONFIG[difficulty] || DIFFICULTY_CONFIG.agent;
 
   // Resolve DB categories from domain IDs
+  const domainCategories = await loadDomainCategories();
   const selectedCategories: string[] = [];
   for (const d of domains) {
-    const cats = DOMAIN_CATEGORIES[d];
+    const cats = domainCategories[d];
     if (cats) selectedCategories.push(...cats);
   }
 

@@ -26,6 +26,7 @@ import {
   teamMatchesTable,
   teamMatchScoresTable,
 } from "@workspace/db";
+import { categoriesTable } from "@workspace/db";
 import { authenticate, requirePermission, requireRole } from "../middleware/auth";
 import { eq, sql, desc, and } from "drizzle-orm";
 import { configureOpenAI, generateQuestionsWithAI } from "@workspace/game-engine";
@@ -361,6 +362,39 @@ router.delete("/admin/questions/:id", requirePermission("manage_questions"), asy
   await db.delete(questionOptionsTable).where(eq(questionOptionsTable.questionId, id));
   await db.delete(questionsTable).where(eq(questionsTable.id, id));
   logAdmin(req.user!.id, "ADMIN_DELETED_QUESTION", "question", String(id));
+  res.json({ success: true });
+});
+
+// ─── Categories Management ─────────────────────────────────────────────
+
+router.get("/admin/categories", requirePermission("manage_questions"), async (_req, res) => {
+  const allCats = await db.select().from(categoriesTable).orderBy(categoriesTable.domain, categoriesTable.name);
+  res.json({ categories: allCats });
+});
+
+router.post("/admin/categories", requirePermission("manage_questions"), async (req, res) => {
+  const { name, displayName, domain } = req.body;
+  if (!name) return res.status(400).json({ error: "name is required" });
+  try {
+    const [cat] = await db.insert(categoriesTable).values({
+      name,
+      displayName: displayName || name,
+      domain: domain || "",
+    }).returning();
+    logAdmin(req.user!.id, "ADMIN_CREATED_CATEGORY", "category", String(cat.id), { name, domain });
+    res.status(201).json(cat);
+  } catch (e: any) {
+    if (e?.code === "23505") return res.status(409).json({ error: "Category already exists" });
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.delete("/admin/categories/:id", requirePermission("manage_questions"), async (req, res) => {
+  const id = parseInt(req.params.id);
+  const [existing] = await db.select().from(categoriesTable).where(eq(categoriesTable.id, id)).limit(1);
+  if (!existing) return res.status(404).json({ error: "Category not found" });
+  await db.delete(categoriesTable).where(eq(categoriesTable.id, id));
+  logAdmin(req.user!.id, "ADMIN_DELETED_CATEGORY", "category", String(id), { name: existing.name });
   res.json({ success: true });
 });
 

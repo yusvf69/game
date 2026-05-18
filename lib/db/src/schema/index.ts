@@ -1,5 +1,6 @@
 export * from "./admin";
 export * from "./ai_characters";
+export * from "./categories";
 export * from "./analytics";
 export * from "./anti_cheat";
 export * from "./behavior";

@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AdminPage, AdminTable, AdminButton, AdminInput, AdminSelect, adminFetch } from "./AdminLayout";
 import {
   ListChecks, ToggleLeft, CheckSquare, Shield, Image, Music, Video,
   GripVertical, Eye, X, Trash2, ChevronUp, ChevronDown, Plus,
-  Download, Upload, Sparkles,
+  Download, Upload, Sparkles, Tag, FolderTree,
 } from "lucide-react";
 
 interface QuestionOption {
@@ -26,6 +26,13 @@ interface Question {
   created_at: string;
 }
 
+interface Category {
+  id: number;
+  name: string;
+  displayName: string;
+  domain: string;
+}
+
 const QUESTION_TYPES = [
   { value: "multiple_choice", label: "Multiple Choice", icon: ListChecks, color: "blue" },
   { value: "true_false", label: "True/False", icon: ToggleLeft, color: "green" },
@@ -35,8 +42,6 @@ const QUESTION_TYPES = [
   { value: "audio", label: "Audio", icon: Music, color: "emerald" },
   { value: "video", label: "Video", icon: Video, color: "red" },
 ] as const;
-
-const CATEGORIES = ["technology", "security", "history", "logic", "intelligence", "general"];
 
 const TYPE_COLORS: Record<string, string> = {
   multiple_choice: "#3b82f6",
@@ -198,6 +203,19 @@ export default function AdminQuestions() {
   const previewRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // --- Categories state ---
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [showCategoryPanel, setShowCategoryPanel] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [newCategoryDisplayName, setNewCategoryDisplayName] = useState("");
+  const [newCategoryDomain, setNewCategoryDomain] = useState("");
+
+  function loadCategories() {
+    adminFetch("/admin/categories").then(r => r.json()).then(d => {
+      if (d.categories) setCategories(d.categories);
+    }).catch(() => {});
+  }
+
   function loadQuestions() {
     setLoading(true);
     const params = new URLSearchParams({ page: String(page), limit: "20" });
@@ -208,6 +226,7 @@ export default function AdminQuestions() {
   }
 
   useEffect(() => { loadQuestions(); }, [page, categoryFilter]);
+  useEffect(() => { loadCategories(); }, []);
 
   async function deleteQuestion(id: number) {
     if (!confirm("Delete this question?")) return;
@@ -239,6 +258,32 @@ export default function AdminQuestions() {
     const d = await r.json();
     setMsg(d.error || `Imported ${d.imported} questions`);
     loadQuestions();
+  }
+
+  async function addCategory() {
+    if (!newCategoryName) return;
+    try {
+      const r = await adminFetch("/admin/categories", {
+        method: "POST",
+        body: JSON.stringify({ name: newCategoryName, displayName: newCategoryDisplayName || newCategoryName, domain: newCategoryDomain }),
+      });
+      const d = await r.json();
+      if (d.error) { setMsg(d.error); return; }
+      setMsg(`Category "${newCategoryName}" created`);
+      setNewCategoryName("");
+      setNewCategoryDisplayName("");
+      setNewCategoryDomain("");
+      loadCategories();
+    } catch { setMsg("Failed to create category"); }
+  }
+
+  async function deleteCategory(id: number, name: string) {
+    if (!confirm(`Delete category "${name}"?`)) return;
+    try {
+      await adminFetch(`/admin/categories/${id}`, { method: "DELETE" });
+      setMsg(`Category "${name}" deleted`);
+      loadCategories();
+    } catch { setMsg("Failed to delete category"); }
   }
 
   async function saveQuestion() {
@@ -313,18 +358,6 @@ export default function AdminQuestions() {
     if (type === "true_false") {
       base.options = [];
       base.correctAnswer = "true";
-    } else if (type === "multi_answer") {
-      base.options = editing?.options?.length >= 2
-        ? editing.options
-        : [{ text: "", isCorrect: false }, { text: "", isCorrect: false }];
-    } else if (["image", "audio", "video"].includes(type)) {
-      base.options = editing?.options?.length >= 2
-        ? editing.options
-        : [{ text: "", isCorrect: false }, { text: "", isCorrect: false }];
-    } else if (type === "cipher") {
-      base.options = editing?.options?.length >= 2
-        ? editing.options
-        : [{ text: "", isCorrect: false }, { text: "", isCorrect: false }];
     } else {
       base.options = editing?.options?.length >= 2
         ? editing.options
@@ -379,6 +412,8 @@ export default function AdminQuestions() {
     setDragIndex(null);
   }
 
+  const categoryOptions = categories.map(c => ({ label: `${c.displayName || c.name}${c.domain ? ` (${c.domain})` : ""}`, value: c.name }));
+
   const headers = ["ID", "Type", "Text", "Category", "Diff", "Options", "Created", "Actions"];
   const rows = questions.map(q => {
     const typeInfo = QUESTION_TYPES.find(t => t.value === q.type);
@@ -430,9 +465,82 @@ export default function AdminQuestions() {
         <AdminButton onClick={() => setShowAiPanel(!showAiPanel)}>
           <Sparkles className="w-4 h-4 inline mr-1" /> AI Generate
         </AdminButton>
+        <AdminButton onClick={() => setShowCategoryPanel(!showCategoryPanel)}>
+          <Tag className="w-4 h-4 inline mr-1" /> Categories
+        </AdminButton>
         {msg && <span className="text-cyan-400 text-xs">{msg}</span>}
       </div>
 
+      {/* ─── Categories Manager ───────────────────────────────────────── */}
+      <AnimatePresence>
+        {showCategoryPanel && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden mb-4"
+          >
+            <div className="bg-zinc-900/50 border border-zinc-800/60 rounded-xl p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-primary flex items-center gap-2">
+                  <FolderTree className="w-4 h-4" /> Category Manager
+                </h3>
+                <button onClick={() => setShowCategoryPanel(false)} className="text-muted-foreground hover:text-foreground">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Add new category form */}
+              <div className="flex gap-2 items-end mb-4 flex-wrap">
+                <div>
+                  <label className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider block mb-1">Name</label>
+                  <AdminInput value={newCategoryName} onChange={setNewCategoryName} placeholder="e.g. cryptography" style={{ width: "140px" }} />
+                </div>
+                <div>
+                  <label className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider block mb-1">Display Name</label>
+                  <AdminInput value={newCategoryDisplayName} onChange={setNewCategoryDisplayName} placeholder="e.g. Cryptography" style={{ width: "160px" }} />
+                </div>
+                <div>
+                  <label className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider block mb-1">Domain</label>
+                  <AdminInput value={newCategoryDomain} onChange={setNewCategoryDomain} placeholder="e.g. cipher_division" style={{ width: "160px" }} />
+                </div>
+                <AdminButton onClick={addCategory}>
+                  <Plus className="w-4 h-4 mr-1" /> Add
+                </AdminButton>
+              </div>
+
+              {/* Existing categories list */}
+              <div className="max-h-48 overflow-y-auto space-y-1">
+                {categories.length === 0 ? (
+                  <p className="text-xs font-mono text-zinc-600">No categories yet. Create one above.</p>
+                ) : (
+                  [...new Set(categories.map(c => c.domain).filter(Boolean))].sort().map(domain => (
+                    <div key={domain}>
+                      {domain && (
+                        <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider mt-2 mb-1">{domain}</p>
+                      )}
+                      {categories.filter(c => c.domain === domain).map(cat => (
+                        <div key={cat.id} className="flex items-center justify-between px-3 py-1.5 rounded-lg hover:bg-zinc-800/40 group">
+                          <div className="flex items-center gap-2">
+                            <Tag className="w-3.5 h-3.5 text-zinc-500" />
+                            <span className="text-xs font-mono text-zinc-300">{cat.displayName || cat.name}</span>
+                            <span className="text-[10px] font-mono text-zinc-600">{cat.name}</span>
+                          </div>
+                          <button
+                            onClick={() => deleteCategory(cat.id, cat.name)}
+                            className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-red-950/30 text-zinc-600 hover:text-red-400 transition-all"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ─── AI Generator ──────────────────────────────────────────────── */}
       <AnimatePresence>
         {showAiPanel && (
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
@@ -472,6 +580,7 @@ export default function AdminQuestions() {
         )}
       </AnimatePresence>
 
+      {/* ─── Question Editor ──────────────────────────────────────────── */}
       <AnimatePresence mode="wait">
         {editing && (
           <motion.div
@@ -498,7 +607,6 @@ export default function AdminQuestions() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="space-y-5">
-                {/* Type Selector */}
                 <div>
                   <label className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider block mb-2">Question Type</label>
                   <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
@@ -513,7 +621,6 @@ export default function AdminQuestions() {
                   </div>
                 </div>
 
-                {/* Question Text */}
                 <div>
                   <label className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider block mb-1.5">
                     {editing.type === "cipher" ? "Cipher Text" : "Question Text"}
@@ -527,7 +634,6 @@ export default function AdminQuestions() {
                   />
                 </div>
 
-                {/* Media URL */}
                 {["image", "audio", "video"].includes(editing.type) && (
                   <div>
                     <label className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider block mb-1.5">
@@ -555,7 +661,6 @@ export default function AdminQuestions() {
                   </div>
                 )}
 
-                {/* Cipher specific visual */}
                 {editing.type === "cipher" && (
                   <div className="bg-cyan-950/20 rounded-lg p-4 border border-cyan-900/30">
                     <p className="font-mono text-[10px] text-cyan-400 tracking-widest mb-2">SIGNAL INTERCEPT</p>
@@ -565,7 +670,6 @@ export default function AdminQuestions() {
                   </div>
                 )}
 
-                {/* True/False specific */}
                 {editing.type === "true_false" && (
                   <div>
                     <label className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider block mb-1.5">Correct Answer</label>
@@ -589,7 +693,6 @@ export default function AdminQuestions() {
                   </div>
                 )}
 
-                {/* Options (for types that use them) */}
                 {editing.type !== "true_false" && (
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
@@ -630,9 +733,7 @@ export default function AdminQuestions() {
                           />
                           <label className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-mono cursor-pointer transition-all ${
                             opt.isCorrect
-                              ? editing.type === "multi_answer"
-                                ? "bg-green-500/10 border-green-500/40 text-green-400"
-                                : "bg-green-500/10 border-green-500/40 text-green-400"
+                              ? "bg-green-500/10 border-green-500/40 text-green-400"
                               : "bg-zinc-900/50 border-zinc-800/60 text-zinc-500 hover:border-zinc-600"
                           }`}>
                             <input
@@ -652,7 +753,7 @@ export default function AdminQuestions() {
                               }}
                               className="sr-only"
                             />
-                            {editing.type === "multi_answer" ? (opt.isCorrect ? "✓" : "○") : (opt.isCorrect ? "✓" : "○")}
+                            {opt.isCorrect ? "✓" : "○"}
                           </label>
                           {(editing.options?.length || 0) > 2 && (
                             <button
@@ -675,14 +776,13 @@ export default function AdminQuestions() {
                   </div>
                 )}
 
-                {/* Metadata row */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider block mb-1.5">Category</label>
                     <AdminSelect
                       value={editing.category || "general"}
                       onChange={v => updateEditing("category", v)}
-                      options={CATEGORIES.map(c => ({ label: c, value: c }))}
+                      options={categoryOptions.length > 0 ? categoryOptions : [{ label: "general", value: "general" }]}
                     />
                   </div>
                   <div>
@@ -743,7 +843,6 @@ export default function AdminQuestions() {
                   />
                 </div>
 
-                {/* Action buttons */}
                 <div className="flex gap-3 pt-2">
                   <AdminButton onClick={saveQuestion}>
                     {editing.id ? "Update Question" : "Create Question"}
@@ -752,7 +851,6 @@ export default function AdminQuestions() {
                 </div>
               </div>
 
-              {/* Live Preview Panel */}
               <div ref={previewRef} className="lg:sticky lg:top-4 self-start">
                 <LivePreview question={editing} />
               </div>
