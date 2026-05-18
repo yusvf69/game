@@ -7,6 +7,7 @@ export * from "./matches";
 export * from "./missions";
 export * from "./questions";
 export * from "./ranking";
+export * from "./rate_limits";
 export * from "./roles";
 export * from "./shop";
 export * from "./skill_trees";

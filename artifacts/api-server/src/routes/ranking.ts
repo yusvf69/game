@@ -66,6 +66,37 @@ router.get("/rankings/daily", async (req, res) => {
   res.json(result);
 });
 
+router.get("/rankings/seasonal", async (req, res) => {
+  const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+  try {
+    const [season] = await db.select().from(seasonsTable).where(eq(seasonsTable.isActive, true)).limit(1);
+    if (!season) { res.json([]); return; }
+
+    const ranks = await db.select().from(rankingsTable)
+      .where(eq(rankingsTable.seasonId, season.id))
+      .orderBy(desc(rankingsTable.rankPoints))
+      .limit(limit);
+
+    const result = await Promise.all(ranks.map(async (rank, idx) => {
+      const [user] = await db.select().from(usersTable).where(eq(usersTable.id, rank.userId)).limit(1);
+      return {
+        rank: idx + 1,
+        userId: rank.userId,
+        username: user?.username || "Unknown",
+        avatarUrl: user?.avatarUrl || null,
+        xp: rank.rankPoints,
+        level: 0,
+        rankTier: rank.rankTier,
+        score: rank.mmr,
+      };
+    }));
+
+    res.json({ season: { id: season.id, name: season.name, theme: season.theme, endDate: season.endDate }, entries: result });
+  } catch {
+    res.json({ season: null, entries: [] });
+  }
+});
+
 router.get("/rankings/me", async (req, res) => {
   const user = await getUserFromToken(req.headers.authorization);
   if (!user) { res.status(401).json({ error: "Not authenticated" }); return; }

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AOSLayout from "@/components/aos/AOSLayout";
+import { initAudio, playMatchStart, playTick, playMatchEnd } from "@/lib/audio";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "";
 
@@ -36,6 +37,32 @@ export default function StagePage() {
   const [error, setError] = useState<string | null>(null);
   const [wrongAttempts, setWrongAttempts] = useState(0);
   const [connected, setConnected] = useState(false);
+
+  useEffect(() => { initAudio(); }, []);
+
+  const prevPhase = useRef<string>("idle");
+  const prevTickSecond = useRef<number>(-1);
+
+  useEffect(() => {
+    if (phase === "intro" && prevPhase.current === "idle") {
+      playMatchStart();
+    }
+    if (phase === "ended" && prevPhase.current !== "ended") {
+      const sorted = [...teams].sort((a, b) => b.score - a.score);
+      const winner = sorted[0];
+      playMatchEnd(!!winner);
+    }
+    if (timerActive && timerSeconds > 0 && timerSeconds <= 5) {
+      const intSec = Math.ceil(timerSeconds);
+      if (intSec >= 1 && intSec !== prevTickSecond.current) {
+        playTick();
+        prevTickSecond.current = intSec;
+      }
+    } else {
+      prevTickSecond.current = -1;
+    }
+    prevPhase.current = phase;
+  }, [phase, timerSeconds, timerActive, teams]);
 
   // Poll stage state
   useEffect(() => {

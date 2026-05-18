@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AOSLayout from "@/components/aos/AOSLayout";
+import { initAudio, playBuzzer } from "@/lib/audio";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "";
 
@@ -37,6 +38,8 @@ export default function BuzzerPage() {
   const [connecting, setConnecting] = useState(false);
   const [answerResult, setAnswerResult] = useState<{ correct: boolean; points: number } | null>(null);
   const [finalScores, setFinalScores] = useState<{ id: number; name: string; color: string; score: number; correct: number; total: number }[]>([]);
+
+  useEffect(() => { initAudio(); }, []);
 
   // Poll for match state
   useEffect(() => {
@@ -99,6 +102,7 @@ export default function BuzzerPage() {
   const handleBuzz = useCallback(async () => {
     if (locked || buzzed || !matchId || !teamId) return;
     setBuzzed(true); setLocked(true);
+    playBuzzer();
     try {
       const res = await fetch(`${BASE_URL}/api/stage/buzz`, {
         method: "POST", headers: { "Content-Type": "application/json" },

@@ -862,8 +862,8 @@ var require_depd = __commonJS({
       return typeName && callSite.getMethodName() ? typeName + "." + funcName : funcName;
     }
     function formatPlain(msg, caller, stack) {
-      var timestamp20 = (/* @__PURE__ */ new Date()).toUTCString();
-      var formatted = timestamp20 + " " + this._namespace + " deprecated " + msg;
+      var timestamp21 = (/* @__PURE__ */ new Date()).toUTCString();
+      var formatted = timestamp21 + " " + this._namespace + " deprecated " + msg;
       if (this._traced) {
         for (var i = 0; i < stack.length; i++) {
           formatted += "\n    at " + stack[i].toString();
@@ -5390,7 +5390,7 @@ var require_raw_body = __commonJS({
       }
       var buffer = decoder ? "" : [];
       stream.on("aborted", onAborted);
-      stream.on("close", cleanup2);
+      stream.on("close", cleanup);
       stream.on("data", onData);
       stream.on("end", onEnd);
       stream.on("error", onEnd);
@@ -5407,7 +5407,7 @@ var require_raw_body = __commonJS({
           invokeCallback();
         }
         function invokeCallback() {
-          cleanup2();
+          cleanup();
           if (args[0]) {
             halt(stream);
           }
@@ -5454,13 +5454,13 @@ var require_raw_body = __commonJS({
           done(null, string4);
         }
       }
-      function cleanup2() {
+      function cleanup() {
         buffer = null;
         stream.removeListener("aborted", onAborted);
         stream.removeListener("data", onData);
         stream.removeListener("end", onEnd);
         stream.removeListener("error", onEnd);
-        stream.removeListener("close", cleanup2);
+        stream.removeListener("close", cleanup);
       }
     }
     function tryRequireAsyncHooks() {
@@ -5509,10 +5509,10 @@ var require_ee_first = __commonJS({
         }
       }
       function callback() {
-        cleanup2();
+        cleanup();
         done.apply(null, arguments);
       }
-      function cleanup2() {
+      function cleanup() {
         var x;
         for (var i2 = 0; i2 < cleanups.length; i2++) {
           x = cleanups[i2];
@@ -5522,7 +5522,7 @@ var require_ee_first = __commonJS({
       function thunk(fn2) {
         done = fn2;
       }
-      thunk.cancel = cleanup2;
+      thunk.cancel = cleanup;
       return thunk;
     }
     function listener(event, done) {
@@ -15736,8 +15736,8 @@ var require_text = __commonJS({
     var debug = require_src()("body-parser:text");
     var read = require_read();
     var { normalizeOptions, passthrough } = require_utils();
-    module.exports = text19;
-    function text19(options) {
+    module.exports = text20;
+    function text20(options) {
       const normalizedOptions = normalizeOptions(options, "text/plain");
       return function textParser(req, res, next) {
         read(req, res, next, passthrough, debug, normalizedOptions);
@@ -19880,11 +19880,11 @@ var require_dist = __commonJS({
     exports.TokenData = TokenData;
     var PathError = class extends TypeError {
       constructor(message, originalPath) {
-        let text19 = message;
+        let text20 = message;
         if (originalPath)
-          text19 += `: ${originalPath}`;
-        text19 += `; visit https://git.new/pathToRegexpError for info`;
-        super(text19);
+          text20 += `: ${originalPath}`;
+        text20 += `; visit https://git.new/pathToRegexpError for info`;
+        super(text20);
         this.originalPath = originalPath;
       }
     };
@@ -21784,8 +21784,8 @@ var require_fresh = __commonJS({
       return true;
     }
     function parseHttpDate(date5) {
-      var timestamp20 = date5 && Date.parse(date5);
-      return typeof timestamp20 === "number" ? timestamp20 : NaN;
+      var timestamp21 = date5 && Date.parse(date5);
+      return typeof timestamp21 === "number" ? timestamp21 : NaN;
     }
     function parseTokenList(str) {
       var end = 0;
@@ -22777,12 +22777,12 @@ var require_send = __commonJS({
       var stream2 = fs.createReadStream(path2, options);
       this.emit("stream", stream2);
       stream2.pipe(res);
-      function cleanup2() {
+      function cleanup() {
         stream2.destroy();
       }
-      onFinished(res, cleanup2);
+      onFinished(res, cleanup);
       stream2.on("error", function onerror(err) {
-        cleanup2();
+        cleanup();
         self.onStatError(err);
       });
       stream2.on("end", function onend() {
@@ -22878,8 +22878,8 @@ var require_send = __commonJS({
       return list;
     }
     function parseHttpDate(date5) {
-      var timestamp20 = date5 && Date.parse(date5);
-      return typeof timestamp20 === "number" ? timestamp20 : NaN;
+      var timestamp21 = date5 && Date.parse(date5);
+      return typeof timestamp21 === "number" ? timestamp21 : NaN;
     }
     function parseTokenList(str) {
       var end = 0;
@@ -35563,11 +35563,11 @@ function numberColumnToSchema(column, z, coerce2) {
   let unsigned = column.getSQLType().includes("unsigned");
   let min;
   let max;
-  let integer21 = false;
+  let integer22 = false;
   if (isColumnType(column, ["MySqlTinyInt", "SingleStoreTinyInt"])) {
     min = unsigned ? 0 : CONSTANTS.INT8_MIN;
     max = unsigned ? CONSTANTS.INT8_UNSIGNED_MAX : CONSTANTS.INT8_MAX;
-    integer21 = true;
+    integer22 = true;
   } else if (isColumnType(column, [
     "PgSmallInt",
     "PgSmallSerial",
@@ -35576,7 +35576,7 @@ function numberColumnToSchema(column, z, coerce2) {
   ])) {
     min = unsigned ? 0 : CONSTANTS.INT16_MIN;
     max = unsigned ? CONSTANTS.INT16_UNSIGNED_MAX : CONSTANTS.INT16_MAX;
-    integer21 = true;
+    integer22 = true;
   } else if (isColumnType(column, [
     "PgReal",
     "MySqlFloat",
@@ -35586,7 +35586,7 @@ function numberColumnToSchema(column, z, coerce2) {
   ])) {
     min = unsigned ? 0 : CONSTANTS.INT24_MIN;
     max = unsigned ? CONSTANTS.INT24_UNSIGNED_MAX : CONSTANTS.INT24_MAX;
-    integer21 = isColumnType(column, ["MySqlMediumInt", "SingleStoreMediumInt"]);
+    integer22 = isColumnType(column, ["MySqlMediumInt", "SingleStoreMediumInt"]);
   } else if (isColumnType(column, [
     "PgInteger",
     "PgSerial",
@@ -35595,7 +35595,7 @@ function numberColumnToSchema(column, z, coerce2) {
   ])) {
     min = unsigned ? 0 : CONSTANTS.INT32_MIN;
     max = unsigned ? CONSTANTS.INT32_UNSIGNED_MAX : CONSTANTS.INT32_MAX;
-    integer21 = true;
+    integer22 = true;
   } else if (isColumnType(column, [
     "PgDoublePrecision",
     "MySqlReal",
@@ -35618,16 +35618,16 @@ function numberColumnToSchema(column, z, coerce2) {
     unsigned = unsigned || isColumnType(column, ["MySqlSerial", "SingleStoreSerial"]);
     min = unsigned ? 0 : Number.MIN_SAFE_INTEGER;
     max = Number.MAX_SAFE_INTEGER;
-    integer21 = true;
+    integer22 = true;
   } else if (isColumnType(column, ["MySqlYear", "SingleStoreYear"])) {
     min = 1901;
     max = 2155;
-    integer21 = true;
+    integer22 = true;
   } else {
     min = Number.MIN_SAFE_INTEGER;
     max = Number.MAX_SAFE_INTEGER;
   }
-  let schema = coerce2 === true || coerce2?.number ? integer21 ? z.coerce.number() : z.coerce.number().int() : integer21 ? z.int() : z.number();
+  let schema = coerce2 === true || coerce2?.number ? integer22 ? z.coerce.number() : z.coerce.number().int() : integer22 ? z.int() : z.number();
   schema = schema.gte(min).lte(max);
   return schema;
 }
@@ -36089,76 +36089,92 @@ var init_ranking = __esm({
   }
 });
 
+// ../../lib/db/src/schema/rate_limits.ts
+import { pgTable as pgTable11, text as text11, timestamp as timestamp11, integer as integer12, serial as serial11 } from "drizzle-orm/pg-core";
+var rateLimitsTable;
+var init_rate_limits = __esm({
+  "../../lib/db/src/schema/rate_limits.ts"() {
+    "use strict";
+    rateLimitsTable = pgTable11("rate_limits", {
+      id: serial11("id").primaryKey(),
+      bucketKey: text11("bucket_key").notNull().unique(),
+      count: integer12("count").notNull().default(1),
+      windowStart: timestamp11("window_start", { withTimezone: true }).notNull().defaultNow(),
+      createdAt: timestamp11("created_at", { withTimezone: true }).notNull().defaultNow()
+    });
+  }
+});
+
 // ../../lib/db/src/schema/roles.ts
-import { pgTable as pgTable11, serial as serial11, text as text11, integer as integer12, timestamp as timestamp11 } from "drizzle-orm/pg-core";
+import { pgTable as pgTable12, serial as serial12, text as text12, integer as integer13, timestamp as timestamp12 } from "drizzle-orm/pg-core";
 var rolesTable, permissionsTable, rolePermissionsTable;
 var init_roles = __esm({
   "../../lib/db/src/schema/roles.ts"() {
     "use strict";
-    rolesTable = pgTable11("roles", {
-      id: serial11("id").primaryKey(),
-      name: text11("name").notNull().unique(),
-      description: text11("description"),
-      createdAt: timestamp11("created_at").defaultNow().notNull()
+    rolesTable = pgTable12("roles", {
+      id: serial12("id").primaryKey(),
+      name: text12("name").notNull().unique(),
+      description: text12("description"),
+      createdAt: timestamp12("created_at").defaultNow().notNull()
     });
-    permissionsTable = pgTable11("permissions", {
-      id: serial11("id").primaryKey(),
-      key: text11("key").notNull().unique(),
-      description: text11("description"),
-      createdAt: timestamp11("created_at").defaultNow().notNull()
+    permissionsTable = pgTable12("permissions", {
+      id: serial12("id").primaryKey(),
+      key: text12("key").notNull().unique(),
+      description: text12("description"),
+      createdAt: timestamp12("created_at").defaultNow().notNull()
     });
-    rolePermissionsTable = pgTable11("role_permissions", {
-      id: serial11("id").primaryKey(),
-      roleId: integer12("role_id").notNull().references(() => rolesTable.id),
-      permissionId: integer12("permission_id").notNull().references(() => permissionsTable.id)
+    rolePermissionsTable = pgTable12("role_permissions", {
+      id: serial12("id").primaryKey(),
+      roleId: integer13("role_id").notNull().references(() => rolesTable.id),
+      permissionId: integer13("permission_id").notNull().references(() => permissionsTable.id)
     });
   }
 });
 
 // ../../lib/db/src/schema/shop.ts
-import { pgTable as pgTable12, text as text12, serial as serial12, timestamp as timestamp12, integer as integer13, boolean as boolean9, jsonb as jsonb7 } from "drizzle-orm/pg-core";
+import { pgTable as pgTable13, text as text13, serial as serial13, timestamp as timestamp13, integer as integer14, boolean as boolean9, jsonb as jsonb7 } from "drizzle-orm/pg-core";
 var shopItemsTable, userInventoryTable, battlePassTable, userBattlePassTable;
 var init_shop = __esm({
   "../../lib/db/src/schema/shop.ts"() {
     "use strict";
     init_users();
     init_ranking();
-    shopItemsTable = pgTable12("shop_items", {
-      id: serial12("id").primaryKey(),
-      name: text12("name").notNull(),
-      description: text12("description").notNull(),
-      type: text12("type").notNull(),
-      priceCoins: integer13("price_coins").notNull().default(0),
-      pricePremium: integer13("price_premium").notNull().default(0),
-      rarity: text12("rarity").notNull().default("common"),
-      iconUrl: text12("icon_url"),
+    shopItemsTable = pgTable13("shop_items", {
+      id: serial13("id").primaryKey(),
+      name: text13("name").notNull(),
+      description: text13("description").notNull(),
+      type: text13("type").notNull(),
+      priceCoins: integer14("price_coins").notNull().default(0),
+      pricePremium: integer14("price_premium").notNull().default(0),
+      rarity: text13("rarity").notNull().default("common"),
+      iconUrl: text13("icon_url"),
       isLimited: boolean9("is_limited").notNull().default(false),
-      availableUntil: timestamp12("available_until", { withTimezone: true }),
-      createdAt: timestamp12("created_at", { withTimezone: true }).notNull().defaultNow()
+      availableUntil: timestamp13("available_until", { withTimezone: true }),
+      createdAt: timestamp13("created_at", { withTimezone: true }).notNull().defaultNow()
     });
-    userInventoryTable = pgTable12("user_inventory", {
-      id: serial12("id").primaryKey(),
-      userId: integer13("user_id").notNull().references(() => usersTable.id),
-      itemId: integer13("item_id").notNull().references(() => shopItemsTable.id),
-      quantity: integer13("quantity").notNull().default(1),
+    userInventoryTable = pgTable13("user_inventory", {
+      id: serial13("id").primaryKey(),
+      userId: integer14("user_id").notNull().references(() => usersTable.id),
+      itemId: integer14("item_id").notNull().references(() => shopItemsTable.id),
+      quantity: integer14("quantity").notNull().default(1),
       equipped: boolean9("equipped").notNull().default(false),
-      purchasedAt: timestamp12("purchased_at", { withTimezone: true }).notNull().defaultNow()
+      purchasedAt: timestamp13("purchased_at", { withTimezone: true }).notNull().defaultNow()
     });
-    battlePassTable = pgTable12("battle_pass", {
-      id: serial12("id").primaryKey(),
-      seasonId: integer13("season_id").notNull().references(() => seasonsTable.id),
-      name: text12("name").notNull(),
-      level: integer13("level").notNull(),
-      xpRequired: integer13("xp_required").notNull(),
+    battlePassTable = pgTable13("battle_pass", {
+      id: serial13("id").primaryKey(),
+      seasonId: integer14("season_id").notNull().references(() => seasonsTable.id),
+      name: text13("name").notNull(),
+      level: integer14("level").notNull(),
+      xpRequired: integer14("xp_required").notNull(),
       freeReward: jsonb7("free_reward"),
       premiumReward: jsonb7("premium_reward")
     });
-    userBattlePassTable = pgTable12("user_battle_pass", {
-      id: serial12("id").primaryKey(),
-      userId: integer13("user_id").notNull().references(() => usersTable.id),
-      battlePassId: integer13("battle_pass_id").notNull().references(() => battlePassTable.id),
-      currentLevel: integer13("current_level").notNull().default(0),
-      currentXp: integer13("current_xp").notNull().default(0),
+    userBattlePassTable = pgTable13("user_battle_pass", {
+      id: serial13("id").primaryKey(),
+      userId: integer14("user_id").notNull().references(() => usersTable.id),
+      battlePassId: integer14("battle_pass_id").notNull().references(() => battlePassTable.id),
+      currentLevel: integer14("current_level").notNull().default(0),
+      currentXp: integer14("current_xp").notNull().default(0),
       isPremium: boolean9("is_premium").notNull().default(false),
       claimedRewards: jsonb7("claimed_rewards").default([])
     });
@@ -36166,290 +36182,290 @@ var init_shop = __esm({
 });
 
 // ../../lib/db/src/schema/skill_trees.ts
-import { pgTable as pgTable13, text as text13, serial as serial13, timestamp as timestamp13, integer as integer14, boolean as boolean10, jsonb as jsonb8 } from "drizzle-orm/pg-core";
+import { pgTable as pgTable14, text as text14, serial as serial14, timestamp as timestamp14, integer as integer15, boolean as boolean10, jsonb as jsonb8 } from "drizzle-orm/pg-core";
 var skillTreesTable, playerSkillsTable;
 var init_skill_trees = __esm({
   "../../lib/db/src/schema/skill_trees.ts"() {
     "use strict";
     init_users();
-    skillTreesTable = pgTable13("skill_trees", {
-      id: serial13("id").primaryKey(),
-      name: text13("name").notNull(),
-      description: text13("description").notNull(),
-      branch: text13("branch").notNull(),
-      level: integer14("level").notNull(),
-      maxLevel: integer14("max_level").notNull(),
-      iconUrl: text13("icon_url").notNull(),
-      parentSkillId: integer14("parent_skill_id"),
-      xpCost: integer14("xp_cost").notNull(),
+    skillTreesTable = pgTable14("skill_trees", {
+      id: serial14("id").primaryKey(),
+      name: text14("name").notNull(),
+      description: text14("description").notNull(),
+      branch: text14("branch").notNull(),
+      level: integer15("level").notNull(),
+      maxLevel: integer15("max_level").notNull(),
+      iconUrl: text14("icon_url").notNull(),
+      parentSkillId: integer15("parent_skill_id"),
+      xpCost: integer15("xp_cost").notNull(),
       statBonus: jsonb8("stat_bonus").default({})
     });
-    playerSkillsTable = pgTable13("player_skills", {
-      id: serial13("id").primaryKey(),
-      userId: integer14("user_id").notNull().references(() => usersTable.id),
-      skillId: integer14("skill_id").notNull().references(() => skillTreesTable.id),
-      currentLevel: integer14("current_level").notNull().default(0),
+    playerSkillsTable = pgTable14("player_skills", {
+      id: serial14("id").primaryKey(),
+      userId: integer15("user_id").notNull().references(() => usersTable.id),
+      skillId: integer15("skill_id").notNull().references(() => skillTreesTable.id),
+      currentLevel: integer15("current_level").notNull().default(0),
       unlocked: boolean10("unlocked").notNull().default(false),
-      unlockedAt: timestamp13("unlocked_at", { withTimezone: true })
+      unlockedAt: timestamp14("unlocked_at", { withTimezone: true })
     });
   }
 });
 
 // ../../lib/db/src/schema/stage_matches.ts
-import { pgTable as pgTable14, serial as serial14, integer as integer15, jsonb as jsonb9, timestamp as timestamp14, varchar } from "drizzle-orm/pg-core";
+import { pgTable as pgTable15, serial as serial15, integer as integer16, jsonb as jsonb9, timestamp as timestamp15, varchar } from "drizzle-orm/pg-core";
 var stageMatchesTable;
 var init_stage_matches = __esm({
   "../../lib/db/src/schema/stage_matches.ts"() {
     "use strict";
-    stageMatchesTable = pgTable14("stage_matches", {
-      id: serial14("id").primaryKey(),
-      matchId: integer15("match_id").notNull().unique(),
-      hostId: integer15("host_id").notNull(),
+    stageMatchesTable = pgTable15("stage_matches", {
+      id: serial15("id").primaryKey(),
+      matchId: integer16("match_id").notNull().unique(),
+      hostId: integer16("host_id").notNull(),
       roomCode: varchar("room_code", { length: 10 }).notNull(),
       state: jsonb9("state").notNull(),
-      createdAt: timestamp14("created_at").defaultNow().notNull(),
-      updatedAt: timestamp14("updated_at").defaultNow().notNull()
+      createdAt: timestamp15("created_at").defaultNow().notNull(),
+      updatedAt: timestamp15("updated_at").defaultNow().notNull()
     });
   }
 });
 
 // ../../lib/db/src/schema/story.ts
-import { pgTable as pgTable15, text as text14, serial as serial15, timestamp as timestamp15, integer as integer16, boolean as boolean11, jsonb as jsonb10 } from "drizzle-orm/pg-core";
+import { pgTable as pgTable16, text as text15, serial as serial16, timestamp as timestamp16, integer as integer17, boolean as boolean11, jsonb as jsonb10 } from "drizzle-orm/pg-core";
 var chaptersTable, storyNodesTable, storyChoicesTable, playerProgressTable, loreEntriesTable, userLoreUnlocksTable;
 var init_story = __esm({
   "../../lib/db/src/schema/story.ts"() {
     "use strict";
     init_users();
-    chaptersTable = pgTable15("chapters", {
-      id: serial15("id").primaryKey(),
-      title: text14("title").notNull(),
-      description: text14("description").notNull(),
-      orderIndex: integer16("order_index").notNull().default(0),
-      unlockLevel: integer16("unlock_level").notNull().default(1),
-      coverImageUrl: text14("cover_image_url"),
-      createdAt: timestamp15("created_at", { withTimezone: true }).notNull().defaultNow()
+    chaptersTable = pgTable16("chapters", {
+      id: serial16("id").primaryKey(),
+      title: text15("title").notNull(),
+      description: text15("description").notNull(),
+      orderIndex: integer17("order_index").notNull().default(0),
+      unlockLevel: integer17("unlock_level").notNull().default(1),
+      coverImageUrl: text15("cover_image_url"),
+      createdAt: timestamp16("created_at", { withTimezone: true }).notNull().defaultNow()
     });
-    storyNodesTable = pgTable15("story_nodes", {
-      id: serial15("id").primaryKey(),
-      chapterId: integer16("chapter_id").notNull().references(() => chaptersTable.id),
-      type: text14("type").notNull().default("dialogue"),
-      content: text14("content").notNull(),
-      speakerName: text14("speaker_name"),
-      mediaUrl: text14("media_url"),
-      orderIndex: integer16("order_index").notNull().default(0)
+    storyNodesTable = pgTable16("story_nodes", {
+      id: serial16("id").primaryKey(),
+      chapterId: integer17("chapter_id").notNull().references(() => chaptersTable.id),
+      type: text15("type").notNull().default("dialogue"),
+      content: text15("content").notNull(),
+      speakerName: text15("speaker_name"),
+      mediaUrl: text15("media_url"),
+      orderIndex: integer17("order_index").notNull().default(0)
     });
-    storyChoicesTable = pgTable15("story_choices", {
-      id: serial15("id").primaryKey(),
-      nodeId: integer16("node_id").notNull().references(() => storyNodesTable.id),
-      text: text14("text").notNull(),
-      nextNodeId: integer16("next_node_id"),
-      consequenceFlag: text14("consequence_flag")
+    storyChoicesTable = pgTable16("story_choices", {
+      id: serial16("id").primaryKey(),
+      nodeId: integer17("node_id").notNull().references(() => storyNodesTable.id),
+      text: text15("text").notNull(),
+      nextNodeId: integer17("next_node_id"),
+      consequenceFlag: text15("consequence_flag")
     });
-    playerProgressTable = pgTable15("player_progress", {
-      id: serial15("id").primaryKey(),
-      userId: integer16("user_id").notNull().references(() => usersTable.id).unique(),
-      currentChapterId: integer16("current_chapter_id").notNull().default(1),
-      currentNodeId: integer16("current_node_id").notNull().default(1),
-      reputationScore: integer16("reputation_score").notNull().default(0),
+    playerProgressTable = pgTable16("player_progress", {
+      id: serial16("id").primaryKey(),
+      userId: integer17("user_id").notNull().references(() => usersTable.id).unique(),
+      currentChapterId: integer17("current_chapter_id").notNull().default(1),
+      currentNodeId: integer17("current_node_id").notNull().default(1),
+      reputationScore: integer17("reputation_score").notNull().default(0),
       storyFlags: jsonb10("story_flags").default({}),
-      updatedAt: timestamp15("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
+      updatedAt: timestamp16("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
     });
-    loreEntriesTable = pgTable15("lore_entries", {
-      id: serial15("id").primaryKey(),
-      title: text14("title").notNull(),
-      content: text14("content").notNull(),
-      category: text14("category").notNull().default("world"),
+    loreEntriesTable = pgTable16("lore_entries", {
+      id: serial16("id").primaryKey(),
+      title: text15("title").notNull(),
+      content: text15("content").notNull(),
+      category: text15("category").notNull().default("world"),
       isSecret: boolean11("is_secret").notNull().default(false),
-      unlockCondition: text14("unlock_condition"),
-      createdAt: timestamp15("created_at", { withTimezone: true }).notNull().defaultNow()
+      unlockCondition: text15("unlock_condition"),
+      createdAt: timestamp16("created_at", { withTimezone: true }).notNull().defaultNow()
     });
-    userLoreUnlocksTable = pgTable15("user_lore_unlocks", {
-      id: serial15("id").primaryKey(),
-      userId: integer16("user_id").notNull().references(() => usersTable.id),
-      loreId: integer16("lore_id").notNull().references(() => loreEntriesTable.id),
-      unlockedAt: timestamp15("unlocked_at", { withTimezone: true }).notNull().defaultNow()
+    userLoreUnlocksTable = pgTable16("user_lore_unlocks", {
+      id: serial16("id").primaryKey(),
+      userId: integer17("user_id").notNull().references(() => usersTable.id),
+      loreId: integer17("lore_id").notNull().references(() => loreEntriesTable.id),
+      unlockedAt: timestamp16("unlocked_at", { withTimezone: true }).notNull().defaultNow()
     });
   }
 });
 
 // ../../lib/db/src/schema/tactical.ts
-import { pgTable as pgTable16, text as text15, serial as serial16, timestamp as timestamp16, integer as integer17, jsonb as jsonb11 } from "drizzle-orm/pg-core";
+import { pgTable as pgTable17, text as text16, serial as serial17, timestamp as timestamp17, integer as integer18, jsonb as jsonb11 } from "drizzle-orm/pg-core";
 var tacticalModulesTable, userTacticalModulesTable;
 var init_tactical = __esm({
   "../../lib/db/src/schema/tactical.ts"() {
     "use strict";
     init_users();
-    tacticalModulesTable = pgTable16("tactical_modules", {
-      id: serial16("id").primaryKey(),
-      moduleId: text15("module_id").notNull().unique(),
-      name: text15("name").notNull(),
-      description: text15("description").notNull(),
-      energyCost: integer17("energy_cost").notNull().default(1),
-      category: text15("category").notNull().default("assist"),
-      rarity: text15("rarity").notNull().default("common"),
-      createdAt: timestamp16("created_at", { withTimezone: true }).notNull().defaultNow()
+    tacticalModulesTable = pgTable17("tactical_modules", {
+      id: serial17("id").primaryKey(),
+      moduleId: text16("module_id").notNull().unique(),
+      name: text16("name").notNull(),
+      description: text16("description").notNull(),
+      energyCost: integer18("energy_cost").notNull().default(1),
+      category: text16("category").notNull().default("assist"),
+      rarity: text16("rarity").notNull().default("common"),
+      createdAt: timestamp17("created_at", { withTimezone: true }).notNull().defaultNow()
     });
-    userTacticalModulesTable = pgTable16("user_tactical_modules", {
-      id: serial16("id").primaryKey(),
-      userId: integer17("user_id").notNull().references(() => usersTable.id).unique(),
-      tacticalEnergy: integer17("tactical_energy").notNull().default(10),
-      maxEnergy: integer17("max_energy").notNull().default(10),
+    userTacticalModulesTable = pgTable17("user_tactical_modules", {
+      id: serial17("id").primaryKey(),
+      userId: integer18("user_id").notNull().references(() => usersTable.id).unique(),
+      tacticalEnergy: integer18("tactical_energy").notNull().default(10),
+      maxEnergy: integer18("max_energy").notNull().default(10),
       modules: jsonb11("modules").notNull().default({}),
-      lastEnergyRegen: timestamp16("last_energy_regen", { withTimezone: true }).notNull().defaultNow(),
-      updatedAt: timestamp16("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
+      lastEnergyRegen: timestamp17("last_energy_regen", { withTimezone: true }).notNull().defaultNow(),
+      updatedAt: timestamp17("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
     });
   }
 });
 
 // ../../lib/db/src/schema/team_ops.ts
-import { pgTable as pgTable17, text as text16, serial as serial17, timestamp as timestamp17, integer as integer18, boolean as boolean12, jsonb as jsonb12 } from "drizzle-orm/pg-core";
+import { pgTable as pgTable18, text as text17, serial as serial18, timestamp as timestamp18, integer as integer19, boolean as boolean12, jsonb as jsonb12 } from "drizzle-orm/pg-core";
 var teamOperationsTable, teamMembersTable, teamMatchesTable, teamMatchScoresTable, teamMatchQuestionsTable;
 var init_team_ops = __esm({
   "../../lib/db/src/schema/team_ops.ts"() {
     "use strict";
     init_users();
-    teamOperationsTable = pgTable17("team_operations", {
-      id: serial17("id").primaryKey(),
-      name: text16("name").notNull(),
-      emblem: text16("emblem").notNull().default("default"),
-      color: text16("color").notNull().default("blue"),
-      maxPlayers: integer18("max_players").notNull().default(4),
-      captainId: integer18("captain_id").notNull().references(() => usersTable.id),
+    teamOperationsTable = pgTable18("team_operations", {
+      id: serial18("id").primaryKey(),
+      name: text17("name").notNull(),
+      emblem: text17("emblem").notNull().default("default"),
+      color: text17("color").notNull().default("blue"),
+      maxPlayers: integer19("max_players").notNull().default(4),
+      captainId: integer19("captain_id").notNull().references(() => usersTable.id),
       tacticalLoadout: jsonb12("tactical_loadout").notNull().default([]),
-      createdAt: timestamp17("created_at", { withTimezone: true }).notNull().defaultNow()
+      createdAt: timestamp18("created_at", { withTimezone: true }).notNull().defaultNow()
     });
-    teamMembersTable = pgTable17("team_members", {
-      id: serial17("id").primaryKey(),
-      teamId: integer18("team_id").notNull().references(() => teamOperationsTable.id),
-      userId: integer18("user_id").notNull().references(() => usersTable.id),
+    teamMembersTable = pgTable18("team_members", {
+      id: serial18("id").primaryKey(),
+      teamId: integer19("team_id").notNull().references(() => teamOperationsTable.id),
+      userId: integer19("user_id").notNull().references(() => usersTable.id),
       isReady: boolean12("is_ready").notNull().default(false),
-      joinedAt: timestamp17("joined_at", { withTimezone: true }).notNull().defaultNow()
+      joinedAt: timestamp18("joined_at", { withTimezone: true }).notNull().defaultNow()
     });
-    teamMatchesTable = pgTable17("team_matches", {
-      id: serial17("id").primaryKey(),
-      roomCode: text16("room_code").notNull().unique(),
-      type: text16("type").notNull().default("battle"),
-      status: text16("status").notNull().default("lobby"),
-      mode: text16("mode").notNull().default("live"),
+    teamMatchesTable = pgTable18("team_matches", {
+      id: serial18("id").primaryKey(),
+      roomCode: text17("room_code").notNull().unique(),
+      type: text17("type").notNull().default("battle"),
+      status: text17("status").notNull().default("lobby"),
+      mode: text17("mode").notNull().default("live"),
       domainOrder: jsonb12("domain_order").notNull().default([]),
-      domainMode: text16("domain_mode").notNull().default("randomized"),
-      difficulty: text16("difficulty").notNull().default("agent"),
-      hostId: integer18("host_id").references(() => usersTable.id),
-      currentDomain: text16("current_domain"),
-      currentQuestion: integer18("current_question").notNull().default(0),
-      totalQuestions: integer18("total_questions").notNull().default(10),
-      createdAt: timestamp17("created_at", { withTimezone: true }).notNull().defaultNow(),
-      startedAt: timestamp17("started_at", { withTimezone: true }),
-      finishedAt: timestamp17("finished_at", { withTimezone: true })
+      domainMode: text17("domain_mode").notNull().default("randomized"),
+      difficulty: text17("difficulty").notNull().default("agent"),
+      hostId: integer19("host_id").references(() => usersTable.id),
+      currentDomain: text17("current_domain"),
+      currentQuestion: integer19("current_question").notNull().default(0),
+      totalQuestions: integer19("total_questions").notNull().default(10),
+      createdAt: timestamp18("created_at", { withTimezone: true }).notNull().defaultNow(),
+      startedAt: timestamp18("started_at", { withTimezone: true }),
+      finishedAt: timestamp18("finished_at", { withTimezone: true })
     });
-    teamMatchScoresTable = pgTable17("team_match_scores", {
-      id: serial17("id").primaryKey(),
-      matchId: integer18("match_id").notNull().references(() => teamMatchesTable.id),
-      teamId: integer18("team_id").notNull().references(() => teamOperationsTable.id),
-      score: integer18("score").notNull().default(0),
-      correctAnswers: integer18("correct_answers").notNull().default(0),
-      totalAnswers: integer18("total_answers").notNull().default(0),
+    teamMatchScoresTable = pgTable18("team_match_scores", {
+      id: serial18("id").primaryKey(),
+      matchId: integer19("match_id").notNull().references(() => teamMatchesTable.id),
+      teamId: integer19("team_id").notNull().references(() => teamOperationsTable.id),
+      score: integer19("score").notNull().default(0),
+      correctAnswers: integer19("correct_answers").notNull().default(0),
+      totalAnswers: integer19("total_answers").notNull().default(0),
       fastestAnswer: boolean12("fastest_answer").notNull().default(false),
       assistsUsed: jsonb12("assists_used").notNull().default([]),
-      currentStreak: integer18("current_streak").notNull().default(0),
+      currentStreak: integer19("current_streak").notNull().default(0),
       perfectCategories: jsonb12("perfect_categories").notNull().default([])
     });
-    teamMatchQuestionsTable = pgTable17("team_match_questions", {
-      id: serial17("id").primaryKey(),
-      matchId: integer18("match_id").notNull().references(() => teamMatchesTable.id),
-      questionIndex: integer18("question_index").notNull(),
-      questionId: integer18("question_id").notNull(),
-      domain: text16("domain").notNull(),
-      answeredBy: integer18("answered_by").references(() => teamOperationsTable.id),
+    teamMatchQuestionsTable = pgTable18("team_match_questions", {
+      id: serial18("id").primaryKey(),
+      matchId: integer19("match_id").notNull().references(() => teamMatchesTable.id),
+      questionIndex: integer19("question_index").notNull(),
+      questionId: integer19("question_id").notNull(),
+      domain: text17("domain").notNull(),
+      answeredBy: integer19("answered_by").references(() => teamOperationsTable.id),
       isCorrect: boolean12("is_correct"),
-      responseTimeMs: integer18("response_time_ms"),
-      buzzerTeam: integer18("buzzer_team").references(() => teamOperationsTable.id),
-      createdAt: timestamp17("created_at", { withTimezone: true }).notNull().defaultNow()
+      responseTimeMs: integer19("response_time_ms"),
+      buzzerTeam: integer19("buzzer_team").references(() => teamOperationsTable.id),
+      createdAt: timestamp18("created_at", { withTimezone: true }).notNull().defaultNow()
     });
   }
 });
 
 // ../../lib/db/src/schema/tournaments.ts
-import { pgTable as pgTable18, text as text17, serial as serial18, timestamp as timestamp18, integer as integer19, boolean as boolean13 } from "drizzle-orm/pg-core";
+import { pgTable as pgTable19, text as text18, serial as serial19, timestamp as timestamp19, integer as integer20, boolean as boolean13 } from "drizzle-orm/pg-core";
 var tournamentsTable, tournamentParticipantsTable, tournamentMatchesTable;
 var init_tournaments = __esm({
   "../../lib/db/src/schema/tournaments.ts"() {
     "use strict";
     init_users();
-    tournamentsTable = pgTable18("tournaments", {
-      id: serial18("id").primaryKey(),
-      name: text17("name").notNull(),
-      description: text17("description").notNull(),
-      type: text17("type").notNull(),
-      status: text17("status").notNull().default("registration"),
-      maxParticipants: integer19("max_participants").notNull(),
-      minLevel: integer19("min_level").notNull().default(1),
-      entryFee: integer19("entry_fee").notNull().default(0),
-      rewardXp: integer19("reward_xp").notNull(),
-      rewardCoins: integer19("reward_coins").notNull(),
-      rewardItem: text17("reward_item"),
-      startDate: timestamp18("start_date", { withTimezone: true }).notNull(),
-      endDate: timestamp18("end_date", { withTimezone: true }).notNull(),
-      createdAt: timestamp18("created_at", { withTimezone: true }).notNull().defaultNow()
+    tournamentsTable = pgTable19("tournaments", {
+      id: serial19("id").primaryKey(),
+      name: text18("name").notNull(),
+      description: text18("description").notNull(),
+      type: text18("type").notNull(),
+      status: text18("status").notNull().default("registration"),
+      maxParticipants: integer20("max_participants").notNull(),
+      minLevel: integer20("min_level").notNull().default(1),
+      entryFee: integer20("entry_fee").notNull().default(0),
+      rewardXp: integer20("reward_xp").notNull(),
+      rewardCoins: integer20("reward_coins").notNull(),
+      rewardItem: text18("reward_item"),
+      startDate: timestamp19("start_date", { withTimezone: true }).notNull(),
+      endDate: timestamp19("end_date", { withTimezone: true }).notNull(),
+      createdAt: timestamp19("created_at", { withTimezone: true }).notNull().defaultNow()
     });
-    tournamentParticipantsTable = pgTable18("tournament_participants", {
-      id: serial18("id").primaryKey(),
-      tournamentId: integer19("tournament_id").notNull().references(() => tournamentsTable.id),
-      userId: integer19("user_id").notNull().references(() => usersTable.id),
-      seed: integer19("seed").notNull().default(0),
-      currentRound: integer19("current_round").notNull().default(0),
+    tournamentParticipantsTable = pgTable19("tournament_participants", {
+      id: serial19("id").primaryKey(),
+      tournamentId: integer20("tournament_id").notNull().references(() => tournamentsTable.id),
+      userId: integer20("user_id").notNull().references(() => usersTable.id),
+      seed: integer20("seed").notNull().default(0),
+      currentRound: integer20("current_round").notNull().default(0),
       isEliminated: boolean13("is_eliminated").notNull().default(false),
-      finalPosition: integer19("final_position"),
-      joinedAt: timestamp18("joined_at", { withTimezone: true }).notNull().defaultNow()
+      finalPosition: integer20("final_position"),
+      joinedAt: timestamp19("joined_at", { withTimezone: true }).notNull().defaultNow()
     });
-    tournamentMatchesTable = pgTable18("tournament_matches", {
-      id: serial18("id").primaryKey(),
-      tournamentId: integer19("tournament_id").notNull().references(() => tournamentsTable.id),
-      round: integer19("round").notNull(),
-      matchIndex: integer19("match_index").notNull(),
-      player1Id: integer19("player1_id").references(() => usersTable.id),
-      player2Id: integer19("player2_id").references(() => usersTable.id),
-      winnerId: integer19("winner_id").references(() => usersTable.id),
-      status: text17("status").notNull().default("pending"),
-      scheduledAt: timestamp18("scheduled_at", { withTimezone: true }),
-      completedAt: timestamp18("completed_at", { withTimezone: true })
+    tournamentMatchesTable = pgTable19("tournament_matches", {
+      id: serial19("id").primaryKey(),
+      tournamentId: integer20("tournament_id").notNull().references(() => tournamentsTable.id),
+      round: integer20("round").notNull(),
+      matchIndex: integer20("match_index").notNull(),
+      player1Id: integer20("player1_id").references(() => usersTable.id),
+      player2Id: integer20("player2_id").references(() => usersTable.id),
+      winnerId: integer20("winner_id").references(() => usersTable.id),
+      status: text18("status").notNull().default("pending"),
+      scheduledAt: timestamp19("scheduled_at", { withTimezone: true }),
+      completedAt: timestamp19("completed_at", { withTimezone: true })
     });
   }
 });
 
 // ../../lib/db/src/schema/world_events.ts
-import { pgTable as pgTable19, text as text18, serial as serial19, timestamp as timestamp19, integer as integer20, boolean as boolean14, jsonb as jsonb13 } from "drizzle-orm/pg-core";
+import { pgTable as pgTable20, text as text19, serial as serial20, timestamp as timestamp20, integer as integer21, boolean as boolean14, jsonb as jsonb13 } from "drizzle-orm/pg-core";
 var worldEventsTable, worldEventParticipantsTable, worldStateTable;
 var init_world_events = __esm({
   "../../lib/db/src/schema/world_events.ts"() {
     "use strict";
     init_users();
-    worldEventsTable = pgTable19("world_events", {
-      id: serial19("id").primaryKey(),
-      title: text18("title").notNull(),
-      description: text18("description").notNull(),
-      type: text18("type").notNull(),
-      status: text18("status").notNull().default("upcoming"),
-      startAt: timestamp19("start_at", { withTimezone: true }).notNull(),
-      endAt: timestamp19("end_at", { withTimezone: true }).notNull(),
+    worldEventsTable = pgTable20("world_events", {
+      id: serial20("id").primaryKey(),
+      title: text19("title").notNull(),
+      description: text19("description").notNull(),
+      type: text19("type").notNull(),
+      status: text19("status").notNull().default("upcoming"),
+      startAt: timestamp20("start_at", { withTimezone: true }).notNull(),
+      endAt: timestamp20("end_at", { withTimezone: true }).notNull(),
       conditions: jsonb13("conditions").default({}),
       rewards: jsonb13("rewards").default({}),
-      narrative: text18("narrative"),
-      createdAt: timestamp19("created_at", { withTimezone: true }).notNull().defaultNow()
+      narrative: text19("narrative"),
+      createdAt: timestamp20("created_at", { withTimezone: true }).notNull().defaultNow()
     });
-    worldEventParticipantsTable = pgTable19("world_event_participants", {
-      id: serial19("id").primaryKey(),
-      eventId: integer20("event_id").notNull().references(() => worldEventsTable.id),
-      userId: integer20("user_id").notNull().references(() => usersTable.id),
-      contribution: integer20("contribution").notNull().default(0),
+    worldEventParticipantsTable = pgTable20("world_event_participants", {
+      id: serial20("id").primaryKey(),
+      eventId: integer21("event_id").notNull().references(() => worldEventsTable.id),
+      userId: integer21("user_id").notNull().references(() => usersTable.id),
+      contribution: integer21("contribution").notNull().default(0),
       rewardsClaimed: boolean14("rewards_claimed").notNull().default(false),
-      joinedAt: timestamp19("joined_at", { withTimezone: true }).notNull().defaultNow()
+      joinedAt: timestamp20("joined_at", { withTimezone: true }).notNull().defaultNow()
     });
-    worldStateTable = pgTable19("world_state", {
-      id: serial19("id").primaryKey(),
-      key: text18("key").notNull().unique(),
+    worldStateTable = pgTable20("world_state", {
+      id: serial20("id").primaryKey(),
+      key: text19("key").notNull().unique(),
       value: jsonb13("value").notNull(),
-      updatedAt: timestamp19("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
+      updatedAt: timestamp20("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
     });
   }
 });
@@ -36484,6 +36500,7 @@ __export(schema_exports, {
   questionsTable: () => questionsTable,
   rankingsTable: () => rankingsTable,
   rateLimitTable: () => rateLimitTable,
+  rateLimitsTable: () => rateLimitsTable,
   rolePermissionsTable: () => rolePermissionsTable,
   rolesTable: () => rolesTable,
   seasonsTable: () => seasonsTable,
@@ -36527,6 +36544,7 @@ var init_schema = __esm({
     init_missions();
     init_questions();
     init_ranking();
+    init_rate_limits();
     init_roles();
     init_shop();
     init_skill_trees();
@@ -36573,6 +36591,7 @@ __export(src_exports, {
   questionsTable: () => questionsTable,
   rankingsTable: () => rankingsTable,
   rateLimitTable: () => rateLimitTable,
+  rateLimitsTable: () => rateLimitsTable,
   rolePermissionsTable: () => rolePermissionsTable,
   rolesTable: () => rolesTable,
   seasonsTable: () => seasonsTable,
@@ -40834,7 +40853,7 @@ var require_pino = __commonJS({
         redact,
         crlf,
         serializers: serializers2,
-        timestamp: timestamp20,
+        timestamp: timestamp21,
         messageKey,
         errorKey,
         nestedKey,
@@ -40884,7 +40903,7 @@ var require_pino = __commonJS({
           chindings = coreChindings(Object.assign({}, base, { name }));
         }
       }
-      const time4 = timestamp20 instanceof Function ? timestamp20 : timestamp20 ? epochTime : nullTime;
+      const time4 = timestamp21 instanceof Function ? timestamp21 : timestamp21 ? epochTime : nullTime;
       const timeSliceIndex = time4().indexOf(":") + 1;
       if (useOnlyCustomLevels && !customLevels) throw Error("customLevels is required if useOnlyCustomLevels is set true");
       if (mixin && typeof mixin !== "function") throw Error(`Unknown mixin type "${typeof mixin}" - expected "function"`);
@@ -40949,13 +40968,202 @@ var require_pino = __commonJS({
   }
 });
 
+// ../../lib/game-engine/src/achievements.ts
+import { eq as eq13 } from "drizzle-orm";
+function evaluateCondition(condition, stats, context) {
+  const totalGamesMatch = condition.match(/^total_games_(\d+)$/);
+  if (totalGamesMatch) return stats.totalGames >= parseInt(totalGamesMatch[1]);
+  const levelMatch = condition.match(/^level_(\d+)$/);
+  if (levelMatch) return stats.level >= parseInt(levelMatch[1]);
+  const streakMatch = condition.match(/^streak_(\d+)$/);
+  if (streakMatch) return stats.streak >= parseInt(streakMatch[1]);
+  if (condition === "speed_5s") {
+    const answerTime = context.answerTimeMs;
+    return typeof answerTime === "number" && answerTime < 5e3;
+  }
+  if (condition === "rank_silver") return RANK_ORDER.indexOf(stats.rankTier) >= RANK_ORDER.indexOf("Silver");
+  if (condition === "rank_legend") return RANK_ORDER.indexOf(stats.rankTier) >= RANK_ORDER.indexOf("Legend");
+  const prestigeMatch = condition.match(/^prestige_(\d+)$/);
+  if (prestigeMatch) return stats.prestigeLevel >= parseInt(prestigeMatch[1]);
+  const pvpMatch = condition.match(/^pvp_wins_(\d+)$/);
+  if (pvpMatch) return stats.wins >= parseInt(pvpMatch[1]);
+  const chapterMatch = condition.match(/^chapter_(\d+)_complete$/);
+  if (chapterMatch) {
+    return context.completedChapters?.includes(parseInt(chapterMatch[1])) ?? false;
+  }
+  if (condition === "perfect_5") return stats.streak >= 5;
+  if (condition === "speed_run") {
+    const opTime = context.operationTimeMs;
+    return typeof opTime === "number" && opTime < 3e4;
+  }
+  const bpMatch = condition.match(/^battlepass_(\d+)$/);
+  if (bpMatch) {
+    return (context.battlePassLevel ?? 0) >= parseInt(bpMatch[1]);
+  }
+  const skillsMatch = condition.match(/^skills_(\d+)$/);
+  if (skillsMatch) {
+    return (context.skillCount ?? 0) >= parseInt(skillsMatch[1]);
+  }
+  const shopMatch = condition.match(/^shop_items_(\d+)$/);
+  if (shopMatch) {
+    return (context.shopPurchases ?? 0) >= parseInt(shopMatch[1]);
+  }
+  if (condition === "all_lore") return context.allLoreUnlocked === true;
+  if (condition === "all_characters") return context.allCharactersMet === true;
+  if (condition === "event_contribute") return context.eventContributed === true;
+  if (condition === "tournament_win") {
+    return (context.tournamentWins ?? 0) > 0;
+  }
+  return false;
+}
+async function checkAchievements(userId, context = {}) {
+  if (!userId) return;
+  try {
+    const allAchievements = await db.select().from(achievementsTable);
+    if (!allAchievements.length) return;
+    const unlocked = await db.select({ achievementId: userAchievementsTable.achievementId }).from(userAchievementsTable).where(eq13(userAchievementsTable.userId, userId));
+    const unlockedIds = new Set(unlocked.map((u) => u.achievementId));
+    const stats = await db.select().from(userStatsTable).where(eq13(userStatsTable.userId, userId)).limit(1);
+    const userStats = stats[0];
+    if (!userStats) return;
+    const userStatsRecord = {
+      totalGames: userStats.totalGames,
+      level: userStats.level,
+      streak: userStats.streak,
+      rankTier: userStats.rankTier,
+      prestigeLevel: userStats.prestigeLevel,
+      wins: userStats.wins
+    };
+    for (const achievement of allAchievements) {
+      if (unlockedIds.has(achievement.id)) continue;
+      if (!achievement.condition) continue;
+      const met = evaluateCondition(achievement.condition, userStatsRecord, context);
+      if (!met) continue;
+      await db.insert(userAchievementsTable).values({
+        userId,
+        achievementId: achievement.id
+      });
+      if (achievement.rewardXp > 0) {
+        await getPool().query(
+          `UPDATE user_stats SET xp = xp + $1 WHERE user_id = $2`,
+          [achievement.rewardXp, userId]
+        );
+      }
+      eventBus.emitSync("ACHIEVEMENT_UNLOCKED", {
+        userId,
+        data: {
+          achievementId: achievement.id,
+          name: achievement.name,
+          rewardXp: achievement.rewardXp
+        }
+      });
+      eventBus.emitSync("XP_EARNED", {
+        userId,
+        data: { amount: achievement.rewardXp, source: "achievement", achievementId: achievement.id }
+      });
+    }
+  } catch (e) {
+    console.error("[achievements] check failed:", e);
+  }
+}
+var RANK_ORDER;
+var init_achievements = __esm({
+  "../../lib/game-engine/src/achievements.ts"() {
+    "use strict";
+    init_src();
+    init_src();
+    init_events();
+    RANK_ORDER = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Legend"];
+  }
+});
+
+// ../../lib/game-engine/src/battlepass.ts
+async function awardBattlePassXp(userId, amount, source = "gameplay") {
+  if (!userId || amount <= 0) return;
+  try {
+    const pool3 = getPool();
+    let bp = await pool3.query(
+      `SELECT id, current_level, current_xp, is_premium FROM user_battle_pass WHERE user_id = $1`,
+      [userId]
+    );
+    let bpId;
+    let currentLevel;
+    let currentXp;
+    let isPremium;
+    if (bp.rows.length === 0) {
+      const insert = await pool3.query(
+        `INSERT INTO user_battle_pass (user_id, current_level, current_xp, is_premium)
+         VALUES ($1, 0, 0, false)
+         RETURNING id, current_level, current_xp, is_premium`,
+        [userId]
+      );
+      bpId = insert.rows[0].id;
+      currentLevel = 0;
+      currentXp = 0;
+      isPremium = false;
+    } else {
+      bpId = bp.rows[0].id;
+      currentLevel = bp.rows[0].current_level;
+      currentXp = bp.rows[0].current_xp;
+      isPremium = bp.rows[0].is_premium;
+    }
+    const maxLevel = 50;
+    let newXp = currentXp + amount;
+    let newLevel = currentLevel;
+    while (newLevel < maxLevel) {
+      const xpReq = (newLevel + 1) * 500;
+      if (newXp >= xpReq) {
+        newXp -= xpReq;
+        newLevel++;
+      } else {
+        break;
+      }
+    }
+    if (newLevel > maxLevel) newLevel = maxLevel;
+    if (newXp > (newLevel < maxLevel ? (newLevel + 1) * 500 : 0)) {
+      newXp = newLevel < maxLevel ? (newLevel + 1) * 500 : 0;
+    }
+    await pool3.query(
+      `UPDATE user_battle_pass SET current_level = $1, current_xp = $2 WHERE id = $3`,
+      [newLevel, newXp, bpId]
+    );
+    if (newLevel > currentLevel) {
+      eventBus.emitSync("LEVEL_UP", {
+        userId,
+        data: { previousLevel: currentLevel, newLevel, source: "battle_pass" }
+      });
+      eventBus.emitSync("XP_EARNED", {
+        userId,
+        data: { amount, source: `battle_pass_level_up_${newLevel}` }
+      });
+      await checkAchievements(userId, { battlePassLevel: newLevel });
+    }
+    eventBus.emitSync("XP_EARNED", {
+      userId,
+      data: { amount, source: `battle_pass_${source}` }
+    });
+  } catch (e) {
+    console.error("[battlepass] award failed:", e);
+  }
+}
+var init_battlepass = __esm({
+  "../../lib/game-engine/src/battlepass.ts"() {
+    "use strict";
+    init_src();
+    init_events();
+    init_achievements();
+  }
+});
+
 // ../../lib/game-engine/src/events.ts
-var EventBus, eventBus;
+var EventBus, eventBus, events_default;
 var init_events = __esm({
   "../../lib/game-engine/src/events.ts"() {
     "use strict";
     init_src();
     init_src();
+    init_achievements();
+    init_battlepass();
     EventBus = class {
       listeners = /* @__PURE__ */ new Map();
       on(type, listener) {
@@ -41006,7 +41214,7 @@ var init_events = __esm({
     });
     eventBus.on("ANSWER_CORRECT", async (event) => {
       if (!event.userId || !event.data) return;
-      const { xpAmount, questionDifficulty } = event.data;
+      const { xpAmount, answerTimeMs } = event.data;
       if (!xpAmount) return;
       try {
         await db.insert(xpLogTable).values({
@@ -41016,10 +41224,14 @@ var init_events = __esm({
         });
         await getPool().query(
           `UPDATE user_stats
-       SET xp = xp + $1, level = GREATEST(1, floor((xp + $1) / 500) + 1)
+       SET xp = xp + $1,
+           level = GREATEST(1, floor((xp + $1) / 500) + 1),
+           streak = streak + 1
        WHERE user_id = $2`,
           [xpAmount, event.userId]
         );
+        await checkAchievements(event.userId, { answerTimeMs });
+        await awardBattlePassXp(event.userId, Math.floor(xpAmount * 0.5), "correct_answer");
       } catch {
       }
     });
@@ -41051,22 +41263,366 @@ var init_events = __esm({
          WHERE user_id = $4`,
             [isWinner ? 1 : 0, isWinner ? 0 : 1, xpReward, team.userId]
           );
+          await checkAchievements(team.userId, { matchWinner: isWinner });
+          await awardBattlePassXp(team.userId, isWinner ? 50 : 25, "match_complete");
         } catch {
         }
       }
     });
+    events_default = eventBus;
   }
 });
 
 // ../../lib/game-engine/src/scoring.ts
+function calcLevel3(xp) {
+  return Math.max(1, Math.floor(xp / XP_PER_LEVEL4) + 1);
+}
+function getRankTier2(rankPoints) {
+  for (let i = RANK_TIERS.length - 1; i >= 0; i--) {
+    if (rankPoints >= RANK_TIERS[i].min) return RANK_TIERS[i].name;
+  }
+  return "Bronze";
+}
+function calculateScore(input) {
+  const baseXp = 10 * input.difficulty;
+  const speedBonus = input.timeSpentMs < 5e3 ? 20 : input.timeSpentMs < 1e4 ? 10 : 0;
+  const newStreak = input.streak + 1;
+  const streakBonus = newStreak >= 5 ? 15 : newStreak >= 3 ? 5 : 0;
+  const rebuzzMultiplier = input.isRebuzz ? 0.5 : 1;
+  const totalXp = Math.round((baseXp + speedBonus + streakBonus) * rebuzzMultiplier);
+  const points = Math.round((100 + speedBonus + streakBonus) * rebuzzMultiplier);
+  return { baseXp, speedBonus, streakBonus, totalXp, points };
+}
+function calculateStageScore(isCorrect, timeSpentMs, streak, wrongAttempts) {
+  if (!isCorrect) return { pointsGained: 0, streakBonus: 0, speedBonus: 0 };
+  const pointsMultiplier = wrongAttempts > 0 ? 0.5 : 1;
+  const speedBonus = timeSpentMs < 5e3 ? 25 : 15;
+  const streakBonus = streak > 0 ? 50 : 0;
+  const pointsGained = Math.round((100 + speedBonus + streakBonus) * pointsMultiplier);
+  return { pointsGained, streakBonus, speedBonus };
+}
+var XP_PER_LEVEL4, RANK_TIERS;
 var init_scoring = __esm({
   "../../lib/game-engine/src/scoring.ts"() {
     "use strict";
+    XP_PER_LEVEL4 = 500;
+    RANK_TIERS = [
+      { min: 0, name: "Bronze" },
+      { min: 500, name: "Silver" },
+      { min: 1e3, name: "Gold" },
+      { min: 1500, name: "Platinum" },
+      { min: 2e3, name: "Diamond" },
+      { min: 3e3, name: "Master" },
+      { min: 4e3, name: "Legend" }
+    ];
   }
 });
 
 // ../../lib/game-engine/src/stage.ts
-import { eq as eq20, sql as sql13 } from "drizzle-orm";
+import { eq as eq14, sql as sql6 } from "drizzle-orm";
+function generateCode(length = 5) {
+  let code = "";
+  for (let i = 0; i < length; i++) code += CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)];
+  return code;
+}
+function pool() {
+  return getPool();
+}
+function recordEvent(state, type, teamId, data) {
+  state.log.push({
+    type,
+    teamId: teamId ?? null,
+    data: data || null,
+    timestamp: Date.now()
+  });
+}
+function stripQuestion(q) {
+  if (!q) return q;
+  const { correctOptionIds, ...rest } = q;
+  return rest;
+}
+function cacheMatch(state) {
+  stageMatchCache.set(state.id, state);
+}
+async function persistMatch(state) {
+  const stmt = () => pool().query(
+    `INSERT INTO stage_matches (match_id, host_id, room_code, state)
+     VALUES ($1, $2, $3, $4)
+     ON CONFLICT (match_id) DO UPDATE SET state = $4, updated_at = NOW()`,
+    [state.id, state.hostId, state.roomCode, JSON.stringify(state)]
+  );
+  try {
+    await stmt();
+  } catch (e) {
+    if (e?.code === "42P01") {
+      await pool().query(`
+        CREATE TABLE IF NOT EXISTS stage_matches (
+          id SERIAL PRIMARY KEY,
+          match_id BIGINT NOT NULL UNIQUE,
+          host_id INTEGER NOT NULL,
+          room_code VARCHAR(10) NOT NULL,
+          state JSONB NOT NULL,
+          created_at TIMESTAMP DEFAULT NOW() NOT NULL,
+          updated_at TIMESTAMP DEFAULT NOW() NOT NULL
+        )
+      `);
+      await stmt();
+    } else if (e?.code === "22003") {
+      await pool().query(`ALTER TABLE stage_matches ALTER COLUMN match_id TYPE BIGINT`);
+      await stmt();
+    } else {
+      throw e;
+    }
+  }
+}
+async function ensureMatch(matchId, force = false) {
+  if (!force) {
+    const cached2 = stageMatchCache.get(matchId);
+    if (cached2) return cached2;
+  }
+  try {
+    const { rows } = await pool().query(`SELECT state FROM stage_matches WHERE match_id = $1`, [matchId]);
+    if (rows.length === 0) return void 0;
+    const state = rows[0].state;
+    stageMatchCache.set(matchId, state);
+    return state;
+  } catch {
+    return void 0;
+  }
+}
+async function getUserFromToken12(token) {
+  if (!token) return null;
+  const bearerToken = token.replace("Bearer ", "");
+  const [session] = await db.select().from(sessionsTable).where(eq14(sessionsTable.token, bearerToken)).limit(1);
+  if (!session || session.expiresAt < /* @__PURE__ */ new Date()) return null;
+  const [user] = await db.select().from(usersTable).where(eq14(usersTable.id, session.userId)).limit(1);
+  return user || null;
+}
+function createMatch(user, params) {
+  const matchId = Date.now() + Math.floor(Math.random() * 1e3);
+  const roomCode = generateCode(5);
+  const usedCodes = /* @__PURE__ */ new Set();
+  const teamCount = params.teamCount || 2;
+  const teams = [];
+  for (let i = 0; i < teamCount; i++) {
+    let code = generateCode(4);
+    while (usedCodes.has(code)) code = generateCode(4);
+    usedCodes.add(code);
+    teams.push({
+      id: i + 1,
+      name: "",
+      color: TEAM_COLORS[i % 8],
+      emblem: TEAM_EMBLEMS[i % 8],
+      code,
+      score: 0,
+      correct: 0,
+      total: 0,
+      streak: 0,
+      tacticalLoadout: []
+    });
+  }
+  const match = {
+    id: matchId,
+    roomCode,
+    hostId: user.id,
+    teams,
+    questions: [],
+    currentQuestionIndex: 0,
+    phase: "lobby",
+    buzzerTeamId: null,
+    wrongAttempts: 0,
+    timerSeconds: params.timerSeconds || 30,
+    timerStartedAt: null,
+    timerDuration: params.timerSeconds || 30,
+    originalTimerSeconds: params.timerSeconds || 30,
+    domainOrder: params.domains || [],
+    currentDomain: params.domains?.[0] || "general",
+    domains: params.domains || [],
+    difficulty: params.difficulty || "agent",
+    totalQuestions: params.questionCount || 10,
+    buzzedOptionId: null,
+    log: []
+  };
+  recordEvent(match, "match_created", null, { teamCount, domains: params.domains, difficulty: params.difficulty });
+  return match;
+}
+function startMatch(match, questions) {
+  match.questions = questions;
+  match.totalQuestions = questions.length;
+  match.currentQuestionIndex = 0;
+  match.phase = "question";
+  match.timerStartedAt = Date.now();
+  match.currentDomain = match.domainOrder[0] || "general";
+  match.buzzedOptionId = null;
+  recordEvent(match, "match_started", null, { totalQuestions: questions.length });
+}
+function buzz(match, teamId) {
+  if (match.phase !== "question" && match.phase !== "rebuzz") {
+    return { success: false, reason: "Not accepting buzzes" };
+  }
+  if (match.buzzerTeamId !== null) {
+    return { success: false, reason: "already_buzzed" };
+  }
+  match.buzzerTeamId = teamId;
+  match.phase = "buzzed";
+  recordEvent(match, "buzzer_pressed", teamId);
+  return { success: true };
+}
+function submitAnswer(match, teamId, optionId) {
+  const team = match.teams.find((t) => t.id === teamId);
+  if (!team) throw new Error("Team not found");
+  const q = match.questions[match.currentQuestionIndex];
+  const isCorrect = q && q.correctOptionIds.includes(optionId);
+  team.total += 1;
+  const score = calculateStageScore(isCorrect, 0, team.streak, match.wrongAttempts);
+  if (isCorrect) {
+    team.correct += 1;
+    team.score += score.pointsGained;
+    team.streak += 1;
+    match.phase = "answered";
+    match.wrongAttempts = 0;
+    match.buzzedOptionId = optionId;
+    recordEvent(match, "answer_correct", teamId, { pointsGained: score.pointsGained, newScore: team.score });
+    return { correct: true, pointsGained: score.pointsGained, rebuzz: false, newScore: team.score };
+  }
+  team.streak = 0;
+  if (match.wrongAttempts === 0) {
+    match.wrongAttempts = 1;
+    match.buzzerTeamId = null;
+    match.buzzedOptionId = optionId;
+    match.phase = "rebuzz";
+    recordEvent(match, "answer_incorrect", teamId, { rebuzz: true });
+    return { correct: false, pointsGained: 0, rebuzz: true, newScore: team.score };
+  }
+  match.phase = "answered";
+  match.wrongAttempts = 0;
+  match.buzzedOptionId = optionId;
+  recordEvent(match, "answer_incorrect", teamId, { final: true });
+  return { correct: false, pointsGained: 0, rebuzz: false, newScore: team.score };
+}
+function nextQuestion(match) {
+  match.currentQuestionIndex++;
+  match.buzzerTeamId = null;
+  match.buzzedOptionId = null;
+  match.wrongAttempts = 0;
+  match.timerSeconds = match.originalTimerSeconds;
+  if (match.currentQuestionIndex >= match.questions.length) {
+    match.phase = "ended";
+    recordEvent(match, "match_ended", null, { reason: "all_questions_answered" });
+    const winner = match.teams.reduce((best, t) => !best || t.score > best.score ? t : best, match.teams[0]);
+    eventBus.emitSync("MATCH_ENDED", {
+      matchId: match.id,
+      data: { teams: match.teams, winnerTeamId: winner?.id }
+    });
+    return { finished: true };
+  }
+  match.phase = "question";
+  match.timerStartedAt = Date.now();
+  recordEvent(match, "next_question", null, { questionIndex: match.currentQuestionIndex });
+  return { finished: false };
+}
+function skipQuestion(match) {
+  match.buzzerTeamId = null;
+  recordEvent(match, "question_skipped", null, { questionIndex: match.currentQuestionIndex });
+}
+function handleTimeout(match) {
+  if (match.phase === "question") {
+    match.phase = "answered";
+    recordEvent(match, "timer_expired", null, { questionIndex: match.currentQuestionIndex });
+    return true;
+  }
+  return false;
+}
+function addBotTeam(match, botName, difficulty) {
+  const DIFFICULTY_SKILL3 = {
+    recruit: { accuracy: 0.45, avgBuzzMs: 8e3, buzzVariance: 4e3 },
+    agent: { accuracy: 0.6, avgBuzzMs: 6e3, buzzVariance: 3e3 },
+    elite: { accuracy: 0.78, avgBuzzMs: 4e3, buzzVariance: 2e3 },
+    omega: { accuracy: 0.92, avgBuzzMs: 2500, buzzVariance: 1500 }
+  };
+  const bot = {
+    id: 1e3 + match.teams.length,
+    name: botName,
+    color: TEAM_COLORS[match.teams.length % 8],
+    emblem: "ai-" + (match.teams.length + 1),
+    code: `AI-${match.teams.length + 1}`,
+    score: 0,
+    correct: 0,
+    total: 0,
+    streak: 0,
+    tacticalLoadout: [],
+    isBot: true
+  };
+  match.teams.push(bot);
+  return bot;
+}
+function getMatchState(match) {
+  const q = match.questions[match.currentQuestionIndex];
+  return {
+    id: match.id,
+    roomCode: match.roomCode,
+    phase: match.phase,
+    teams: match.teams.filter((t) => t.name).map((t) => ({
+      id: t.id,
+      name: t.name,
+      color: t.color,
+      emblem: t.emblem,
+      code: t.code,
+      score: t.score,
+      correct: t.correct,
+      total: t.total,
+      streak: t.streak,
+      tacticalLoadout: t.tacticalLoadout
+    })),
+    currentQuestionIndex: match.currentQuestionIndex,
+    totalQuestions: match.totalQuestions,
+    currentDomain: match.currentDomain,
+    buzzerTeamId: match.buzzerTeamId,
+    wrongAttempts: match.wrongAttempts,
+    originalTimerSeconds: match.originalTimerSeconds,
+    timerSeconds: match.timerSeconds,
+    question: stripQuestion(q),
+    domains: match.domains,
+    difficulty: match.difficulty
+  };
+}
+async function getMatchForReplay(matchId) {
+  const { rows } = await getPool().query(`SELECT * FROM stage_matches WHERE match_id = $1`, [matchId]);
+  if (rows.length === 0) return null;
+  const state = rows[0].state;
+  return {
+    matchId: rows[0].match_id,
+    roomCode: rows[0].room_code,
+    teams: state.teams.filter((t) => t.name),
+    questions: state.questions.map(stripQuestion),
+    log: state.log,
+    phase: state.phase,
+    createdAt: rows[0].created_at,
+    updatedAt: rows[0].updated_at
+  };
+}
+async function listReplays() {
+  const { rows } = await getPool().query(
+    `SELECT match_id, room_code, host_id, state, created_at, updated_at
+     FROM stage_matches
+     WHERE state->>'phase' = 'ended'
+     ORDER BY updated_at DESC LIMIT 50`
+  );
+  return rows.map((r) => ({
+    matchId: r.match_id,
+    roomCode: r.room_code,
+    hostId: r.host_id,
+    teamCount: (r.state?.teams || []).filter((t) => t.name).length,
+    totalQuestions: r.state?.totalQuestions || 0,
+    phases: r.state?.log?.length || 0,
+    createdAt: r.created_at,
+    updatedAt: r.updated_at
+  }));
+}
+async function getStageMatch(matchId) {
+  return ensureMatch(matchId);
+}
+var DOMAIN_CATEGORIES, DIFFICULTY_CONFIG, TEAM_COLORS, TEAM_EMBLEMS, CODE_CHARS, stageMatchCache;
 var init_stage = __esm({
   "../../lib/game-engine/src/stage.ts"() {
     "use strict";
@@ -41074,17 +41630,132 @@ var init_stage = __esm({
     init_src();
     init_events();
     init_scoring();
+    DOMAIN_CATEGORIES = {
+      cyber_systems: ["technology", "security"],
+      cognitive_analysis: ["logic", "intelligence"],
+      historical_archives: ["history"],
+      threat_intelligence: ["security", "intelligence"],
+      scientific_division: ["technology"],
+      behavioral_analysis: ["intelligence"],
+      global_mapping: ["history", "technology"],
+      cipher_division: ["security", "intelligence"]
+    };
+    DIFFICULTY_CONFIG = {
+      recruit: { diffRange: [1, 3] },
+      agent: { diffRange: [3, 6] },
+      elite: { diffRange: [5, 8] },
+      omega: { diffRange: [7, 10] }
+    };
+    TEAM_COLORS = ["#3b82f6", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#14b8a6", "#f97316"];
+    TEAM_EMBLEMS = ["raven", "wolf", "phoenix", "viper", "titan", "shadow", "ghost", "cipher"];
+    CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    stageMatchCache = /* @__PURE__ */ new Map();
   }
 });
 
 // ../../lib/game-engine/src/validation.ts
-import { eq as eq21, and as and9 } from "drizzle-orm";
+import { eq as eq15, and as and6 } from "drizzle-orm";
+async function validateAnswer(input) {
+  const anomalies = [];
+  if (input.timeSpentMs < SPEED_LIMIT) {
+    anomalies.push("impossible_speed");
+  } else if (input.timeSpentMs < MIN_ANSWER_TIME) {
+    anomalies.push("suspicious_speed");
+  }
+  if (input.userId) {
+    try {
+      const { rows } = await getPool().query(
+        `SELECT count(*) as cnt FROM answer_logs
+         WHERE user_id = $1 AND question_id = $2
+         AND created_at > now() - interval '30 seconds'`,
+        [input.userId, input.questionId]
+      );
+      if (Number(rows[0]?.cnt || 0) > 0) {
+        anomalies.push("duplicate_answer");
+      }
+    } catch {
+    }
+  }
+  if (input.timeSpentMs < MIN_ANSWER_TIME) {
+    if (input.userId) {
+      await eventBus.emit("ANSWER_INCORRECT", {
+        userId: input.userId,
+        data: { anomalies, timeSpentMs: input.timeSpentMs, questionId: input.questionId, rejected: true }
+      });
+    }
+    return {
+      valid: false,
+      isCorrect: false,
+      correctOptionId: null,
+      explanation: "Answer rejected \u2014 too fast",
+      anomalies,
+      rejected: true
+    };
+  }
+  const [question] = await db.select().from(questionsTable).where(eq15(questionsTable.id, input.questionId)).limit(1);
+  if (!question) {
+    return {
+      valid: false,
+      isCorrect: false,
+      correctOptionId: null,
+      explanation: "Question not found",
+      anomalies,
+      rejected: true
+    };
+  }
+  const [selectedOption] = await db.select().from(questionOptionsTable).where(eq15(questionOptionsTable.id, input.optionId)).limit(1);
+  const isCorrect = selectedOption?.isCorrect === 1;
+  const [correctOption] = await db.select().from(questionOptionsTable).where(and6(
+    eq15(questionOptionsTable.questionId, input.questionId),
+    eq15(questionOptionsTable.isCorrect, 1)
+  )).limit(1);
+  try {
+    await db.insert(
+      (await Promise.resolve().then(() => (init_src(), src_exports))).answerLogsTable
+    ).values({
+      userId: input.userId || 0,
+      questionId: input.questionId,
+      category: question.category,
+      difficulty: question.difficulty,
+      correct: isCorrect ? 1 : 0,
+      timeSpentMs: input.timeSpentMs
+    });
+  } catch {
+  }
+  if (anomalies.length > 0) {
+    try {
+      await getPool().query(
+        `INSERT INTO anti_cheat_logs (user_id, action, details, severity, flagged)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [
+          input.userId || 0,
+          "answer_anomaly",
+          JSON.stringify({ questionId: input.questionId, timeSpentMs: input.timeSpentMs, isCorrect, anomalies }),
+          anomalies.includes("impossible_speed") ? 3 : 1,
+          anomalies.includes("impossible_speed")
+        ]
+      );
+    } catch {
+    }
+  }
+  return {
+    valid: true,
+    isCorrect,
+    correctOptionId: correctOption?.id || null,
+    explanation: question.explanation,
+    anomalies,
+    rejected: false
+  };
+}
+var MIN_ANSWER_TIME, SPEED_LIMIT;
 var init_validation = __esm({
   "../../lib/game-engine/src/validation.ts"() {
     "use strict";
     init_src();
     init_src();
     init_events();
+    MIN_ANSWER_TIME = 300;
+    SPEED_LIMIT = 500;
   }
 });
 
@@ -41092,21 +41763,74 @@ var init_validation = __esm({
 function pickRandom(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
-function generateAITemplateQuestion(category, difficulty) {
-  let pool2 = QUESTION_TEMPLATES;
-  if (category) {
-    const filtered = pool2.filter((q) => q.category === category);
-    if (filtered.length > 0) pool2 = filtered;
-  }
-  if (difficulty) {
-    const filtered = pool2.filter((q) => q.difficulty === difficulty);
-    if (filtered.length > 0) pool2 = filtered;
-    else {
-      const close = pool2.sort((a, b) => Math.abs(a.difficulty - difficulty) - Math.abs(b.difficulty - difficulty));
-      pool2 = [close[0]];
+function generateBotName() {
+  return pickRandom(BOT_NAMES);
+}
+function addBotToMatch(match, name, difficulty = "agent") {
+  const botName = name || generateBotName();
+  const skill = DIFFICULTY_SKILL[difficulty] || DIFFICULTY_SKILL.agent;
+  const bot = {
+    id: 1e3 + match.teams.length,
+    name: botName,
+    color: "",
+    emblem: "",
+    code: `AI-${match.teams.length + 1}`,
+    score: 0,
+    correct: 0,
+    total: 0,
+    streak: 0,
+    tacticalLoadout: [],
+    isBot: true
+  };
+  match.teams.push(bot);
+  return bot;
+}
+function decideBotBuzz(match, difficulty = "agent") {
+  if (match.phase !== "question" || match.buzzerTeamId !== null) return null;
+  const skill = DIFFICULTY_SKILL[difficulty] || DIFFICULTY_SKILL.agent;
+  const elapsed = Date.now() - (match.timerStartedAt || Date.now());
+  const botTeams = match.teams.filter((t) => t.isBot);
+  if (botTeams.length === 0) return null;
+  for (const bot of botTeams) {
+    const buzzChance = Math.min(0.3, elapsed / (skill.avgBuzzMs * 3));
+    if (Math.random() < buzzChance) {
+      const q = match.questions[match.currentQuestionIndex];
+      const willBeCorrect = Math.random() < skill.accuracy;
+      let selectedOptionId = null;
+      if (q && q.correctOptionIds?.length > 0) {
+        const firstCorrect = q.correctOptionIds[0];
+        if (willBeCorrect) {
+          selectedOptionId = firstCorrect;
+        } else {
+          const wrongOptions = q.options.filter((o) => !q.correctOptionIds.includes(o.id));
+          selectedOptionId = wrongOptions[Math.floor(Math.random() * wrongOptions.length)]?.id || null;
+        }
+      }
+      return {
+        action: "buzz",
+        teamId: bot.id,
+        correct: willBeCorrect,
+        selectedOptionId
+      };
     }
   }
-  const template = pickRandom(pool2);
+  return { action: "wait" };
+}
+function generateAITemplateQuestion(category, difficulty) {
+  let pool3 = QUESTION_TEMPLATES;
+  if (category) {
+    const filtered = pool3.filter((q) => q.category === category);
+    if (filtered.length > 0) pool3 = filtered;
+  }
+  if (difficulty) {
+    const filtered = pool3.filter((q) => q.difficulty === difficulty);
+    if (filtered.length > 0) pool3 = filtered;
+    else {
+      const close = pool3.sort((a, b) => Math.abs(a.difficulty - difficulty) - Math.abs(b.difficulty - difficulty));
+      pool3 = [close[0]];
+    }
+  }
+  const template = pickRandom(pool3);
   const correctIndex = template.options.indexOf(template.correctAnswer);
   return {
     questionText: template.text,
@@ -41119,6 +41843,9 @@ function generateAITemplateQuestion(category, difficulty) {
 }
 function configureOpenAI(config2) {
   openAIConfig = config2;
+}
+function isOpenAIConfigured() {
+  return !!openAIConfig.apiKey;
 }
 async function callOpenAI(prompt) {
   if (!openAIConfig.apiKey) return null;
@@ -41200,10 +41927,31 @@ Return ONLY valid JSON array:
   }
   return generateQuestionsWithAI(count, category, difficulty);
 }
-var QUESTION_TEMPLATES, openAIConfig;
+function randomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+var BOT_NAMES, DIFFICULTY_SKILL, QUESTION_TEMPLATES, openAIConfig;
 var init_ai = __esm({
   "../../lib/game-engine/src/ai.ts"() {
     "use strict";
+    BOT_NAMES = [
+      "Cipher-7",
+      "Nexus-9",
+      "Phantom-X",
+      "Void-3",
+      "Aegis-1",
+      "Omega-5",
+      "Delta-Z",
+      "Sigma-4",
+      "Talon-6",
+      "Wraith-2"
+    ];
+    DIFFICULTY_SKILL = {
+      recruit: { accuracy: 0.45, avgBuzzMs: 8e3, buzzVariance: 4e3 },
+      agent: { accuracy: 0.6, avgBuzzMs: 6e3, buzzVariance: 3e3 },
+      elite: { accuracy: 0.78, avgBuzzMs: 4e3, buzzVariance: 2e3 },
+      omega: { accuracy: 0.92, avgBuzzMs: 2500, buzzVariance: 1500 }
+    };
     QUESTION_TEMPLATES = [
       {
         category: "technology",
@@ -41259,6 +42007,45 @@ var init_ai = __esm({
 });
 
 // ../../lib/game-engine/src/index.ts
+var src_exports2 = {};
+__export(src_exports2, {
+  DIFFICULTY_CONFIG: () => DIFFICULTY_CONFIG,
+  DOMAIN_CATEGORIES: () => DOMAIN_CATEGORIES,
+  RANK_TIERS: () => RANK_TIERS,
+  XP_PER_LEVEL: () => XP_PER_LEVEL4,
+  addBotTeam: () => addBotTeam,
+  addBotToMatch: () => addBotToMatch,
+  buzz: () => buzz,
+  cacheMatch: () => cacheMatch,
+  calcLevel: () => calcLevel3,
+  calculateScore: () => calculateScore,
+  calculateStageScore: () => calculateStageScore,
+  configureOpenAI: () => configureOpenAI,
+  createMatch: () => createMatch,
+  decideBotBuzz: () => decideBotBuzz,
+  ensureMatch: () => ensureMatch,
+  eventBus: () => eventBus,
+  eventBusInstance: () => events_default,
+  generateAITemplateQuestion: () => generateAITemplateQuestion,
+  generateBotName: () => generateBotName,
+  generateQuestionsWithAI: () => generateQuestionsWithAI,
+  getMatchForReplay: () => getMatchForReplay,
+  getMatchState: () => getMatchState,
+  getRankTier: () => getRankTier2,
+  getStageMatch: () => getStageMatch,
+  getUserFromToken: () => getUserFromToken12,
+  handleTimeout: () => handleTimeout,
+  isOpenAIConfigured: () => isOpenAIConfigured,
+  listReplays: () => listReplays,
+  nextQuestion: () => nextQuestion,
+  persistMatch: () => persistMatch,
+  randomInt: () => randomInt,
+  skipQuestion: () => skipQuestion,
+  startMatch: () => startMatch,
+  stripQuestion: () => stripQuestion,
+  submitAnswer: () => submitAnswer,
+  validateAnswer: () => validateAnswer
+});
 var init_src2 = __esm({
   "../../lib/game-engine/src/index.ts"() {
     "use strict";
@@ -41278,34 +42065,34 @@ __export(stage_exports, {
   getStageMatch: () => getStageMatch2,
   persistMatch: () => persistMatch2
 });
-import { eq as eq22, sql as sql15 } from "drizzle-orm";
+import { eq as eq23, sql as sql15 } from "drizzle-orm";
 async function getUserFromToken19(token) {
   if (!token) return null;
   const bearerToken = token.replace("Bearer ", "");
-  const [session] = await db.select().from(sessionsTable).where(eq22(sessionsTable.token, bearerToken)).limit(1);
+  const [session] = await db.select().from(sessionsTable).where(eq23(sessionsTable.token, bearerToken)).limit(1);
   if (!session || session.expiresAt < /* @__PURE__ */ new Date()) return null;
-  const [user] = await db.select().from(usersTable).where(eq22(usersTable.id, session.userId)).limit(1);
+  const [user] = await db.select().from(usersTable).where(eq23(usersTable.id, session.userId)).limit(1);
   return user || null;
 }
-function generateCode(length = 5) {
+function generateCode2(length = 5) {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let code = "";
   for (let i = 0; i < length; i++) code += chars[Math.floor(Math.random() * chars.length)];
   return code;
 }
-function pool() {
+function pool2() {
   return getPool();
 }
 async function ensureMatch2(matchId, force = false) {
   if (!force) {
-    const cached2 = stageMatchCache.get(matchId);
+    const cached2 = stageMatchCache2.get(matchId);
     if (cached2) return cached2;
   }
   try {
-    const { rows } = await pool().query(`SELECT state FROM stage_matches WHERE match_id = $1`, [matchId]);
+    const { rows } = await pool2().query(`SELECT state FROM stage_matches WHERE match_id = $1`, [matchId]);
     if (rows.length === 0) return void 0;
     const state = rows[0].state;
-    stageMatchCache.set(matchId, state);
+    stageMatchCache2.set(matchId, state);
     return state;
   } catch (e) {
     console.error("[stage] ensureMatch DB error:", e?.message);
@@ -41313,9 +42100,9 @@ async function ensureMatch2(matchId, force = false) {
   }
 }
 function cacheMatch2(state) {
-  stageMatchCache.set(state.id, state);
+  stageMatchCache2.set(state.id, state);
 }
-function recordEvent(state, type, teamId, data) {
+function recordEvent2(state, type, teamId, data) {
   state.log.push({
     type,
     teamId: teamId ?? null,
@@ -41324,7 +42111,7 @@ function recordEvent(state, type, teamId, data) {
   });
 }
 async function persistMatch2(state) {
-  const insert = () => pool().query(
+  const insert = () => pool2().query(
     `INSERT INTO stage_matches (match_id, host_id, room_code, state) VALUES ($1, $2, $3, $4)
      ON CONFLICT (match_id) DO UPDATE SET state = $4, updated_at = NOW()`,
     [state.id, state.hostId, state.roomCode, JSON.stringify(state)]
@@ -41334,7 +42121,7 @@ async function persistMatch2(state) {
   } catch (e) {
     if (e?.code === "42P01") {
       try {
-        await pool().query(`
+        await pool2().query(`
           CREATE TABLE IF NOT EXISTS stage_matches (
             id SERIAL PRIMARY KEY,
             match_id BIGINT NOT NULL UNIQUE,
@@ -41352,7 +42139,7 @@ async function persistMatch2(state) {
       await insert();
     } else if (e?.code === "22003") {
       try {
-        await pool().query(`ALTER TABLE stage_matches ALTER COLUMN match_id TYPE BIGINT`);
+        await pool2().query(`ALTER TABLE stage_matches ALTER COLUMN match_id TYPE BIGINT`);
       } catch (e2) {
         console.error("[stage] alter column failed:", e2);
         throw new Error(`Failed to migrate match_id column: ${e2?.message || "unknown"}`);
@@ -41372,7 +42159,7 @@ function stripAnswer(q) {
   const { correctOptionIds, ...rest } = q;
   return rest;
 }
-var import_express21, router21, stageMatchCache, DOMAIN_CATEGORIES3, TEAM_COLORS, TEAM_EMBLEMS, stage_default;
+var import_express21, router21, stageMatchCache2, DOMAIN_CATEGORIES3, TEAM_COLORS2, TEAM_EMBLEMS2, stage_default;
 var init_stage2 = __esm({
   "src/routes/stage.ts"() {
     "use strict";
@@ -41382,7 +42169,7 @@ var init_stage2 = __esm({
     init_src();
     init_src2();
     router21 = (0, import_express21.Router)();
-    stageMatchCache = /* @__PURE__ */ new Map();
+    stageMatchCache2 = /* @__PURE__ */ new Map();
     DOMAIN_CATEGORIES3 = {
       cyber_systems: ["technology", "security"],
       cognitive_analysis: ["logic", "intelligence"],
@@ -41393,8 +42180,8 @@ var init_stage2 = __esm({
       global_mapping: ["history", "technology"],
       cipher_division: ["security", "intelligence"]
     };
-    TEAM_COLORS = ["#3b82f6", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#14b8a6", "#f97316"];
-    TEAM_EMBLEMS = ["raven", "wolf", "phoenix", "viper", "titan", "shadow", "ghost", "cipher"];
+    TEAM_COLORS2 = ["#3b82f6", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#14b8a6", "#f97316"];
+    TEAM_EMBLEMS2 = ["raven", "wolf", "phoenix", "viper", "titan", "shadow", "ghost", "cipher"];
     router21.post("/stage/create", async (req, res) => {
       const user = await getUserFromToken19(req.headers.authorization);
       if (!user) {
@@ -41406,19 +42193,19 @@ var init_stage2 = __esm({
         res.status(400).json({ error: "Select at least one domain" });
         return;
       }
-      const roomCode = generateCode(5);
+      const roomCode = generateCode2(5);
       const matchId = Date.now() + Math.floor(Math.random() * 1e3);
       const usedCodes = /* @__PURE__ */ new Set();
       const teams = [];
       for (let i = 0; i < (teamCount || 2); i++) {
-        let code = generateCode(4);
-        while (usedCodes.has(code)) code = generateCode(4);
+        let code = generateCode2(4);
+        while (usedCodes.has(code)) code = generateCode2(4);
         usedCodes.add(code);
         teams.push({
           id: i + 1,
           name: "",
-          color: TEAM_COLORS[i % 8],
-          emblem: TEAM_EMBLEMS[i % 8],
+          color: TEAM_COLORS2[i % 8],
+          emblem: TEAM_EMBLEMS2[i % 8],
           code,
           score: 0,
           correct: 0,
@@ -41449,7 +42236,7 @@ var init_stage2 = __esm({
         buzzedOptionId: null,
         log: []
       };
-      recordEvent(stageMatch, "match_created", null, { teamCount: teams.length, domains, difficulty });
+      recordEvent2(stageMatch, "match_created", null, { teamCount: teams.length, domains, difficulty });
       cacheMatch2(stageMatch);
       await persistMatch2(stageMatch);
       res.json({
@@ -41464,7 +42251,7 @@ var init_stage2 = __esm({
         res.status(400).json({ error: "Team code required" });
         return;
       }
-      let match = Array.from(stageMatchCache.values()).find(
+      let match = Array.from(stageMatchCache2.values()).find(
         (m) => m.teams.some((t) => t.code === teamCode.toUpperCase())
       );
       if (!match) {
@@ -41517,7 +42304,7 @@ var init_stage2 = __esm({
       if (name) team.name = name;
       if (color) team.color = color;
       if (emblem) team.emblem = emblem;
-      recordEvent(match, "team_configured", team.id, { name, color, emblem });
+      recordEvent2(match, "team_configured", team.id, { name, color, emblem });
       await persistMatch2(match);
       res.json({ team });
     });
@@ -41544,7 +42331,7 @@ var init_stage2 = __esm({
         if (t.color) team.color = t.color;
         if (t.emblem) team.emblem = t.emblem;
         if (t.tacticalLoadout) team.tacticalLoadout = t.tacticalLoadout;
-        recordEvent(match, "team_configured", team.id, { name: team.name, color: team.color, emblem: team.emblem });
+        recordEvent2(match, "team_configured", team.id, { name: team.name, color: team.color, emblem: team.emblem });
       }
       await persistMatch2(match);
       res.json({ success: true });
@@ -41577,7 +42364,7 @@ var init_stage2 = __esm({
       }
       const questions = await db.select().from(questionsTable).where(selectedCategories.length > 0 ? sql15`${questionsTable.category} IN (${sql15.join(selectedCategories.map((c) => sql15`${c}`), sql15`, `)})` : void 0).orderBy(sql15`RANDOM()`).limit(match.totalQuestions);
       const fullQs = await Promise.all(questions.map(async (q) => {
-        const options = await db.select({ id: questionOptionsTable.id, text: questionOptionsTable.optionText, isCorrect: questionOptionsTable.isCorrect }).from(questionOptionsTable).where(eq22(questionOptionsTable.questionId, q.id));
+        const options = await db.select({ id: questionOptionsTable.id, text: questionOptionsTable.optionText, isCorrect: questionOptionsTable.isCorrect }).from(questionOptionsTable).where(eq23(questionOptionsTable.questionId, q.id));
         const correctIds = options.filter((o) => o.isCorrect === 1).map((o) => o.id);
         return {
           id: q.id,
@@ -41597,7 +42384,7 @@ var init_stage2 = __esm({
       match.timerStartedAt = Date.now();
       match.currentDomain = match.domainOrder[0] || "general";
       match.buzzedOptionId = null;
-      recordEvent(match, "match_started", null, { totalQuestions: fullQs.length });
+      recordEvent2(match, "match_started", null, { totalQuestions: fullQs.length });
       await persistMatch2(match);
       eventBus.emitSync("MATCH_STARTED", {
         matchId: match.id,
@@ -41622,7 +42409,7 @@ var init_stage2 = __esm({
       }
       match.buzzerTeamId = teamId;
       match.phase = "buzzed";
-      recordEvent(match, "buzzer_pressed", teamId);
+      recordEvent2(match, "buzzer_pressed", teamId);
       await persistMatch2(match);
       res.json({ success: true, teamId });
     });
@@ -41665,13 +42452,14 @@ var init_stage2 = __esm({
         match.phase = "answered";
         match.wrongAttempts = 0;
         match.buzzedOptionId = optionId;
-        recordEvent(match, "answer_correct", team.id, { pointsGained, newScore: team.score });
+        recordEvent2(match, "answer_correct", team.id, { pointsGained, newScore: team.score });
         await persistMatch2(match);
+        const answerTimeMs = match.timerStartedAt ? Date.now() - match.timerStartedAt : 0;
         eventBus.emitSync("ANSWER_CORRECT", {
           matchId: match.id,
           teamId: team.id,
           userId: match.hostId,
-          data: { xpAmount: pointsGained, questionIndex: match.currentQuestionIndex }
+          data: { xpAmount: pointsGained, questionIndex: match.currentQuestionIndex, answerTimeMs }
         });
         res.json({ success: true, correct: true, pointsGained, newScore: team.score });
         return;
@@ -41688,7 +42476,7 @@ var init_stage2 = __esm({
         match.buzzerTeamId = null;
         match.buzzedOptionId = optionId;
         match.phase = "rebuzz";
-        recordEvent(match, "answer_incorrect", team.id, { rebuzz: true });
+        recordEvent2(match, "answer_incorrect", team.id, { rebuzz: true });
         await persistMatch2(match);
         res.json({ success: true, correct: false, pointsGained: 0, rebuzz: true });
         return;
@@ -41696,7 +42484,7 @@ var init_stage2 = __esm({
       match.phase = "answered";
       match.wrongAttempts = 0;
       match.buzzedOptionId = optionId;
-      recordEvent(match, "answer_incorrect", team.id, { final: true });
+      recordEvent2(match, "answer_incorrect", team.id, { final: true });
       await persistMatch2(match);
       res.json({ success: true, correct: false, pointsGained: 0, newScore: team.score });
     });
@@ -41723,7 +42511,7 @@ var init_stage2 = __esm({
       match.timerSeconds = match.originalTimerSeconds;
       if (match.currentQuestionIndex >= match.questions.length) {
         match.phase = "ended";
-        recordEvent(match, "match_ended", null, { reason: "all_questions_answered" });
+        recordEvent2(match, "match_ended", null, { reason: "all_questions_answered" });
         const winner = match.teams.reduce((best, t) => !best || t.score > best.score ? t : best, match.teams[0]);
         eventBus.emitSync("MATCH_ENDED", {
           matchId: match.id,
@@ -41735,7 +42523,7 @@ var init_stage2 = __esm({
       }
       match.phase = "question";
       match.timerStartedAt = Date.now();
-      recordEvent(match, "next_question", null, { questionIndex: match.currentQuestionIndex });
+      recordEvent2(match, "next_question", null, { questionIndex: match.currentQuestionIndex });
       await persistMatch2(match);
       res.json({ success: true, currentQuestion: match.currentQuestionIndex });
     });
@@ -41756,7 +42544,7 @@ var init_stage2 = __esm({
         return;
       }
       match.buzzerTeamId = null;
-      recordEvent(match, "question_skipped", null, { questionIndex: match.currentQuestionIndex });
+      recordEvent2(match, "question_skipped", null, { questionIndex: match.currentQuestionIndex });
       await persistMatch2(match);
       res.json({ success: true });
     });
@@ -41812,7 +42600,7 @@ var init_stage2 = __esm({
       }
       if (match.phase === "question") {
         match.phase = "answered";
-        recordEvent(match, "timer_expired", null, { questionIndex: match.currentQuestionIndex });
+        recordEvent2(match, "timer_expired", null, { questionIndex: match.currentQuestionIndex });
         await persistMatch2(match).catch(() => {
         });
       }
@@ -46410,34 +47198,47 @@ import { eq as eq3, and, desc, sql, inArray } from "drizzle-orm";
 
 // src/middleware/rateLimit.ts
 init_src();
-var buckets = /* @__PURE__ */ new Map();
-var CLEANUP_INTERVAL = 6e4;
-var lastCleanup = Date.now();
-function cleanup() {
+var CLEANUP_INTERVAL = 3e5;
+var lastCleanup = 0;
+async function cleanupOldEntries() {
   const now = Date.now();
   if (now - lastCleanup < CLEANUP_INTERVAL) return;
   lastCleanup = now;
-  for (const [key, entry] of buckets) {
-    if (now - entry.windowStart > 12e4) buckets.delete(key);
+  try {
+    const pool3 = getPool();
+    await pool3.query(`DELETE FROM rate_limits WHERE window_start < NOW() - INTERVAL '10 minutes'`);
+  } catch {
   }
 }
 function rateLimit(maxRequests, windowMs = 6e4) {
-  return (req, res, next) => {
-    cleanup();
+  return async (req, res, next) => {
     const key = `${req.ip || req.socket.remoteAddress || "unknown"}:${req.path}`;
-    const now = Date.now();
-    const entry = buckets.get(key);
-    if (!entry || now - entry.windowStart > windowMs) {
-      buckets.set(key, { count: 1, windowStart: now });
+    const windowKey = Math.floor(Date.now() / windowMs);
+    const compositeKey = `${key}:${windowKey}`;
+    try {
+      cleanupOldEntries();
+      const pool3 = getPool();
+      const result = await pool3.query(
+        `INSERT INTO rate_limits (bucket_key, count, window_start)
+         VALUES ($1, 1, NOW())
+         ON CONFLICT (bucket_key)
+         DO UPDATE SET count = rate_limits.count + 1
+         WHERE rate_limits.count < $2
+         RETURNING count`,
+        [compositeKey, maxRequests]
+      );
+      const count = result.rows[0]?.count;
+      if (!count) {
+        res.status(429).json({
+          error: "Too many requests",
+          retryAfter: Math.ceil(windowMs / 1e3)
+        });
+        return;
+      }
       next();
-      return;
+    } catch {
+      next();
     }
-    if (entry.count >= maxRequests) {
-      res.status(429).json({ error: "Too many requests", retryAfter: Math.ceil((entry.windowStart + windowMs - now) / 1e3) });
-      return;
-    }
-    entry.count++;
-    next();
   };
 }
 async function logSuspiciousActivity(userId, action, details, severity = 1) {
@@ -47057,8 +47858,8 @@ router5.post("/story/choose", async (req, res) => {
       };
       const matchedKey = Object.keys(directorContexts).find((k) => choice.consequenceFlag?.includes(k));
       if (matchedKey) {
-        const pool2 = directorContexts[matchedKey];
-        directorMessage = `[AI DIRECTOR]: ${pool2[Math.floor(Math.random() * pool2.length)]}`;
+        const pool3 = directorContexts[matchedKey];
+        directorMessage = `[AI DIRECTOR]: ${pool3[Math.floor(Math.random() * pool3.length)]}`;
       }
     }
     if (directorMessage) {
@@ -47164,6 +47965,33 @@ router6.get("/rankings/daily", async (req, res) => {
     };
   }));
   res.json(result);
+});
+router6.get("/rankings/seasonal", async (req, res) => {
+  const limit = req.query.limit ? parseInt(req.query.limit) : 20;
+  try {
+    const [season] = await db.select().from(seasonsTable).where(eq5(seasonsTable.isActive, true)).limit(1);
+    if (!season) {
+      res.json([]);
+      return;
+    }
+    const ranks = await db.select().from(rankingsTable).where(eq5(rankingsTable.seasonId, season.id)).orderBy(desc2(rankingsTable.rankPoints)).limit(limit);
+    const result = await Promise.all(ranks.map(async (rank, idx) => {
+      const [user] = await db.select().from(usersTable).where(eq5(usersTable.id, rank.userId)).limit(1);
+      return {
+        rank: idx + 1,
+        userId: rank.userId,
+        username: user?.username || "Unknown",
+        avatarUrl: user?.avatarUrl || null,
+        xp: rank.rankPoints,
+        level: 0,
+        rankTier: rank.rankTier,
+        score: rank.mmr
+      };
+    }));
+    res.json({ season: { id: season.id, name: season.name, theme: season.theme, endDate: season.endDate }, entries: result });
+  } catch {
+    res.json({ season: null, entries: [] });
+  }
 });
 router6.get("/rankings/me", async (req, res) => {
   const user = await getUserFromToken4(req.headers.authorization);
@@ -47310,8 +48138,8 @@ var narrationTemplates = {
 router8.post("/ai/narrate", async (req, res) => {
   const { context, mood, characterName } = req.body;
   const templates = narrationTemplates[mood] || narrationTemplates.mysterious;
-  const text19 = templates[Math.floor(Math.random() * templates.length)];
-  const finalText = characterName ? `[${characterName}]: ${text19}` : text19;
+  const text20 = templates[Math.floor(Math.random() * templates.length)];
+  const finalText = characterName ? `[${characterName}]: ${text20}` : text20;
   res.json({ text: finalText, mood });
 });
 router8.post("/ai/explain", async (req, res) => {
@@ -47331,8 +48159,8 @@ router8.post("/ai/explain", async (req, res) => {
     ]
   };
   const catKey = Object.keys(explanations).find((k) => category?.toLowerCase().includes(k)) || "default";
-  const pool2 = explanations[catKey];
-  const explanation = pool2[Math.floor(Math.random() * pool2.length)];
+  const pool3 = explanations[catKey];
+  const explanation = pool3[Math.floor(Math.random() * pool3.length)];
   res.json({
     explanation,
     additionalFacts: [
@@ -47493,8 +48321,8 @@ router8.post("/ai/director-report", async (req, res) => {
       "Continue your operations. The Director will issue further observations as patterns emerge."
     ];
   }
-  const text19 = templates[Math.floor(Math.random() * templates.length)];
-  const finalText = `[AI DIRECTOR]: ${text19}`;
+  const text20 = templates[Math.floor(Math.random() * templates.length)];
+  const finalText = `[AI DIRECTOR]: ${text20}`;
   try {
     getIO().to(`user:${user.id}`).emit("director:message", { text: finalText });
   } catch {
@@ -47582,8 +48410,8 @@ router9.get("/ai/generate-questions", async (req, res) => {
     });
   });
   const filtered = allQuestions.filter((q) => Math.abs(q.difficulty - difficulty) <= 2);
-  const pool2 = filtered.length > 0 ? filtered : allQuestions;
-  const shuffled = pool2.sort(() => Math.random() - 0.5);
+  const pool3 = filtered.length > 0 ? filtered : allQuestions;
+  const shuffled = pool3.sort(() => Math.random() - 0.5);
   const selected = shuffled.slice(0, limit);
   const result = selected.map((q, idx) => ({
     id: -(idx + 1),
@@ -48065,14 +48893,15 @@ var tournaments_default = router13;
 var import_express14 = __toESM(require_express2(), 1);
 init_src();
 init_src();
-import { eq as eq13, sql as sql6 } from "drizzle-orm";
+init_src2();
+import { eq as eq16, sql as sql8 } from "drizzle-orm";
 var router14 = (0, import_express14.Router)();
-async function getUserFromToken12(token) {
+async function getUserFromToken13(token) {
   if (!token) return null;
   const bearerToken = token.replace("Bearer ", "");
-  const [session] = await db.select().from(sessionsTable).where(eq13(sessionsTable.token, bearerToken)).limit(1);
+  const [session] = await db.select().from(sessionsTable).where(eq16(sessionsTable.token, bearerToken)).limit(1);
   if (!session || session.expiresAt < /* @__PURE__ */ new Date()) return null;
-  const [user] = await db.select().from(usersTable).where(eq13(usersTable.id, session.userId)).limit(1);
+  const [user] = await db.select().from(usersTable).where(eq16(usersTable.id, session.userId)).limit(1);
   return user || null;
 }
 var BUILTIN_SHOP = [
@@ -48087,18 +48916,32 @@ var BUILTIN_SHOP = [
 ];
 router14.get("/shop/items", async (req, res) => {
   let owned = [];
-  const user = await getUserFromToken12(req.headers.authorization);
+  let coins = 0;
+  const user = await getUserFromToken13(req.headers.authorization);
   if (user) {
     try {
-      const raw = await db.execute(sql6`SELECT item_id FROM user_inventory WHERE user_id = ${user.id}`);
+      const raw = await db.execute(sql8`SELECT item_id FROM user_inventory WHERE user_id = ${user.id}`);
       owned = (raw.rows || []).map((r) => r.item_id);
+      const [stats] = await db.select().from(userStatsTable).where(eq16(userStatsTable.userId, user.id)).limit(1);
+      coins = stats?.coins ?? 0;
     } catch {
     }
   }
-  res.json(BUILTIN_SHOP.map((item) => ({ ...item, owned: owned.includes(item.id) })));
+  let shopItems;
+  try {
+    const dbItems = await db.select().from(shopItemsTable);
+    if (dbItems.length > 0) {
+      shopItems = dbItems.map((i) => ({ id: i.id, name: i.name, description: i.description, type: i.type, priceCoins: i.priceCoins, pricePremium: i.pricePremium, rarity: i.rarity, iconUrl: i.iconUrl }));
+    } else {
+      shopItems = BUILTIN_SHOP;
+    }
+  } catch {
+    shopItems = BUILTIN_SHOP;
+  }
+  res.json({ items: shopItems.map((item) => ({ ...item, owned: owned.includes(item.id) })), coins });
 });
 router14.post("/shop/buy", async (req, res) => {
-  const user = await getUserFromToken12(req.headers.authorization);
+  const user = await getUserFromToken13(req.headers.authorization);
   if (!user) {
     res.status(401).json({ error: "Not authenticated" });
     return;
@@ -48109,13 +48952,13 @@ router14.post("/shop/buy", async (req, res) => {
     res.status(404).json({ error: "Item not found" });
     return;
   }
-  const [stats] = await db.select().from(userStatsTable).where(eq13(userStatsTable.userId, user.id)).limit(1);
+  const [stats] = await db.select().from(userStatsTable).where(eq16(userStatsTable.userId, user.id)).limit(1);
   if (!stats) {
     res.status(404).json({ error: "Stats not found" });
     return;
   }
   try {
-    const checkRaw = await db.execute(sql6`SELECT id FROM user_inventory WHERE user_id = ${user.id} AND item_id = ${itemId}`);
+    const checkRaw = await db.execute(sql8`SELECT id FROM user_inventory WHERE user_id = ${user.id} AND item_id = ${itemId}`);
     if (checkRaw.rows?.length) {
       res.status(400).json({ error: "Already owned" });
       return;
@@ -48126,18 +48969,30 @@ router14.post("/shop/buy", async (req, res) => {
     res.status(400).json({ error: `Not enough coins. Required: ${item.priceCoins}, Available: ${stats.coins}` });
     return;
   }
-  await db.update(userStatsTable).set({ coins: stats.coins - item.priceCoins }).where(eq13(userStatsTable.userId, user.id));
-  await db.execute(sql6`INSERT INTO user_inventory (user_id, item_id, quantity, equipped) VALUES (${user.id}, ${itemId}, 1, false)`);
-  res.json({ success: true, item, coinsRemaining: stats.coins - item.priceCoins });
+  const newCoins = stats.coins - item.priceCoins;
+  await db.update(userStatsTable).set({ coins: newCoins }).where(eq16(userStatsTable.userId, user.id));
+  await db.execute(sql8`INSERT INTO user_inventory (user_id, item_id, quantity, equipped) VALUES (${user.id}, ${itemId}, 1, false)`);
+  eventBus.emitSync("XP_EARNED", {
+    userId: user.id,
+    data: { source: "shop_purchase", itemId, itemName: item.name, coinsSpent: item.priceCoins }
+  });
+  try {
+    const purchaseCount = await db.execute(sql8`SELECT COUNT(*) as cnt FROM user_inventory WHERE user_id = ${user.id}`);
+    const shopPurchases = parseInt(purchaseCount.rows?.[0]?.cnt || "0");
+    const { checkAchievements: checkAchievements2 } = await Promise.resolve().then(() => (init_src2(), src_exports2));
+    await checkAchievements2(user.id, { shopPurchases });
+  } catch {
+  }
+  res.json({ success: true, item, coinsRemaining: newCoins });
 });
 router14.get("/shop/inventory", async (req, res) => {
-  const user = await getUserFromToken12(req.headers.authorization);
+  const user = await getUserFromToken13(req.headers.authorization);
   if (!user) {
     res.status(401).json({ error: "Not authenticated" });
     return;
   }
   try {
-    const raw = await db.execute(sql6`SELECT ui.*, u.username FROM user_inventory ui WHERE ui.user_id = ${user.id}`);
+    const raw = await db.execute(sql8`SELECT ui.*, u.username FROM user_inventory ui WHERE ui.user_id = ${user.id}`);
     const items = (raw.rows || []).map((r) => {
       const shopItem = BUILTIN_SHOP.find((i) => i.id === r.item_id);
       return { id: r.id, itemId: r.item_id, name: shopItem?.name || "Unknown", type: shopItem?.type || "cosmetic", quantity: r.quantity, equipped: r.equipped, rarity: shopItem?.rarity || "common" };
@@ -48148,14 +49003,14 @@ router14.get("/shop/inventory", async (req, res) => {
   }
 });
 router14.post("/shop/equip", async (req, res) => {
-  const user = await getUserFromToken12(req.headers.authorization);
+  const user = await getUserFromToken13(req.headers.authorization);
   if (!user) {
     res.status(401).json({ error: "Not authenticated" });
     return;
   }
   const { itemId, equip } = req.body;
   try {
-    await db.execute(sql6`UPDATE user_inventory SET equipped = ${equip ? "true" : "false"} WHERE user_id = ${user.id} AND item_id = ${itemId}`);
+    await db.execute(sql8`UPDATE user_inventory SET equipped = ${equip ? "true" : "false"} WHERE user_id = ${user.id} AND item_id = ${itemId}`);
     res.json({ success: true, itemId, equipped: equip });
   } catch {
     res.status(500).json({ error: "Server error" });
@@ -48163,14 +49018,14 @@ router14.post("/shop/equip", async (req, res) => {
 });
 var BATTLE_PASS_LEVELS = 50;
 router14.get("/battle-pass", async (req, res) => {
-  const user = await getUserFromToken12(req.headers.authorization);
+  const user = await getUserFromToken13(req.headers.authorization);
   if (!user) {
     res.status(401).json({ error: "Not authenticated" });
     return;
   }
   let bp = null;
   try {
-    const raw = await db.execute(sql6`SELECT * FROM user_battle_pass WHERE user_id = ${user.id}`);
+    const raw = await db.execute(sql8`SELECT * FROM user_battle_pass WHERE user_id = ${user.id}`);
     if (raw.rows?.length) {
       bp = raw.rows[0];
     }
@@ -48186,12 +49041,12 @@ router14.get("/battle-pass", async (req, res) => {
   });
 });
 router14.post("/battle-pass/upgrade", async (req, res) => {
-  const user = await getUserFromToken12(req.headers.authorization);
+  const user = await getUserFromToken13(req.headers.authorization);
   if (!user) {
     res.status(401).json({ error: "Not authenticated" });
     return;
   }
-  const [stats] = await db.select().from(userStatsTable).where(eq13(userStatsTable.userId, user.id)).limit(1);
+  const [stats] = await db.select().from(userStatsTable).where(eq16(userStatsTable.userId, user.id)).limit(1);
   if (!stats) {
     res.status(404).json({ error: "Stats not found" });
     return;
@@ -48200,16 +49055,16 @@ router14.post("/battle-pass/upgrade", async (req, res) => {
     res.status(400).json({ error: "Premium upgrade costs 1500 coins" });
     return;
   }
-  await db.update(userStatsTable).set({ coins: stats.coins - 1500 }).where(eq13(userStatsTable.userId, user.id));
+  await db.update(userStatsTable).set({ coins: stats.coins - 1500 }).where(eq16(userStatsTable.userId, user.id));
   try {
-    const existing = await db.execute(sql6`SELECT id FROM user_battle_pass WHERE user_id = ${user.id}`);
+    const existing = await db.execute(sql8`SELECT id FROM user_battle_pass WHERE user_id = ${user.id}`);
     if (existing.rows?.length) {
-      await db.execute(sql6`UPDATE user_battle_pass SET is_premium = true WHERE user_id = ${user.id}`);
+      await db.execute(sql8`UPDATE user_battle_pass SET is_premium = true WHERE user_id = ${user.id}`);
     } else {
-      await db.execute(sql6`INSERT INTO user_battle_pass (user_id, is_premium) VALUES (${user.id}, true)`);
+      await db.execute(sql8`INSERT INTO user_battle_pass (user_id, is_premium) VALUES (${user.id}, true)`);
     }
   } catch {
-    await db.execute(sql6`INSERT INTO user_battle_pass (user_id, is_premium) VALUES (${user.id}, true)`);
+    await db.execute(sql8`INSERT INTO user_battle_pass (user_id, is_premium) VALUES (${user.id}, true)`);
   }
   res.json({ success: true, message: "Battle Pass upgraded to premium!" });
 });
@@ -48219,14 +49074,14 @@ var shop_default = router14;
 var import_express15 = __toESM(require_express2(), 1);
 init_src();
 init_src();
-import { eq as eq14, sql as sql7 } from "drizzle-orm";
+import { eq as eq17, sql as sql9 } from "drizzle-orm";
 var router15 = (0, import_express15.Router)();
-async function getUserFromToken13(token) {
+async function getUserFromToken14(token) {
   if (!token) return null;
   const bearerToken = token.replace("Bearer ", "");
-  const [session] = await db.select().from(sessionsTable).where(eq14(sessionsTable.token, bearerToken)).limit(1);
+  const [session] = await db.select().from(sessionsTable).where(eq17(sessionsTable.token, bearerToken)).limit(1);
   if (!session || session.expiresAt < /* @__PURE__ */ new Date()) return null;
-  const [user] = await db.select().from(usersTable).where(eq14(usersTable.id, session.userId)).limit(1);
+  const [user] = await db.select().from(usersTable).where(eq17(usersTable.id, session.userId)).limit(1);
   return user || null;
 }
 var BUILTIN_EVENTS = [
@@ -48259,19 +49114,19 @@ var BUILTIN_EVENTS = [
   }
 ];
 router15.get("/world-events", async (req, res) => {
-  const user = await getUserFromToken13(req.headers.authorization);
+  const user = await getUserFromToken14(req.headers.authorization);
   let events = BUILTIN_EVENTS;
   let myContributions = [];
   if (user) {
     try {
-      const raw = await db.execute(sql7`SELECT event_id, contribution FROM world_event_participants WHERE user_id = ${user.id}`);
+      const raw = await db.execute(sql9`SELECT event_id, contribution FROM world_event_participants WHERE user_id = ${user.id}`);
       myContributions = (raw.rows || []).map((r) => ({ eventId: r.event_id, contribution: r.contribution }));
     } catch {
     }
   }
   let totalContributions = {};
   try {
-    const totals = await db.execute(sql7`SELECT event_id, SUM(contribution) as total FROM world_event_participants GROUP BY event_id`);
+    const totals = await db.execute(sql9`SELECT event_id, SUM(contribution) as total FROM world_event_participants GROUP BY event_id`);
     for (const row of totals.rows || []) {
       totalContributions[row.event_id] = parseInt(row.total) || 0;
     }
@@ -48288,7 +49143,7 @@ router15.get("/world-events", async (req, res) => {
   }));
 });
 router15.post("/world-events/:id/contribute", async (req, res) => {
-  const user = await getUserFromToken13(req.headers.authorization);
+  const user = await getUserFromToken14(req.headers.authorization);
   if (!user) {
     res.status(401).json({ error: "Not authenticated" });
     return;
@@ -48301,18 +49156,18 @@ router15.post("/world-events/:id/contribute", async (req, res) => {
   }
   const { amount = 1 } = req.body;
   try {
-    const existing = await db.execute(sql7`SELECT id, contribution FROM world_event_participants WHERE user_id = ${user.id} AND event_id = ${eventId}`);
+    const existing = await db.execute(sql9`SELECT id, contribution FROM world_event_participants WHERE user_id = ${user.id} AND event_id = ${eventId}`);
     if (existing.rows?.length) {
-      await db.execute(sql7`UPDATE world_event_participants SET contribution = contribution + ${amount} WHERE user_id = ${user.id} AND event_id = ${eventId}`);
+      await db.execute(sql9`UPDATE world_event_participants SET contribution = contribution + ${amount} WHERE user_id = ${user.id} AND event_id = ${eventId}`);
     } else {
-      await db.execute(sql7`INSERT INTO world_event_participants (event_id, user_id, contribution) VALUES (${eventId}, ${user.id}, ${amount})`);
+      await db.execute(sql9`INSERT INTO world_event_participants (event_id, user_id, contribution) VALUES (${eventId}, ${user.id}, ${amount})`);
     }
   } catch {
   }
   res.json({ success: true, eventId, contributed: amount });
 });
 router15.post("/world-events/:id/claim", async (req, res) => {
-  const user = await getUserFromToken13(req.headers.authorization);
+  const user = await getUserFromToken14(req.headers.authorization);
   if (!user) {
     res.status(401).json({ error: "Not authenticated" });
     return;
@@ -48324,7 +49179,7 @@ router15.post("/world-events/:id/claim", async (req, res) => {
     return;
   }
   try {
-    await db.execute(sql7`UPDATE world_event_participants SET rewards_claimed = true WHERE user_id = ${user.id} AND event_id = ${eventId}`);
+    await db.execute(sql9`UPDATE world_event_participants SET rewards_claimed = true WHERE user_id = ${user.id} AND event_id = ${eventId}`);
   } catch {
   }
   res.json({ success: true, rewards: event.rewards });
@@ -48335,19 +49190,19 @@ var worldEvents_default = router15;
 var import_express16 = __toESM(require_express2(), 1);
 init_src();
 init_src();
-import { eq as eq15, desc as desc6, sql as sql8 } from "drizzle-orm";
+import { eq as eq18, desc as desc6, sql as sql10 } from "drizzle-orm";
 var router16 = (0, import_express16.Router)();
 router16.get("/analytics/overview", async (req, res) => {
   try {
-    const totalUsers = (await db.select({ count: sql8`count(*)` }).from(usersTable))[0]?.count || 0;
-    const totalGames = (await db.select({ sum: sql8`coalesce(sum(total_games), 0)` }).from(userStatsTable))[0]?.sum || 0;
+    const totalUsers = (await db.select({ count: sql10`count(*)` }).from(usersTable))[0]?.count || 0;
+    const totalGames = (await db.select({ sum: sql10`coalesce(sum(total_games), 0)` }).from(userStatsTable))[0]?.sum || 0;
     const topPlayers = await db.select({
       username: usersTable.username,
       xp: userStatsTable.xp,
       level: userStatsTable.level,
       rankTier: userStatsTable.rankTier
-    }).from(usersTable).innerJoin(userStatsTable, eq15(usersTable.id, userStatsTable.userId)).orderBy(desc6(userStatsTable.xp)).limit(5);
-    const recentXp = await db.select({ sum: sql8`coalesce(sum(amount), 0)` }).from(xpLogTable).where(sql8`created_at > now() - interval '24 hours'`);
+    }).from(usersTable).innerJoin(userStatsTable, eq18(usersTable.id, userStatsTable.userId)).orderBy(desc6(userStatsTable.xp)).limit(5);
+    const recentXp = await db.select({ sum: sql10`coalesce(sum(amount), 0)` }).from(xpLogTable).where(sql10`created_at > now() - interval '24 hours'`);
     res.json({
       totalUsers,
       totalGames,
@@ -48363,7 +49218,7 @@ router16.get("/analytics/distribution", async (req, res) => {
   try {
     const rankDist = await db.select({
       rankTier: userStatsTable.rankTier,
-      count: sql8`count(*)`
+      count: sql10`count(*)`
     }).from(userStatsTable).groupBy(userStatsTable.rankTier).orderBy(userStatsTable.rankTier);
     res.json({ rankDistribution: rankDist });
   } catch {
@@ -48376,21 +49231,21 @@ var analytics_default = router16;
 var import_express17 = __toESM(require_express2(), 1);
 init_src();
 init_src();
-import { eq as eq16, sql as sql9 } from "drizzle-orm";
+import { eq as eq19, sql as sql11 } from "drizzle-orm";
 var router17 = (0, import_express17.Router)();
-async function getUserFromToken14(token) {
+async function getUserFromToken15(token) {
   if (!token) return null;
   const bearerToken = token.replace("Bearer ", "");
-  const [session] = await db.select().from(sessionsTable).where(eq16(sessionsTable.token, bearerToken)).limit(1);
+  const [session] = await db.select().from(sessionsTable).where(eq19(sessionsTable.token, bearerToken)).limit(1);
   if (!session || session.expiresAt < /* @__PURE__ */ new Date()) return null;
-  const [user] = await db.select().from(usersTable).where(eq16(usersTable.id, session.userId)).limit(1);
+  const [user] = await db.select().from(usersTable).where(eq19(usersTable.id, session.userId)).limit(1);
   return user || null;
 }
 router17.post("/anti-cheat/log", async (req, res) => {
-  const user = await getUserFromToken14(req.headers.authorization);
+  const user = await getUserFromToken15(req.headers.authorization);
   const { action, details } = req.body;
   try {
-    await db.execute(sql9`INSERT INTO anti_cheat_logs (user_id, action, details, severity) VALUES (${user?.id || 0}, ${action}, ${JSON.stringify(details || {})}, ${0})`);
+    await db.execute(sql11`INSERT INTO anti_cheat_logs (user_id, action, details, severity) VALUES (${user?.id || 0}, ${action}, ${JSON.stringify(details || {})}, ${0})`);
   } catch {
   }
   res.json({ logged: true });
@@ -48401,21 +49256,21 @@ var antiCheat_default = router17;
 var import_express18 = __toESM(require_express2(), 1);
 init_src();
 init_src();
-import { eq as eq17, and as and6, sql as sql10 } from "drizzle-orm";
+import { eq as eq20, and as and7, sql as sql12 } from "drizzle-orm";
 var router18 = (0, import_express18.Router)();
-async function getUserFromToken15(token) {
+async function getUserFromToken16(token) {
   if (!token) return null;
   const bearerToken = token.replace("Bearer ", "");
-  const [session] = await db.select().from(sessionsTable).where(eq17(sessionsTable.token, bearerToken)).limit(1);
+  const [session] = await db.select().from(sessionsTable).where(eq20(sessionsTable.token, bearerToken)).limit(1);
   if (!session || session.expiresAt < /* @__PURE__ */ new Date()) return null;
-  const [user] = await db.select().from(usersTable).where(eq17(usersTable.id, session.userId)).limit(1);
+  const [user] = await db.select().from(usersTable).where(eq20(usersTable.id, session.userId)).limit(1);
   return user || null;
 }
-var XP_PER_LEVEL4 = 500;
-function calcLevel3(xp) {
-  return Math.floor(xp / XP_PER_LEVEL4) + 1;
+var XP_PER_LEVEL5 = 500;
+function calcLevel4(xp) {
+  return Math.floor(xp / XP_PER_LEVEL5) + 1;
 }
-var DOMAIN_CATEGORIES = {
+var DOMAIN_CATEGORIES2 = {
   "cyber_systems": ["technology", "cybersecurity"],
   "cognitive_analysis": ["logic", "reasoning"],
   "historical_archives": ["history"],
@@ -48432,7 +49287,7 @@ var DOMAIN_CATEGORIES = {
   "ancient_records": ["mythology"],
   "cipher_division": ["cryptography"]
 };
-var DIFFICULTY_CONFIG = {
+var DIFFICULTY_CONFIG2 = {
   recruit: { timerMult: 1.5, xpMult: 0.5, label: "RECRUIT", diffRange: [1, 3] },
   agent: { timerMult: 1, xpMult: 1, label: "AGENT", diffRange: [3, 6] },
   elite: { timerMult: 0.7, xpMult: 1.8, label: "ELITE", diffRange: [5, 8] },
@@ -48447,7 +49302,7 @@ var THREAT_LABELS = {
 };
 function calculateThreatLevel(domainCount, difficulty, modifiers) {
   let score = domainCount * 5;
-  const diffCfg = DIFFICULTY_CONFIG[difficulty] || DIFFICULTY_CONFIG.agent;
+  const diffCfg = DIFFICULTY_CONFIG2[difficulty] || DIFFICULTY_CONFIG2.agent;
   score += diffCfg.xpMult * 20;
   if (modifiers.includes("timed")) score += 15;
   if (modifiers.includes("adaptive")) score += 10;
@@ -48459,7 +49314,7 @@ function calculateThreatLevel(domainCount, difficulty, modifiers) {
   return "low";
 }
 function estimateXp(domainCount, difficulty, modifiers) {
-  const diffCfg = DIFFICULTY_CONFIG[difficulty] || DIFFICULTY_CONFIG.agent;
+  const diffCfg = DIFFICULTY_CONFIG2[difficulty] || DIFFICULTY_CONFIG2.agent;
   let base = domainCount * 40;
   base = Math.round(base * diffCfg.xpMult);
   if (modifiers.includes("bonus_xp")) base = Math.round(base * 1.3);
@@ -48468,8 +49323,8 @@ function estimateXp(domainCount, difficulty, modifiers) {
   return base;
 }
 router18.get("/mission/domains", async (req, res) => {
-  const user = await getUserFromToken15(req.headers.authorization);
-  const domains = Object.entries(DOMAIN_CATEGORIES).map(([key, cats]) => {
+  const user = await getUserFromToken16(req.headers.authorization);
+  const domains = Object.entries(DOMAIN_CATEGORIES2).map(([key, cats]) => {
     const displayNames = {
       cyber_systems: "Cyber Systems",
       cognitive_analysis: "Cognitive Analysis",
@@ -48508,7 +49363,7 @@ router18.get("/mission/domains", async (req, res) => {
   });
   let domainMastery = {};
   if (user) {
-    const logs = await db.select().from(answerLogsTable).where(eq17(answerLogsTable.userId, user.id));
+    const logs = await db.select().from(answerLogsTable).where(eq20(answerLogsTable.userId, user.id));
     for (const domain2 of domains) {
       const domainLogs = logs.filter((l) => domain2.categories.includes(l.category));
       if (domainLogs.length > 0) {
@@ -48522,7 +49377,7 @@ router18.get("/mission/domains", async (req, res) => {
   res.json({ domains, mastery: domainMastery });
 });
 router18.post("/mission/start", async (req, res) => {
-  const user = await getUserFromToken15(req.headers.authorization);
+  const user = await getUserFromToken16(req.headers.authorization);
   if (!user) {
     res.status(401).json({ error: "Not authenticated" });
     return;
@@ -48532,47 +49387,47 @@ router18.post("/mission/start", async (req, res) => {
     res.status(400).json({ error: "Select 1\u20136 intelligence domains" });
     return;
   }
-  const diffCfg = DIFFICULTY_CONFIG[difficulty] || DIFFICULTY_CONFIG.agent;
+  const diffCfg = DIFFICULTY_CONFIG2[difficulty] || DIFFICULTY_CONFIG2.agent;
   const selectedCategories = [];
   for (const d of domains) {
-    const cats = DOMAIN_CATEGORIES[d];
+    const cats = DOMAIN_CATEGORIES2[d];
     if (cats) selectedCategories.push(...cats);
   }
   if (selectedCategories.length === 0) {
     res.status(400).json({ error: "Invalid domains" });
     return;
   }
-  const answered = await db.select({ questionId: userAnsweredQuestionsTable.questionId }).from(userAnsweredQuestionsTable).where(eq17(userAnsweredQuestionsTable.userId, user.id));
+  const answered = await db.select({ questionId: userAnsweredQuestionsTable.questionId }).from(userAnsweredQuestionsTable).where(eq20(userAnsweredQuestionsTable.userId, user.id));
   const answeredIds = answered.map((a) => a.questionId);
   const conditions = [];
   if (selectedCategories.length > 0) {
-    conditions.push(sql10`${questionsTable.category} IN (${sql10.join(selectedCategories.map((c) => sql10`${c}`), sql10`, `)})`);
+    conditions.push(sql12`${questionsTable.category} IN (${sql12.join(selectedCategories.map((c) => sql12`${c}`), sql12`, `)})`);
   }
-  conditions.push(sql10`${questionsTable.difficulty} >= ${diffCfg.diffRange[0]} AND ${questionsTable.difficulty} <= ${diffCfg.diffRange[1]}`);
+  conditions.push(sql12`${questionsTable.difficulty} >= ${diffCfg.diffRange[0]} AND ${questionsTable.difficulty} <= ${diffCfg.diffRange[1]}`);
   if (answeredIds.length > 0) {
-    conditions.push(sql10`${questionsTable.id} NOT IN (${sql10.join(answeredIds.map((id) => sql10`${id}`), sql10`, `)})`);
+    conditions.push(sql12`${questionsTable.id} NOT IN (${sql12.join(answeredIds.map((id) => sql12`${id}`), sql12`, `)})`);
   }
-  let questions = await db.select().from(questionsTable).where(and6(...conditions)).orderBy(sql10`RANDOM()`).limit(questionCount);
+  let questions = await db.select().from(questionsTable).where(and7(...conditions)).orderBy(sql12`RANDOM()`).limit(questionCount);
   let archiveMode = false;
   if (questions.length < questionCount && answeredIds.length > 0) {
     archiveMode = true;
     const remaining = questionCount - questions.length;
-    const recycleConditions = [sql10`${questionsTable.id} IN (${sql10.join(answeredIds.map((id) => sql10`${id}`), sql10`, `)})`];
+    const recycleConditions = [sql12`${questionsTable.id} IN (${sql12.join(answeredIds.map((id) => sql12`${id}`), sql12`, `)})`];
     if (selectedCategories.length > 0) {
-      recycleConditions.push(sql10`${questionsTable.category} IN (${sql10.join(selectedCategories.map((c) => sql10`${c}`), sql10`, `)})`);
+      recycleConditions.push(sql12`${questionsTable.category} IN (${sql12.join(selectedCategories.map((c) => sql12`${c}`), sql12`, `)})`);
     }
-    const recycled = await db.select().from(questionsTable).where(and6(...recycleConditions)).orderBy(sql10`RANDOM()`).limit(remaining);
+    const recycled = await db.select().from(questionsTable).where(and7(...recycleConditions)).orderBy(sql12`RANDOM()`).limit(remaining);
     questions = [...questions, ...recycled];
   }
   if (questions.length === 0) {
     const fallbackConds = [];
     if (selectedCategories.length > 0) {
-      fallbackConds.push(sql10`${questionsTable.category} IN (${sql10.join(selectedCategories.map((c) => sql10`${c}`), sql10`, `)})`);
+      fallbackConds.push(sql12`${questionsTable.category} IN (${sql12.join(selectedCategories.map((c) => sql12`${c}`), sql12`, `)})`);
     }
-    questions = await db.select().from(questionsTable).where(fallbackConds.length > 0 ? and6(...fallbackConds) : void 0).orderBy(sql10`RANDOM()`).limit(questionCount);
+    questions = await db.select().from(questionsTable).where(fallbackConds.length > 0 ? and7(...fallbackConds) : void 0).orderBy(sql12`RANDOM()`).limit(questionCount);
   }
   const result = await Promise.all(questions.map(async (q) => {
-    const options = await db.select({ id: questionOptionsTable.id, text: questionOptionsTable.optionText }).from(questionOptionsTable).where(eq17(questionOptionsTable.questionId, q.id));
+    const options = await db.select({ id: questionOptionsTable.id, text: questionOptionsTable.optionText }).from(questionOptionsTable).where(eq20(questionOptionsTable.questionId, q.id));
     const adjustedTime = q.timeLimitSeconds ? Math.max(5, Math.round(q.timeLimitSeconds * diffCfg.timerMult)) : Math.round(30 * diffCfg.timerMult);
     return {
       id: q.id,
@@ -48610,13 +49465,13 @@ router18.post("/mission/start", async (req, res) => {
   });
 });
 router18.post("/mission/complete", async (req, res) => {
-  const user = await getUserFromToken15(req.headers.authorization);
+  const user = await getUserFromToken16(req.headers.authorization);
   if (!user) {
     res.status(401).json({ error: "Not authenticated" });
     return;
   }
   const { missionId, answers } = req.body;
-  const [mission] = await db.select().from(missionLogsTable).where(eq17(missionLogsTable.id, missionId)).limit(1);
+  const [mission] = await db.select().from(missionLogsTable).where(eq20(missionLogsTable.id, missionId)).limit(1);
   if (!mission) {
     res.status(404).json({ error: "Mission not found" });
     return;
@@ -48624,7 +49479,7 @@ router18.post("/mission/complete", async (req, res) => {
   const correctCount = answers.filter((a) => a.correct).length;
   const totalQuestions = answers.length;
   const accuracy = totalQuestions > 0 ? correctCount / totalQuestions : 0;
-  const diffCfg = DIFFICULTY_CONFIG[mission.difficulty] || DIFFICULTY_CONFIG.agent;
+  const diffCfg = DIFFICULTY_CONFIG2[mission.difficulty] || DIFFICULTY_CONFIG2.agent;
   const baseXpPerQuestion = 10 * diffCfg.xpMult;
   const totalXp = Math.round(answers.reduce((sum, a) => {
     if (a.correct) return sum + baseXpPerQuestion;
@@ -48642,11 +49497,11 @@ router18.post("/mission/complete", async (req, res) => {
     questionsAnswered: totalQuestions,
     questionsCorrect: correctCount,
     completedAt: /* @__PURE__ */ new Date()
-  }).where(eq17(missionLogsTable.id, missionId));
-  const [stats] = await db.select().from(userStatsTable).where(eq17(userStatsTable.userId, user.id)).limit(1);
+  }).where(eq20(missionLogsTable.id, missionId));
+  const [stats] = await db.select().from(userStatsTable).where(eq20(userStatsTable.userId, user.id)).limit(1);
   if (stats) {
     const newXp = stats.xp + totalXp;
-    const newLevel = calcLevel3(newXp);
+    const newLevel = calcLevel4(newXp);
     await db.update(userStatsTable).set({
       xp: newXp,
       level: newLevel,
@@ -48654,7 +49509,7 @@ router18.post("/mission/complete", async (req, res) => {
       totalGames: stats.totalGames + 1,
       wins: accuracy >= 0.6 ? stats.wins + 1 : stats.wins,
       losses: accuracy < 0.6 ? stats.losses + 1 : stats.losses
-    }).where(eq17(userStatsTable.userId, user.id));
+    }).where(eq20(userStatsTable.userId, user.id));
     await db.insert(xpLogTable).values({ userId: user.id, action: "mission_complete", amount: totalXp });
   }
   res.json({
@@ -48672,14 +49527,14 @@ var mission_default = router18;
 var import_express19 = __toESM(require_express2(), 1);
 init_src();
 init_src();
-import { eq as eq18, and as and7, ne as ne2 } from "drizzle-orm";
+import { eq as eq21, and as and8, ne as ne2 } from "drizzle-orm";
 var router19 = (0, import_express19.Router)();
-async function getUserFromToken16(token) {
+async function getUserFromToken17(token) {
   if (!token) return null;
   const bearerToken = token.replace("Bearer ", "");
-  const [session] = await db.select().from(sessionsTable).where(eq18(sessionsTable.token, bearerToken)).limit(1);
+  const [session] = await db.select().from(sessionsTable).where(eq21(sessionsTable.token, bearerToken)).limit(1);
   if (!session || session.expiresAt < /* @__PURE__ */ new Date()) return null;
-  const [user] = await db.select().from(usersTable).where(eq18(usersTable.id, session.userId)).limit(1);
+  const [user] = await db.select().from(usersTable).where(eq21(usersTable.id, session.userId)).limit(1);
   return user || null;
 }
 var MODULE_DEFS = {
@@ -48765,7 +49620,7 @@ var HINTS = {
   default: ["The Archive suggests: consider the question from a different angle.", "Cross-reference with known intelligence patterns.", "Sometimes the most obvious answer is correct."]
 };
 async function ensureUserModules(userId) {
-  let [row] = await db.select().from(userTacticalModulesTable).where(eq18(userTacticalModulesTable.userId, userId)).limit(1);
+  let [row] = await db.select().from(userTacticalModulesTable).where(eq21(userTacticalModulesTable.userId, userId)).limit(1);
   if (!row) {
     const defaults = { signal_trace: 3, time_dilation: 2, archive_scan: 3, ghost_protocol: 1, neural_boost: 2, threat_prediction: 2, memory_recall: 1, overclock: 0 };
     [row] = await db.insert(userTacticalModulesTable).values({
@@ -48778,7 +49633,7 @@ async function ensureUserModules(userId) {
   return row;
 }
 router19.get("/tactical/modules", async (req, res) => {
-  const user = await getUserFromToken16(req.headers.authorization);
+  const user = await getUserFromToken17(req.headers.authorization);
   if (!user) {
     res.json({
       modules: Object.values(MODULE_DEFS).map((m) => ({
@@ -48806,7 +49661,7 @@ router19.get("/tactical/modules", async (req, res) => {
     await db.update(userTacticalModulesTable).set({
       tacticalEnergy: newEnergy,
       lastEnergyRegen: /* @__PURE__ */ new Date()
-    }).where(eq18(userTacticalModulesTable.userId, user.id));
+    }).where(eq21(userTacticalModulesTable.userId, user.id));
     utm.tacticalEnergy = newEnergy;
   }
   res.json({
@@ -48824,7 +49679,7 @@ router19.get("/tactical/modules", async (req, res) => {
   });
 });
 router19.post("/tactical/activate", async (req, res) => {
-  const user = await getUserFromToken16(req.headers.authorization);
+  const user = await getUserFromToken17(req.headers.authorization);
   if (!user) {
     res.status(401).json({ error: "Not authenticated" });
     return;
@@ -48851,11 +49706,11 @@ router19.post("/tactical/activate", async (req, res) => {
   await db.update(userTacticalModulesTable).set({
     modules: newModules,
     tacticalEnergy: newEnergy
-  }).where(eq18(userTacticalModulesTable.userId, user.id));
+  }).where(eq21(userTacticalModulesTable.userId, user.id));
   let effectData = { type: def.effect, moduleId };
   switch (def.effect) {
     case "eliminate_wrong": {
-      const options = await db.select({ id: questionOptionsTable.id, isCorrect: questionOptionsTable.isCorrect }).from(questionOptionsTable).where(eq18(questionOptionsTable.questionId, questionId));
+      const options = await db.select({ id: questionOptionsTable.id, isCorrect: questionOptionsTable.isCorrect }).from(questionOptionsTable).where(eq21(questionOptionsTable.questionId, questionId));
       const wrongOptions = options.filter((o) => !o.isCorrect);
       const eliminated = wrongOptions.slice(0, 2).map((o) => o.id);
       effectData.eliminatedOptionIds = eliminated;
@@ -48866,7 +49721,7 @@ router19.post("/tactical/activate", async (req, res) => {
       break;
     }
     case "reveal_hint": {
-      const [q] = await db.select({ category: questionsTable.category }).from(questionsTable).where(eq18(questionsTable.id, questionId)).limit(1);
+      const [q] = await db.select({ category: questionsTable.category }).from(questionsTable).where(eq21(questionsTable.id, questionId)).limit(1);
       const hintPool = HINTS[q?.category] || HINTS.default;
       effectData.hint = hintPool[Math.floor(Math.random() * hintPool.length)];
       effectData.questionCategory = q?.category || "unknown";
@@ -48888,9 +49743,9 @@ router19.post("/tactical/activate", async (req, res) => {
       break;
     }
     case "show_similar": {
-      const [q] = await db.select({ category: questionsTable.category }).from(questionsTable).where(eq18(questionsTable.id, questionId)).limit(1);
+      const [q] = await db.select({ category: questionsTable.category }).from(questionsTable).where(eq21(questionsTable.id, questionId)).limit(1);
       if (q) {
-        const [similar] = await db.select({ questionText: questionsTable.questionText }).from(questionsTable).where(and7(eq18(questionsTable.category, q.category), ne2(questionsTable.id, questionId))).limit(1);
+        const [similar] = await db.select({ questionText: questionsTable.questionText }).from(questionsTable).where(and8(eq21(questionsTable.category, q.category), ne2(questionsTable.id, questionId))).limit(1);
         effectData.similarQuestion = similar?.questionText || "No similar intel in Archive.";
       }
       break;
@@ -48912,13 +49767,13 @@ router19.post("/tactical/activate", async (req, res) => {
   res.json({ success: true, effect: effectData, energyRemaining: newEnergy });
 });
 router19.post("/tactical/purchase", async (req, res) => {
-  const user = await getUserFromToken16(req.headers.authorization);
+  const user = await getUserFromToken17(req.headers.authorization);
   if (!user) {
     res.status(401).json({ error: "Not authenticated" });
     return;
   }
   const { type, moduleId } = req.body;
-  const [stats] = await db.select().from(userStatsTable).where(eq18(userStatsTable.userId, user.id)).limit(1);
+  const [stats] = await db.select().from(userStatsTable).where(eq21(userStatsTable.userId, user.id)).limit(1);
   if (!stats) {
     res.status(400).json({ error: "Stats not found" });
     return;
@@ -48933,8 +49788,8 @@ router19.post("/tactical/purchase", async (req, res) => {
     }
     const newEnergy = Math.min(utm.maxEnergy, utm.tacticalEnergy + 5);
     const regenEnergy = newEnergy - utm.tacticalEnergy;
-    await db.update(userStatsTable).set({ coins: (stats.coins || 0) - cost }).where(eq18(userStatsTable.userId, user.id));
-    await db.update(userTacticalModulesTable).set({ tacticalEnergy: newEnergy }).where(eq18(userTacticalModulesTable.userId, user.id));
+    await db.update(userStatsTable).set({ coins: (stats.coins || 0) - cost }).where(eq21(userStatsTable.userId, user.id));
+    await db.update(userTacticalModulesTable).set({ tacticalEnergy: newEnergy }).where(eq21(userTacticalModulesTable.userId, user.id));
     res.json({ success: true, tacticalEnergy: newEnergy, coinsSpent: cost, energyGained: regenEnergy });
     return;
   }
@@ -48961,8 +49816,8 @@ router19.post("/tactical/purchase", async (req, res) => {
     }
     const modOwned = owned;
     const newModules = { ...modOwned, [modId]: (modOwned[modId] || 0) + 1 };
-    await db.update(userStatsTable).set({ coins: (stats.coins || 0) - cost }).where(eq18(userStatsTable.userId, user.id));
-    await db.update(userTacticalModulesTable).set({ modules: newModules }).where(eq18(userTacticalModulesTable.userId, user.id));
+    await db.update(userStatsTable).set({ coins: (stats.coins || 0) - cost }).where(eq21(userStatsTable.userId, user.id));
+    await db.update(userTacticalModulesTable).set({ modules: newModules }).where(eq21(userTacticalModulesTable.userId, user.id));
     res.json({ success: true, moduleId: modId, quantity: newModules[modId], coinsSpent: cost });
     return;
   }
@@ -48974,14 +49829,14 @@ var tactical_default = router19;
 var import_express20 = __toESM(require_express2(), 1);
 init_src();
 init_src();
-import { eq as eq19, and as and8, sql as sql12 } from "drizzle-orm";
+import { eq as eq22, and as and9, sql as sql14 } from "drizzle-orm";
 var router20 = (0, import_express20.Router)();
-async function getUserFromToken17(token) {
+async function getUserFromToken18(token) {
   if (!token) return null;
   const bearerToken = token.replace("Bearer ", "");
-  const [session] = await db.select().from(sessionsTable).where(eq19(sessionsTable.token, bearerToken)).limit(1);
+  const [session] = await db.select().from(sessionsTable).where(eq22(sessionsTable.token, bearerToken)).limit(1);
   if (!session || session.expiresAt < /* @__PURE__ */ new Date()) return null;
-  const [user] = await db.select().from(usersTable).where(eq19(usersTable.id, session.userId)).limit(1);
+  const [user] = await db.select().from(usersTable).where(eq22(usersTable.id, session.userId)).limit(1);
   return user || null;
 }
 function generateRoomCode() {
@@ -48991,7 +49846,7 @@ function generateRoomCode() {
   return code;
 }
 router20.post("/team/create", async (req, res) => {
-  const user = await getUserFromToken17(req.headers.authorization);
+  const user = await getUserFromToken18(req.headers.authorization);
   if (!user) {
     res.status(401).json({ error: "Not authenticated" });
     return;
@@ -49013,18 +49868,18 @@ router20.post("/team/create", async (req, res) => {
   res.json({ team });
 });
 router20.post("/team/join", async (req, res) => {
-  const user = await getUserFromToken17(req.headers.authorization);
+  const user = await getUserFromToken18(req.headers.authorization);
   if (!user) {
     res.status(401).json({ error: "Not authenticated" });
     return;
   }
   const { teamId } = req.body;
-  const [team] = await db.select().from(teamOperationsTable).where(eq19(teamOperationsTable.id, teamId)).limit(1);
+  const [team] = await db.select().from(teamOperationsTable).where(eq22(teamOperationsTable.id, teamId)).limit(1);
   if (!team) {
     res.status(404).json({ error: "Team not found" });
     return;
   }
-  const members = await db.select().from(teamMembersTable).where(eq19(teamMembersTable.teamId, teamId));
+  const members = await db.select().from(teamMembersTable).where(eq22(teamMembersTable.teamId, teamId));
   if (members.length >= team.maxPlayers) {
     res.status(400).json({ error: "Team is full" });
     return;
@@ -49038,7 +49893,7 @@ router20.post("/team/join", async (req, res) => {
   res.json({ team, member });
 });
 router20.post("/team/loadout", async (req, res) => {
-  const user = await getUserFromToken17(req.headers.authorization);
+  const user = await getUserFromToken18(req.headers.authorization);
   if (!user) {
     res.status(401).json({ error: "Not authenticated" });
     return;
@@ -49048,31 +49903,31 @@ router20.post("/team/loadout", async (req, res) => {
     res.status(400).json({ error: "Select up to 3 tactical modules" });
     return;
   }
-  const [team] = await db.select().from(teamOperationsTable).where(eq19(teamOperationsTable.id, teamId)).limit(1);
+  const [team] = await db.select().from(teamOperationsTable).where(eq22(teamOperationsTable.id, teamId)).limit(1);
   if (!team || team.captainId !== user.id) {
     res.status(403).json({ error: "Only the captain can set loadout" });
     return;
   }
-  await db.update(teamOperationsTable).set({ tacticalLoadout: modules }).where(eq19(teamOperationsTable.id, teamId));
+  await db.update(teamOperationsTable).set({ tacticalLoadout: modules }).where(eq22(teamOperationsTable.id, teamId));
   res.json({ success: true, tacticalLoadout: modules });
 });
 router20.post("/team/match/create", async (req, res) => {
-  const user = await getUserFromToken17(req.headers.authorization);
+  const user = await getUserFromToken18(req.headers.authorization);
   if (!user) {
     res.status(401).json({ error: "Not authenticated" });
     return;
   }
   const { teamId, mode, domains, domainMode, difficulty } = req.body;
-  const [team] = await db.select().from(teamOperationsTable).where(eq19(teamOperationsTable.id, teamId)).limit(1);
+  const [team] = await db.select().from(teamOperationsTable).where(eq22(teamOperationsTable.id, teamId)).limit(1);
   if (!team) {
     res.status(404).json({ error: "Team not found" });
     return;
   }
   let roomCode = generateRoomCode();
-  let existing = await db.select().from(teamMatchesTable).where(eq19(teamMatchesTable.roomCode, roomCode)).limit(1);
+  let existing = await db.select().from(teamMatchesTable).where(eq22(teamMatchesTable.roomCode, roomCode)).limit(1);
   while (existing.length > 0) {
     roomCode = generateRoomCode();
-    existing = await db.select().from(teamMatchesTable).where(eq19(teamMatchesTable.roomCode, roomCode)).limit(1);
+    existing = await db.select().from(teamMatchesTable).where(eq22(teamMatchesTable.roomCode, roomCode)).limit(1);
   }
   const [match] = await db.insert(teamMatchesTable).values({
     roomCode,
@@ -49087,13 +49942,13 @@ router20.post("/team/match/create", async (req, res) => {
   res.json({ match, roomCode });
 });
 router20.post("/team/match/join", async (req, res) => {
-  const user = await getUserFromToken17(req.headers.authorization);
+  const user = await getUserFromToken18(req.headers.authorization);
   if (!user) {
     res.status(401).json({ error: "Not authenticated" });
     return;
   }
   const { roomCode, teamId } = req.body;
-  const [match] = await db.select().from(teamMatchesTable).where(eq19(teamMatchesTable.roomCode, roomCode)).limit(1);
+  const [match] = await db.select().from(teamMatchesTable).where(eq22(teamMatchesTable.roomCode, roomCode)).limit(1);
   if (!match) {
     res.status(404).json({ error: "Match not found" });
     return;
@@ -49102,9 +49957,9 @@ router20.post("/team/match/join", async (req, res) => {
     res.status(400).json({ error: "Match already started" });
     return;
   }
-  const existing = await db.select().from(teamMatchScoresTable).where(and8(
-    eq19(teamMatchScoresTable.matchId, match.id),
-    eq19(teamMatchScoresTable.teamId, teamId)
+  const existing = await db.select().from(teamMatchScoresTable).where(and9(
+    eq22(teamMatchScoresTable.matchId, match.id),
+    eq22(teamMatchScoresTable.teamId, teamId)
   )).limit(1);
   if (existing.length > 0) {
     res.json({ match });
@@ -49118,13 +49973,13 @@ router20.post("/team/match/join", async (req, res) => {
   res.json({ match });
 });
 router20.post("/team/match/start", async (req, res) => {
-  const user = await getUserFromToken17(req.headers.authorization);
+  const user = await getUserFromToken18(req.headers.authorization);
   if (!user) {
     res.status(401).json({ error: "Not authenticated" });
     return;
   }
   const { matchId } = req.body;
-  const [match] = await db.select().from(teamMatchesTable).where(eq19(teamMatchesTable.id, matchId)).limit(1);
+  const [match] = await db.select().from(teamMatchesTable).where(eq22(teamMatchesTable.id, matchId)).limit(1);
   if (!match) {
     res.status(404).json({ error: "Match not found" });
     return;
@@ -49133,7 +49988,7 @@ router20.post("/team/match/start", async (req, res) => {
     res.status(403).json({ error: "Only host can start" });
     return;
   }
-  const scores = await db.select().from(teamMatchScoresTable).where(eq19(teamMatchScoresTable.matchId, matchId));
+  const scores = await db.select().from(teamMatchScoresTable).where(eq22(teamMatchScoresTable.matchId, matchId));
   if (scores.length < 1) {
     res.status(400).json({ error: "Need at least 1 team" });
     return;
@@ -49141,9 +49996,9 @@ router20.post("/team/match/start", async (req, res) => {
   const { questionsTable: questionsTable3, questionOptionsTable: questionOptionsTable3 } = await Promise.resolve().then(() => (init_src(), src_exports));
   const { ne: ne3, desc: d } = await import("drizzle-orm");
   const questionCount = 10;
-  const questions = await db.select().from(questionsTable3).orderBy(sql12`RANDOM()`).limit(questionCount);
+  const questions = await db.select().from(questionsTable3).orderBy(sql14`RANDOM()`).limit(questionCount);
   const qs = await Promise.all(questions.map(async (q) => {
-    const options = await db.select({ id: questionOptionsTable3.id, text: questionOptionsTable3.optionText }).from(questionOptionsTable3).where(eq19(questionOptionsTable3.questionId, q.id));
+    const options = await db.select({ id: questionOptionsTable3.id, text: questionOptionsTable3.optionText }).from(questionOptionsTable3).where(eq22(questionOptionsTable3.questionId, q.id));
     return {
       id: q.id,
       questionText: q.questionText,
@@ -49158,7 +50013,7 @@ router20.post("/team/match/start", async (req, res) => {
     status: "active",
     startedAt: /* @__PURE__ */ new Date(),
     totalQuestions: qs.length
-  }).where(eq19(teamMatchesTable.id, matchId));
+  }).where(eq22(teamMatchesTable.id, matchId));
   try {
     const io = getIO();
     io.to(`match:${matchId}`).emit("team:match-started", {
@@ -49177,27 +50032,27 @@ router20.post("/team/match/start", async (req, res) => {
   res.json({ success: true, totalQuestions: qs.length, questions: qs });
 });
 router20.post("/team/match/answer", async (req, res) => {
-  const user = await getUserFromToken17(req.headers.authorization);
+  const user = await getUserFromToken18(req.headers.authorization);
   if (!user) {
     res.status(401).json({ error: "Not authenticated" });
     return;
   }
   const { matchId, teamId, questionIndex, optionId, timeMs } = req.body;
-  const [match] = await db.select().from(teamMatchesTable).where(eq19(teamMatchesTable.id, matchId)).limit(1);
+  const [match] = await db.select().from(teamMatchesTable).where(eq22(teamMatchesTable.id, matchId)).limit(1);
   if (!match || match.status !== "active") {
     res.status(400).json({ error: "Match not active" });
     return;
   }
-  const [score] = await db.select().from(teamMatchScoresTable).where(and8(
-    eq19(teamMatchScoresTable.matchId, matchId),
-    eq19(teamMatchScoresTable.teamId, teamId)
+  const [score] = await db.select().from(teamMatchScoresTable).where(and9(
+    eq22(teamMatchScoresTable.matchId, matchId),
+    eq22(teamMatchScoresTable.teamId, teamId)
   )).limit(1);
   if (!score) {
     res.status(404).json({ error: "Team not in match" });
     return;
   }
   const { questionOptionsTable: qot } = await Promise.resolve().then(() => (init_src(), src_exports));
-  const [opt] = await db.select({ isCorrect: qot.isCorrect }).from(qot).where(eq19(qot.id, optionId)).limit(1);
+  const [opt] = await db.select({ isCorrect: qot.isCorrect }).from(qot).where(eq22(qot.id, optionId)).limit(1);
   if (!opt) {
     res.status(400).json({ error: "Invalid option" });
     return;
@@ -49213,7 +50068,7 @@ router20.post("/team/match/answer", async (req, res) => {
     totalAnswers: score.totalAnswers + 1,
     currentStreak: newStreak,
     fastestAnswer: timeMs < 5e3 ? true : score.fastestAnswer
-  }).where(and8(eq19(teamMatchScoresTable.matchId, matchId), eq19(teamMatchScoresTable.teamId, teamId)));
+  }).where(and9(eq22(teamMatchScoresTable.matchId, matchId), eq22(teamMatchScoresTable.teamId, teamId)));
   await db.insert(teamMatchQuestionsTable).values({
     matchId,
     questionIndex,
@@ -49234,13 +50089,13 @@ router20.post("/team/match/answer", async (req, res) => {
       questionIndex,
       responseTimeMs: timeMs
     });
-    const allScores = await db.select().from(teamMatchScoresTable).where(eq19(teamMatchScoresTable.matchId, matchId));
+    const allScores = await db.select().from(teamMatchScoresTable).where(eq22(teamMatchScoresTable.matchId, matchId));
     const allAnswered = allScores.every((s) => s.totalAnswers > questionIndex);
     if (allAnswered) {
       const nextIdx = questionIndex + 1;
       if (nextIdx >= (match.totalQuestions || 10)) {
         io.to(`match:${matchId}`).emit("team:match-ended", { matchId });
-        await db.update(teamMatchesTable).set({ status: "finished", finishedAt: /* @__PURE__ */ new Date() }).where(eq19(teamMatchesTable.id, matchId));
+        await db.update(teamMatchesTable).set({ status: "finished", finishedAt: /* @__PURE__ */ new Date() }).where(eq22(teamMatchesTable.id, matchId));
       }
     }
   } catch {
@@ -49248,13 +50103,13 @@ router20.post("/team/match/answer", async (req, res) => {
   res.json({ success: true, isCorrect, pointsGained, newScore: score.score + pointsGained, newStreak });
 });
 router20.post("/team/match/next", async (req, res) => {
-  const user = await getUserFromToken17(req.headers.authorization);
+  const user = await getUserFromToken18(req.headers.authorization);
   if (!user) {
     res.status(401).json({ error: "Not authenticated" });
     return;
   }
   const { matchId, questions } = req.body;
-  const [match] = await db.select().from(teamMatchesTable).where(eq19(teamMatchesTable.id, matchId)).limit(1);
+  const [match] = await db.select().from(teamMatchesTable).where(eq22(teamMatchesTable.id, matchId)).limit(1);
   if (!match || match.hostId !== user.id) {
     res.status(403).json({ error: "Only host can advance" });
     return;
@@ -49265,11 +50120,11 @@ router20.post("/team/match/next", async (req, res) => {
       getIO().to(`match:${matchId}`).emit("team:match-ended", { matchId });
     } catch {
     }
-    await db.update(teamMatchesTable).set({ status: "finished", finishedAt: /* @__PURE__ */ new Date() }).where(eq19(teamMatchesTable.id, matchId));
+    await db.update(teamMatchesTable).set({ status: "finished", finishedAt: /* @__PURE__ */ new Date() }).where(eq22(teamMatchesTable.id, matchId));
     res.json({ finished: true });
     return;
   }
-  await db.update(teamMatchesTable).set({ currentQuestion: nextQ }).where(eq19(teamMatchesTable.id, matchId));
+  await db.update(teamMatchesTable).set({ currentQuestion: nextQ }).where(eq22(teamMatchesTable.id, matchId));
   try {
     const io = getIO();
     const q = questions?.[nextQ];
@@ -49285,20 +50140,20 @@ router20.post("/team/match/next", async (req, res) => {
   res.json({ success: true, currentQuestion: nextQ });
 });
 router20.post("/team/match/buzz", async (req, res) => {
-  const user = await getUserFromToken17(req.headers.authorization);
+  const user = await getUserFromToken18(req.headers.authorization);
   if (!user) {
     res.status(401).json({ error: "Not authenticated" });
     return;
   }
   const { matchId, teamId } = req.body;
-  const [match] = await db.select().from(teamMatchesTable).where(eq19(teamMatchesTable.id, matchId)).limit(1);
+  const [match] = await db.select().from(teamMatchesTable).where(eq22(teamMatchesTable.id, matchId)).limit(1);
   if (!match || match.status !== "active") {
     res.status(400).json({ error: "Match not active" });
     return;
   }
-  const existingBuzz = await db.select().from(teamMatchQuestionsTable).where(and8(
-    eq19(teamMatchQuestionsTable.matchId, matchId),
-    eq19(teamMatchQuestionsTable.questionIndex, match.currentQuestion)
+  const existingBuzz = await db.select().from(teamMatchQuestionsTable).where(and9(
+    eq22(teamMatchQuestionsTable.matchId, matchId),
+    eq22(teamMatchQuestionsTable.questionIndex, match.currentQuestion)
   )).limit(1);
   if (existingBuzz.length > 0) {
     res.json({ success: false, reason: "already_buzzed" });
@@ -49328,33 +50183,33 @@ router20.get("/team/match/:id/scoreboard", async (req, res) => {
     correctAnswers: teamMatchScoresTable.correctAnswers,
     totalAnswers: teamMatchScoresTable.totalAnswers,
     currentStreak: teamMatchScoresTable.currentStreak
-  }).from(teamMatchScoresTable).where(eq19(teamMatchScoresTable.matchId, parseInt(req.params.id))).orderBy(sql12`score DESC`);
+  }).from(teamMatchScoresTable).where(eq22(teamMatchScoresTable.matchId, parseInt(req.params.id))).orderBy(sql14`score DESC`);
   const teams = await Promise.all(scores.map(async (s) => {
-    const [team] = await db.select({ name: teamOperationsTable.name, color: teamOperationsTable.color, emblem: teamOperationsTable.emblem }).from(teamOperationsTable).where(eq19(teamOperationsTable.id, s.teamId)).limit(1);
+    const [team] = await db.select({ name: teamOperationsTable.name, color: teamOperationsTable.color, emblem: teamOperationsTable.emblem }).from(teamOperationsTable).where(eq22(teamOperationsTable.id, s.teamId)).limit(1);
     return { ...s, teamName: team?.name || "Unknown", color: team?.color || "blue", emblem: team?.emblem || "default" };
   }));
   res.json({ scores: teams });
 });
 router20.get("/team/list", async (req, res) => {
-  const user = await getUserFromToken17(req.headers.authorization);
+  const user = await getUserFromToken18(req.headers.authorization);
   if (!user) {
     res.status(401).json({ error: "Not authenticated" });
     return;
   }
-  const memberships = await db.select({ teamId: teamMembersTable.teamId }).from(teamMembersTable).where(eq19(teamMembersTable.userId, user.id));
+  const memberships = await db.select({ teamId: teamMembersTable.teamId }).from(teamMembersTable).where(eq22(teamMembersTable.userId, user.id));
   const teamIds = memberships.map((m) => m.teamId);
   if (teamIds.length === 0) {
     res.json({ teams: [] });
     return;
   }
   const teams = await Promise.all(teamIds.map(async (id) => {
-    const [team] = await db.select().from(teamOperationsTable).where(eq19(teamOperationsTable.id, id)).limit(1);
+    const [team] = await db.select().from(teamOperationsTable).where(eq22(teamOperationsTable.id, id)).limit(1);
     if (!team) return null;
     const members = await db.select({
       userId: teamMembersTable.userId,
       isReady: teamMembersTable.isReady,
       username: usersTable.username
-    }).from(teamMembersTable).leftJoin(usersTable, eq19(teamMembersTable.userId, usersTable.id)).where(eq19(teamMembersTable.teamId, id));
+    }).from(teamMembersTable).leftJoin(usersTable, eq22(teamMembersTable.userId, usersTable.id)).where(eq22(teamMembersTable.teamId, id));
     return { ...team, members };
   }));
   res.json({ teams: teams.filter(Boolean) });
@@ -49371,7 +50226,7 @@ init_src();
 
 // src/middleware/auth.ts
 init_src();
-import { eq as eq23 } from "drizzle-orm";
+import { eq as eq24 } from "drizzle-orm";
 async function authenticate(req, _res, next) {
   const token = req.headers.authorization?.replace("Bearer ", "");
   if (!token) {
@@ -49380,13 +50235,13 @@ async function authenticate(req, _res, next) {
     return;
   }
   try {
-    const [session] = await db.select().from(sessionsTable).where(eq23(sessionsTable.token, token)).limit(1);
+    const [session] = await db.select().from(sessionsTable).where(eq24(sessionsTable.token, token)).limit(1);
     if (!session || session.expiresAt < /* @__PURE__ */ new Date()) {
       req.user = void 0;
       next();
       return;
     }
-    const [user] = await db.select().from(usersTable).where(eq23(usersTable.id, session.userId)).limit(1);
+    const [user] = await db.select().from(usersTable).where(eq24(usersTable.id, session.userId)).limit(1);
     if (!user) {
       req.user = void 0;
       next();
@@ -49395,7 +50250,7 @@ async function authenticate(req, _res, next) {
     const role = user.role || "player";
     let permissions = [];
     try {
-      const perms = await db.select({ key: permissionsTable.key }).from(rolePermissionsTable).innerJoin(rolesTable, eq23(rolePermissionsTable.roleId, rolesTable.id)).innerJoin(permissionsTable, eq23(rolePermissionsTable.permissionId, permissionsTable.id)).where(eq23(rolesTable.name, role));
+      const perms = await db.select({ key: permissionsTable.key }).from(rolePermissionsTable).innerJoin(rolesTable, eq24(rolePermissionsTable.roleId, rolesTable.id)).innerJoin(permissionsTable, eq24(rolePermissionsTable.permissionId, permissionsTable.id)).where(eq24(rolesTable.name, role));
       permissions = perms.map((p) => p.key);
     } catch {
     }
@@ -49428,7 +50283,7 @@ function requirePermission(...permissions) {
 
 // src/routes/admin.ts
 init_src2();
-import { eq as eq24, sql as sql17, desc as desc8, and as and10 } from "drizzle-orm";
+import { eq as eq25, sql as sql17, desc as desc8, and as and10 } from "drizzle-orm";
 var OPENAI_KEY = process.env["OPENAI_API_KEY"];
 if (OPENAI_KEY) {
   configureOpenAI({ apiKey: OPENAI_KEY, model: "gpt-4o-mini" });
@@ -49590,15 +50445,15 @@ router22.get("/admin/questions", requirePermission("manage_questions"), async (r
     [limit, offset]
   );
   const questionsWithOptions = await Promise.all(rows.map(async (q) => {
-    const opts = await db.select().from(questionOptionsTable).where(eq24(questionOptionsTable.questionId, q.id));
+    const opts = await db.select().from(questionOptionsTable).where(eq25(questionOptionsTable.questionId, q.id));
     return { ...q, options: opts };
   }));
   res.json({ questions: questionsWithOptions, total, page, limit });
 });
 router22.get("/admin/questions/:id", requirePermission("manage_questions"), async (req, res) => {
-  const [q] = await db.select().from(questionsTable).where(eq24(questionsTable.id, parseInt(req.params.id))).limit(1);
+  const [q] = await db.select().from(questionsTable).where(eq25(questionsTable.id, parseInt(req.params.id))).limit(1);
   if (!q) return res.status(404).json({ error: "Question not found" });
-  const opts = await db.select().from(questionOptionsTable).where(eq24(questionOptionsTable.questionId, q.id));
+  const opts = await db.select().from(questionOptionsTable).where(eq25(questionOptionsTable.questionId, q.id));
   res.json({ ...q, options: opts });
 });
 function validateQuestionBody(body) {
@@ -49670,7 +50525,7 @@ router22.post("/admin/questions", requirePermission("manage_questions"), async (
 });
 router22.put("/admin/questions/:id", requirePermission("manage_questions"), async (req, res) => {
   const id = parseInt(req.params.id);
-  const [existing] = await db.select().from(questionsTable).where(eq24(questionsTable.id, id)).limit(1);
+  const [existing] = await db.select().from(questionsTable).where(eq25(questionsTable.id, id)).limit(1);
   if (!existing) return res.status(404).json({ error: "Question not found" });
   const body = req.body;
   if (body.type || body.questionText || body.correctAnswer || body.mediaUrl || body.options) {
@@ -49696,10 +50551,10 @@ router22.put("/admin/questions/:id", requirePermission("manage_questions"), asyn
   if (body.explanation !== void 0) updateData.explanation = body.explanation;
   if (body.mediaUrl !== void 0) updateData.mediaUrl = body.mediaUrl;
   if (Object.keys(updateData).length > 0) {
-    await db.update(questionsTable).set(updateData).where(eq24(questionsTable.id, id));
+    await db.update(questionsTable).set(updateData).where(eq25(questionsTable.id, id));
   }
   if (resolvedOptions) {
-    await db.delete(questionOptionsTable).where(eq24(questionOptionsTable.questionId, id));
+    await db.delete(questionOptionsTable).where(eq25(questionOptionsTable.questionId, id));
     for (let i = 0; i < resolvedOptions.length; i++) {
       await db.insert(questionOptionsTable).values({
         questionId: id,
@@ -49713,8 +50568,8 @@ router22.put("/admin/questions/:id", requirePermission("manage_questions"), asyn
 });
 router22.delete("/admin/questions/:id", requirePermission("manage_questions"), async (req, res) => {
   const id = parseInt(req.params.id);
-  await db.delete(questionOptionsTable).where(eq24(questionOptionsTable.questionId, id));
-  await db.delete(questionsTable).where(eq24(questionsTable.id, id));
+  await db.delete(questionOptionsTable).where(eq25(questionOptionsTable.questionId, id));
+  await db.delete(questionsTable).where(eq25(questionsTable.id, id));
   logAdmin(req.user.id, "ADMIN_DELETED_QUESTION", "question", String(id));
   res.json({ success: true });
 });
@@ -49759,7 +50614,7 @@ router22.post("/admin/questions/generate", requirePermission("manage_questions")
     [sampleCount]
   );
   const questionsWithOptions = await Promise.all(rows.map(async (q) => {
-    const opts = await db.select().from(questionOptionsTable).where(eq24(questionOptionsTable.questionId, q.id));
+    const opts = await db.select().from(questionOptionsTable).where(eq25(questionOptionsTable.questionId, q.id));
     return { ...q, options: opts };
   }));
   logAdmin(req.user.id, "ADMIN_COPIED_QUESTIONS", "question", null, { count: questionsWithOptions.length });
@@ -49768,7 +50623,7 @@ router22.post("/admin/questions/generate", requirePermission("manage_questions")
 router22.get("/admin/questions/export", requirePermission("manage_questions"), async (req, res) => {
   const { rows } = await getPool().query(`SELECT * FROM questions ORDER BY id`);
   const questions = await Promise.all(rows.map(async (q) => {
-    const opts = await db.select().from(questionOptionsTable).where(eq24(questionOptionsTable.questionId, q.id));
+    const opts = await db.select().from(questionOptionsTable).where(eq25(questionOptionsTable.questionId, q.id));
     return { ...q, options: opts };
   }));
   res.setHeader("Content-Type", "application/json");
@@ -49819,9 +50674,9 @@ router22.get("/admin/users", requirePermission("manage_users"), async (req, res)
   const [{ count }] = await db.select({ count: sql17`count(*)` }).from(usersTable).where(where);
   const users = await db.select().from(usersTable).where(where).orderBy(desc8(usersTable.id)).limit(limit).offset(offset);
   const usersWithStats = await Promise.all(users.map(async (u) => {
-    const [stats] = await db.select().from(userStatsTable).where(eq24(userStatsTable.userId, u.id)).limit(1);
+    const [stats] = await db.select().from(userStatsTable).where(eq25(userStatsTable.userId, u.id)).limit(1);
     const [ban] = await db.select().from(bansTable).where(and10(
-      eq24(bansTable.userId, u.id),
+      eq25(bansTable.userId, u.id),
       sql17`(expires_at IS NULL OR expires_at > now())`
     )).limit(1);
     return { ...u, stats, banned: !!ban, banReason: ban?.reason, banExpiresAt: ban?.expiresAt };
@@ -49829,12 +50684,12 @@ router22.get("/admin/users", requirePermission("manage_users"), async (req, res)
   res.json({ users: usersWithStats, total: Number(count), page, limit });
 });
 router22.get("/admin/users/:id", requirePermission("manage_users"), async (req, res) => {
-  const [user] = await db.select().from(usersTable).where(eq24(usersTable.id, parseInt(req.params.id))).limit(1);
+  const [user] = await db.select().from(usersTable).where(eq25(usersTable.id, parseInt(req.params.id))).limit(1);
   if (!user) return res.status(404).json({ error: "User not found" });
-  const [stats] = await db.select().from(userStatsTable).where(eq24(userStatsTable.userId, user.id)).limit(1);
-  const sessions = await db.select().from(sessionsTable).where(eq24(sessionsTable.userId, user.id)).orderBy(desc8(sessionsTable.createdAt)).limit(10);
+  const [stats] = await db.select().from(userStatsTable).where(eq25(userStatsTable.userId, user.id)).limit(1);
+  const sessions = await db.select().from(sessionsTable).where(eq25(sessionsTable.userId, user.id)).orderBy(desc8(sessionsTable.createdAt)).limit(10);
   const [ban] = await db.select().from(bansTable).where(and10(
-    eq24(bansTable.userId, user.id),
+    eq25(bansTable.userId, user.id),
     sql17`(expires_at IS NULL OR expires_at > now())`
   )).limit(1);
   res.json({ ...user, stats, sessions, ban });
@@ -49848,13 +50703,13 @@ router22.post("/admin/users/:id/ban", requirePermission("manage_users"), async (
     bannedBy: req.user.id,
     expiresAt: expiresInHours ? new Date(Date.now() + expiresInHours * 60 * 60 * 1e3) : void 0
   });
-  await db.delete(sessionsTable).where(eq24(sessionsTable.userId, userId));
+  await db.delete(sessionsTable).where(eq25(sessionsTable.userId, userId));
   logAdmin(req.user.id, "ADMIN_BANNED_USER", "user", String(userId), { reason, expiresInHours });
   res.json({ success: true });
 });
 router22.post("/admin/users/:id/unban", requirePermission("manage_users"), async (req, res) => {
   const userId = parseInt(req.params.id);
-  await db.delete(bansTable).where(eq24(bansTable.userId, userId));
+  await db.delete(bansTable).where(eq25(bansTable.userId, userId));
   logAdmin(req.user.id, "ADMIN_UNBANNED_USER", "user", String(userId));
   res.json({ success: true });
 });
@@ -49862,13 +50717,13 @@ router22.post("/admin/users/:id/role", requirePermission("manage_users"), async 
   const userId = parseInt(req.params.id);
   const { role } = req.body;
   if (!role) return res.status(400).json({ error: "Role required" });
-  await db.update(usersTable).set({ role }).where(eq24(usersTable.id, userId));
+  await db.update(usersTable).set({ role }).where(eq25(usersTable.id, userId));
   logAdmin(req.user.id, "ADMIN_CHANGED_ROLE", "user", String(userId), { role });
   res.json({ success: true });
 });
 router22.post("/admin/users/:id/reset-xp", requirePermission("manage_users"), async (req, res) => {
   const userId = parseInt(req.params.id);
-  await db.update(userStatsTable).set({ xp: 0, level: 1 }).where(eq24(userStatsTable.userId, userId));
+  await db.update(userStatsTable).set({ xp: 0, level: 1 }).where(eq25(userStatsTable.userId, userId));
   logAdmin(req.user.id, "ADMIN_RESET_XP", "user", String(userId));
   res.json({ success: true });
 });
@@ -49878,7 +50733,7 @@ router22.post("/admin/users/:id/give-coins", requirePermission("manage_users"), 
   if (!amount || amount < 0) return res.status(400).json({ error: "Valid amount required" });
   await db.update(userStatsTable).set({
     coins: sql17`coins + ${amount}`
-  }).where(eq24(userStatsTable.userId, userId));
+  }).where(eq25(userStatsTable.userId, userId));
   logAdmin(req.user.id, "ADMIN_GAVE_COINS", "user", String(userId), { amount });
   res.json({ success: true });
 });
@@ -49907,20 +50762,20 @@ router22.put("/admin/story/chapters/:id", requirePermission("manage_story"), asy
     ...orderIndex && { orderIndex },
     ...unlockLevel && { unlockLevel },
     ...coverImageUrl && { coverImageUrl }
-  }).where(eq24(chaptersTable.id, id));
+  }).where(eq25(chaptersTable.id, id));
   logAdmin(req.user.id, "ADMIN_EDITED_CHAPTER", "story", String(id));
   res.json({ success: true });
 });
 router22.delete("/admin/story/chapters/:id", requirePermission("manage_story"), async (req, res) => {
   const id = parseInt(req.params.id);
-  await db.delete(chaptersTable).where(eq24(chaptersTable.id, id));
-  await db.delete(storyNodesTable).where(eq24(storyNodesTable.chapterId, id));
+  await db.delete(chaptersTable).where(eq25(chaptersTable.id, id));
+  await db.delete(storyNodesTable).where(eq25(storyNodesTable.chapterId, id));
   logAdmin(req.user.id, "ADMIN_DELETED_CHAPTER", "story", String(id));
   res.json({ success: true });
 });
 router22.get("/admin/story/nodes", requirePermission("manage_story"), async (req, res) => {
   const chapterId = req.query.chapterId ? parseInt(req.query.chapterId) : void 0;
-  const where = chapterId ? eq24(storyNodesTable.chapterId, chapterId) : void 0;
+  const where = chapterId ? eq25(storyNodesTable.chapterId, chapterId) : void 0;
   const nodes = await db.select().from(storyNodesTable).where(where).orderBy(storyNodesTable.orderIndex);
   res.json({ nodes });
 });
@@ -49960,12 +50815,12 @@ router22.put("/admin/shop/items/:id", requirePermission("manage_shop"), async (r
     ...iconUrl && { iconUrl },
     ...isLimited !== void 0 && { isLimited },
     ...availableUntil && { availableUntil }
-  }).where(eq24(shopItemsTable.id, id));
+  }).where(eq25(shopItemsTable.id, id));
   logAdmin(req.user.id, "ADMIN_EDITED_SHOP_ITEM", "shop", String(id));
   res.json({ success: true });
 });
 router22.delete("/admin/shop/items/:id", requirePermission("manage_shop"), async (req, res) => {
-  await db.delete(shopItemsTable).where(eq24(shopItemsTable.id, parseInt(req.params.id)));
+  await db.delete(shopItemsTable).where(eq25(shopItemsTable.id, parseInt(req.params.id)));
   logAdmin(req.user.id, "ADMIN_DELETED_SHOP_ITEM", "shop", req.params.id);
   res.json({ success: true });
 });
@@ -50137,7 +50992,7 @@ router22.post("/admin/seed/defaults", async (req, res) => {
     const [inserted] = await db.insert(rolesTable).values({ name: role.name }).onConflictDoNothing().returning();
     if (!inserted) continue;
     for (const permKey of role.permissions) {
-      const [perm] = await db.select().from(permissionsTable).where(eq24(permissionsTable.key, permKey)).limit(1);
+      const [perm] = await db.select().from(permissionsTable).where(eq25(permissionsTable.key, permKey)).limit(1);
       if (perm) {
         await db.insert(rolePermissionsTable).values({ roleId: inserted.id, permissionId: perm.id }).onConflictDoNothing();
       }
@@ -50228,7 +51083,7 @@ var admin_default = router22;
 var import_express23 = __toESM(require_express2(), 1);
 init_stage2();
 var router23 = (0, import_express23.Router)();
-var BOT_NAMES = [
+var BOT_NAMES2 = [
   "Cipher-7",
   "Nexus-9",
   "Phantom-X",
@@ -50242,7 +51097,7 @@ var BOT_NAMES = [
 ];
 var BOT_COLORS = ["#a855f7", "#14b8a6", "#f97316", "#06b6d4", "#d946ef"];
 var BOT_EMBLEMS = ["ai-1", "ai-2", "ai-3", "ai-4", "ai-5"];
-var DIFFICULTY_SKILL = {
+var DIFFICULTY_SKILL2 = {
   recruit: { accuracy: 0.45, avgBuzzMs: 8e3, buzzVariance: 4e3 },
   agent: { accuracy: 0.6, avgBuzzMs: 6e3, buzzVariance: 3e3 },
   elite: { accuracy: 0.78, avgBuzzMs: 4e3, buzzVariance: 2e3 },
@@ -50263,7 +51118,7 @@ router23.post("/stage/ai-opponent/add", async (req, res) => {
   for (let i = 0; i < count; i++) {
     const bot = {
       id: 1e3 + match.teams.length + i,
-      name: pickRandom2(BOT_NAMES),
+      name: pickRandom2(BOT_NAMES2),
       color: BOT_COLORS[i % BOT_COLORS.length],
       emblem: BOT_EMBLEMS[i % BOT_EMBLEMS.length],
       code: `AI-${match.teams.length + i + 1}`,
@@ -50273,7 +51128,7 @@ router23.post("/stage/ai-opponent/add", async (req, res) => {
       streak: 0,
       tacticalLoadout: [],
       isBot: true,
-      skill: DIFFICULTY_SKILL[difficulty || "agent"]
+      skill: DIFFICULTY_SKILL2[difficulty || "agent"]
     };
     match.teams.push(bot);
     bots.push({ id: bot.id, name: bot.name, color: bot.color, emblem: bot.emblem });
@@ -50306,7 +51161,7 @@ router23.post("/stage/ai-opponent/tick", async (req, res) => {
   const { persistMatch: persistMatch3, cacheMatch: cacheMatch3 } = await Promise.resolve().then(() => (init_stage2(), stage_exports));
   const elapsed = Date.now() - (match.timerStartedAt || Date.now());
   for (const bot of botTeams) {
-    const skill = bot.skill || DIFFICULTY_SKILL.agent;
+    const skill = bot.skill || DIFFICULTY_SKILL2.agent;
     const buzzChance = Math.min(0.3, elapsed / (skill.avgBuzzMs * 3));
     if (Math.random() < buzzChance && match.buzzerTeamId === null) {
       match.buzzerTeamId = bot.id;

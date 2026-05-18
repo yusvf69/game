@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { getToken } from "@/lib/auth";
 import AOSLayout from "@/components/aos/AOSLayout";
 import { NavBar } from "@/components/NavBar";
+import { initAudio, playMatchStart, playCorrect, playWrong, playMatchEnd, playTick } from "@/lib/audio";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "";
 
@@ -97,6 +98,39 @@ export default function HostControl() {
   const [rebuzzOpen, setRebuzzOpen] = useState(false);
   const [rebuzzExcludedTeam, setRebuzzExcludedTeam] = useState("");
   const [connectedTeamIds, setConnectedTeamIds] = useState<number[]>([]);
+
+  useEffect(() => { initAudio(); }, []);
+
+  const prevHostPhase = useRef<string>("lobby");
+  const prevHostTick = useRef<number>(-1);
+
+  useEffect(() => {
+    if (phase === "intro" && prevHostPhase.current === "idle") {
+      playMatchStart();
+    }
+    if (step === "ended" && prevHostPhase.current !== "ended") {
+      playMatchEnd(true);
+    }
+    prevHostPhase.current = step === "ended" ? "ended" : phase;
+  }, [phase, step]);
+
+  useEffect(() => {
+    if (!answerResult || answerResult.rebuzz) return;
+    if (answerResult.correct) playCorrect();
+    else playWrong();
+  }, [answerResult]);
+
+  useEffect(() => {
+    if (timerActive && timerValue > 0 && timerValue <= 5) {
+      const intSec = Math.ceil(timerValue);
+      if (intSec >= 1 && intSec !== prevHostTick.current) {
+        playTick();
+        prevHostTick.current = intSec;
+      }
+    } else {
+      prevHostTick.current = -1;
+    }
+  }, [timerActive, timerValue]);
 
   // Polling: fetch stage state every 1.2s
   const pollStage = useCallback(async (id: number) => {

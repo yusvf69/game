@@ -1,6 +1,8 @@
 import { db, getPool } from "@workspace/db";
 import { xpLogTable, analyticsEventsTable } from "@workspace/db";
 import { sql } from "drizzle-orm";
+import { checkAchievements } from "./achievements.js";
+import { awardBattlePassXp } from "./battlepass.js";
 
 export type GameEventType =
   | "ANSWER_CORRECT"
@@ -89,10 +91,10 @@ eventBus.on("*" as any, async (event: GameEvent) => {
   } catch {}
 });
 
-// XP listener
+// XP + streak + achievement listener
 eventBus.on("ANSWER_CORRECT", async (event: GameEvent) => {
   if (!event.userId || !event.data) return;
-  const { xpAmount, questionDifficulty } = event.data as any;
+  const { xpAmount, answerTimeMs } = event.data as any;
   if (!xpAmount) return;
 
   try {
@@ -104,10 +106,15 @@ eventBus.on("ANSWER_CORRECT", async (event: GameEvent) => {
 
     await getPool().query(
       `UPDATE user_stats
-       SET xp = xp + $1, level = GREATEST(1, floor((xp + $1) / 500) + 1)
+       SET xp = xp + $1,
+           level = GREATEST(1, floor((xp + $1) / 500) + 1),
+           streak = streak + 1
        WHERE user_id = $2`,
       [xpAmount, event.userId]
     );
+
+    await checkAchievements(event.userId, { answerTimeMs });
+    await awardBattlePassXp(event.userId, Math.floor(xpAmount * 0.5), "correct_answer");
   } catch {}
 });
 
@@ -122,7 +129,7 @@ eventBus.on("ANSWER_INCORRECT", async (event: GameEvent) => {
   } catch {}
 });
 
-// Match finished → update stats
+// Match finished → update stats + check achievements
 eventBus.on("MATCH_ENDED", async (event: GameEvent) => {
   if (!event.matchId) return;
   const data = event.data as any;
@@ -142,6 +149,8 @@ eventBus.on("MATCH_ENDED", async (event: GameEvent) => {
          WHERE user_id = $4`,
         [isWinner ? 1 : 0, isWinner ? 0 : 1, xpReward, team.userId]
       );
+      await checkAchievements(team.userId, { matchWinner: isWinner });
+      await awardBattlePassXp(team.userId, isWinner ? 50 : 25, "match_complete");
     } catch {}
   }
 });

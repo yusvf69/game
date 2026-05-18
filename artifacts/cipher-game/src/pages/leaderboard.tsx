@@ -16,8 +16,9 @@ import {
   getGetMyRankingQueryKey,
 } from "@workspace/api-client-react";
 
+const BASE_URL = import.meta.env.VITE_API_URL || "";
+
 type LeaderboardEntry = { rank: number; userId: number; username: string; avatarUrl: string | null; xp: number; level: number; rankTier: string; score: number };
-type PlayerRanking = { userId: number; mmr: number; rankTier: string; rankPoints: number; seasonId: number; position: number };
 
 function PositionIcon({ rank }: { rank: number }) {
   if (rank === 1) return <span style={{ color: "#fbbf24", textShadow: "0 0 8px rgba(251,191,36,0.6)" }} className="font-mono font-black text-lg">1st</span>;
@@ -46,7 +47,7 @@ export default function LeaderboardPage() {
     if (booted["leaderboard"]) setBootDone(true);
   }, [booted]);
 
-  const [tab, setTab] = useState<"global" | "daily">("global");
+  const [tab, setTab] = useState<"global" | "daily" | "seasonal">("global");
 
   const { data: globalLb, isLoading: globalLoading } = useGetGlobalLeaderboard(
     { limit: 20 },
@@ -65,9 +66,28 @@ export default function LeaderboardPage() {
     query: { queryKey: getGetMyRankingQueryKey() },
   });
 
-  const entries = (tab === "global" ? globalLb : dailyLb) as LeaderboardEntry[] | undefined;
-  const isLoading = tab === "global" ? globalLoading : dailyLoading;
-  const myRank = myRanking as PlayerRanking | undefined;
+  const [seasonalData, setSeasonalData] = useState<{ season: any; entries: LeaderboardEntry[] } | null>(null);
+  const [seasonalLoading, setSeasonalLoading] = useState(false);
+
+  useEffect(() => {
+    if (tab !== "seasonal") return;
+    setSeasonalLoading(true);
+    const token = localStorage.getItem("cipher_token");
+    fetch(`${BASE_URL}/api/rankings/seasonal?limit=20`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+      .then(r => r.json())
+      .then(d => setSeasonalData(d))
+      .catch(() => setSeasonalData({ season: null, entries: [] }))
+      .finally(() => setSeasonalLoading(false));
+  }, [tab]);
+
+  const entries = tab === "global" ? (globalLb as LeaderboardEntry[] | undefined)
+    : tab === "daily" ? (dailyLb as LeaderboardEntry[] | undefined)
+    : seasonalData?.entries;
+  const isLoading = tab === "global" ? globalLoading : tab === "daily" ? dailyLoading : seasonalLoading;
+  const myRank = myRanking as any;
+  const currentSeason = tab === "seasonal" ? seasonalData?.season : season;
 
   return (
     <>
@@ -75,139 +95,111 @@ export default function LeaderboardPage() {
       <AOSLayout>
         <NavBar />
         <div className="pt-14 min-h-screen">
-
-        <div className="relative max-w-4xl mx-auto px-4 py-8">
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-6"
-          >
-            <p className="font-mono text-xs text-zinc-600 tracking-widest mb-1">THE ARCHIVE</p>
-            <h1 className="font-mono text-2xl font-bold text-zinc-100">AGENT RANKINGS</h1>
-          </motion.div>
-
-          {/* Season Banner */}
-          {season && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="glass border border-purple-500/30 rounded-lg p-4 mb-6 flex items-center justify-between"
-            >
-              <div>
-                <p className="font-mono text-xs text-zinc-500 tracking-widest">ACTIVE SEASON</p>
-                <p className="font-mono text-sm font-bold text-purple-300">{season.name}</p>
-              </div>
-              <div className="text-right">
-                <p className="font-mono text-xs text-zinc-600">{season.theme}</p>
-                <p className="font-mono text-xs text-zinc-700">ENDS {season.endDate}</p>
-              </div>
+          <div className="relative max-w-4xl mx-auto px-4 py-8">
+            {/* Header */}
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+              <p className="font-mono text-xs text-zinc-600 tracking-widest mb-1">THE ARCHIVE</p>
+              <h1 className="font-mono text-2xl font-bold text-zinc-100">AGENT RANKINGS</h1>
             </motion.div>
-          )}
 
-          {/* My Rank */}
-          {myRank && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 }}
-              className="glass-strong cipher-border rounded-lg p-5 mb-6 flex items-center justify-between"
-            >
-              <div>
-                <p className="font-mono text-xs text-zinc-600 tracking-widest mb-1">YOUR STANDING</p>
-                <div className="flex items-center gap-3">
-                  <span className="font-mono text-2xl font-black text-blue-400">#{myRank.position}</span>
-                  <RankBadge tier={myRank.rankTier} size="md" />
+            {/* Season Banner */}
+            {currentSeason && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+                className="glass border border-purple-500/30 rounded-lg p-4 mb-6 flex items-center justify-between">
+                <div>
+                  <p className="font-mono text-xs text-zinc-500 tracking-widest">ACTIVE SEASON</p>
+                  <p className="font-mono text-sm font-bold text-purple-300">{currentSeason.name}</p>
                 </div>
-              </div>
-              <div className="text-right">
-                <p className="font-mono text-xs text-zinc-600">RANK POINTS</p>
-                <p className="font-mono text-xl font-bold text-zinc-100">{myRank.rankPoints.toLocaleString()}</p>
-                <p className="font-mono text-xs text-zinc-700">MMR {myRank.mmr}</p>
-              </div>
-            </motion.div>
-          )}
+                <div className="text-right">
+                  <p className="font-mono text-xs text-zinc-600">{currentSeason.theme}</p>
+                  <p className="font-mono text-xs text-zinc-700">ENDS {currentSeason.endDate}</p>
+                </div>
+              </motion.div>
+            )}
 
-          {/* Tabs */}
-          <div className="flex gap-2 mb-6">
-            {(["global", "daily"] as const).map((t) => (
-              <button
-                key={t}
-                onClick={() => setTab(t)}
-                className={`font-mono text-xs tracking-widest px-6 py-2 rounded border transition-all ${
-                  tab === t
-                    ? "bg-blue-500/20 border-blue-500/50 text-blue-300"
-                    : "glass border-zinc-700/40 text-zinc-500 hover:text-zinc-300"
-                }`}
-              >
-                {t === "global" ? "ALL-TIME" : "DAILY"}
-              </button>
-            ))}
-          </div>
+            {/* My Rank */}
+            {myRank && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+                className="glass-strong cipher-border rounded-lg p-5 mb-6 flex items-center justify-between">
+                <div>
+                  <p className="font-mono text-xs text-zinc-600 tracking-widest mb-1">YOUR STANDING</p>
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-2xl font-black text-blue-400">#{myRank.position}</span>
+                    <RankBadge tier={myRank.rankTier} size="md" />
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-mono text-xs text-zinc-600">RANK POINTS</p>
+                  <p className="font-mono text-xl font-bold text-zinc-100">{myRank.rankPoints.toLocaleString()}</p>
+                  <p className="font-mono text-xs text-zinc-700">MMR {myRank.mmr}</p>
+                </div>
+              </motion.div>
+            )}
 
-          {/* Leaderboard Table */}
-          <motion.div
-            layout
-            className="glass-strong cipher-border rounded-lg overflow-hidden"
-          >
-            {/* Table Header */}
-            <div className="grid grid-cols-[60px_1fr_120px_100px_100px] gap-4 px-6 py-3 border-b border-zinc-800/60 bg-zinc-900/40">
-              {["RANK", "AGENT", "TIER", "LEVEL", "SCORE"].map((h) => (
-                <span key={h} className="font-mono text-[10px] text-zinc-600 tracking-widest">{h}</span>
+            {/* Tabs */}
+            <div className="flex gap-2 mb-6">
+              {(["global", "daily", "seasonal"] as const).map((t) => (
+                <button key={t} onClick={() => setTab(t)}
+                  className={`font-mono text-xs tracking-widest px-6 py-2 rounded border transition-all ${
+                    tab === t
+                      ? "bg-blue-500/20 border-blue-500/50 text-blue-300"
+                      : "glass border-zinc-700/40 text-zinc-500 hover:text-zinc-300"
+                  }`}>
+                  {t === "global" ? "ALL-TIME" : t === "daily" ? "DAILY" : "SEASONAL"}
+                </button>
               ))}
             </div>
 
-            <AnimatePresence mode="wait">
-              {isLoading ? (
-                <motion.div key="loading" className="p-6 space-y-3">
-                  {[...Array(8)].map((_, i) => (
-                    <div key={i} className="h-12 glass rounded animate-pulse" />
-                  ))}
-                </motion.div>
-              ) : entries && entries.length > 0 ? (
-                <motion.div key={tab} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                  {entries.map((entry, i) => (
-                    <motion.div
-                      key={entry.userId}
-                      layout
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.04 }}
-                      className="grid grid-cols-[60px_1fr_120px_100px_100px] gap-4 px-6 py-4 border-b border-zinc-800/30 last:border-0 hover:bg-zinc-800/20 transition-colors"
-                    >
-                      <div className="flex items-center">
-                        <PositionIcon rank={entry.rank} />
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center flex-shrink-0">
-                          <span className="font-mono text-xs text-blue-400">{entry.username[0]?.toUpperCase()}</span>
+            {/* Leaderboard Table */}
+            <motion.div layout className="glass-strong cipher-border rounded-lg overflow-hidden">
+              {/* Table Header */}
+              <div className="grid grid-cols-[60px_1fr_120px_100px_100px] gap-4 px-6 py-3 border-b border-zinc-800/60 bg-zinc-900/40">
+                {["RANK", "AGENT", "TIER", "LEVEL", "SCORE"].map((h) => (
+                  <span key={h} className="font-mono text-[10px] text-zinc-600 tracking-widest">{h}</span>
+                ))}
+              </div>
+
+              <AnimatePresence mode="wait">
+                {isLoading ? (
+                  <motion.div key="loading" className="p-6 space-y-3">
+                    {[...Array(8)].map((_, i) => (
+                      <div key={i} className="h-12 glass rounded animate-pulse" />
+                    ))}
+                  </motion.div>
+                ) : entries && entries.length > 0 ? (
+                  <motion.div key={tab} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                    {entries.map((entry, i) => (
+                      <motion.div key={`${entry.userId}-${tab}`} layout
+                        initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.04 }}
+                        className="grid grid-cols-[60px_1fr_120px_100px_100px] gap-4 px-6 py-4 border-b border-zinc-800/30 last:border-0 hover:bg-zinc-800/20 transition-colors">
+                        <div className="flex items-center"><PositionIcon rank={entry.rank} /></div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center flex-shrink-0">
+                            <span className="font-mono text-xs text-blue-400">{entry.username[0]?.toUpperCase()}</span>
+                          </div>
+                          <span className="font-mono text-sm text-zinc-200 truncate">{entry.username}</span>
                         </div>
-                        <span className="font-mono text-sm text-zinc-200 truncate">{entry.username}</span>
-                      </div>
-                      <div className="flex items-center">
-                        <RankBadge tier={entry.rankTier} size="xs" />
-                      </div>
-                      <div className="flex items-center">
-                        <span className="font-mono text-sm text-zinc-400">Lv.{entry.level}</span>
-                      </div>
-                      <div className="flex items-center justify-end">
-                        <span className="font-mono text-sm text-blue-400">{entry.score.toLocaleString()}</span>
-                      </div>
-                    </motion.div>
-                  ))}
-                </motion.div>
-              ) : (
-                <motion.div key="empty" className="p-10 text-center">
-                  <p className="font-mono text-xs text-zinc-600">NO AGENTS RANKED YET</p>
-                  <p className="font-mono text-xs text-zinc-700 mt-2">Complete operations to appear on the board</p>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
+                        <div className="flex items-center"><RankBadge tier={entry.rankTier} size="xs" /></div>
+                        <div className="flex items-center">
+                          <span className="font-mono text-sm text-zinc-400">{tab === "seasonal" ? "—" : `Lv.${entry.level}`}</span>
+                        </div>
+                        <div className="flex items-center justify-end">
+                          <span className="font-mono text-sm text-blue-400">{entry.score.toLocaleString()}</span>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                ) : (
+                  <motion.div key="empty" className="p-10 text-center">
+                    <p className="font-mono text-xs text-zinc-600">NO AGENTS RANKED YET</p>
+                    <p className="font-mono text-xs text-zinc-700 mt-2">Complete operations to appear on the board</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          </div>
         </div>
-      </div>
-    </AOSLayout>
+      </AOSLayout>
     </>
   );
 }

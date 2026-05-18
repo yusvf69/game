@@ -429,11 +429,12 @@ router.post("/stage/answer", async (req, res) => {
     recordEvent(match, "answer_correct", team.id, { pointsGained, newScore: team.score });
     await persistMatch(match);
 
+    const answerTimeMs = match.timerStartedAt ? Date.now() - match.timerStartedAt : 0;
     eventBus.emitSync("ANSWER_CORRECT", {
       matchId: match.id,
       teamId: team.id,
       userId: match.hostId,
-      data: { xpAmount: pointsGained, questionIndex: match.currentQuestionIndex },
+      data: { xpAmount: pointsGained, questionIndex: match.currentQuestionIndex, answerTimeMs },
     });
 
     res.json({ success: true, correct: true, pointsGained, newScore: team.score });

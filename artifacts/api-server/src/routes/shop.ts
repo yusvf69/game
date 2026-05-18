@@ -1,7 +1,8 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { sessionsTable, usersTable, userStatsTable } from "@workspace/db";
+import { sessionsTable, usersTable, userStatsTable, shopItemsTable } from "@workspace/db";
 import { eq, sql } from "drizzle-orm";
+import { eventBus } from "@workspace/game-engine";
 
 const router = Router();
 
@@ -27,14 +28,31 @@ const BUILTIN_SHOP = [
 
 router.get("/shop/items", async (req, res) => {
   let owned: number[] = [];
+  let coins = 0;
   const user = await getUserFromToken(req.headers.authorization);
   if (user) {
     try {
       const raw = await db.execute(sql`SELECT item_id FROM user_inventory WHERE user_id = ${user.id}`);
       owned = (raw.rows || []).map((r: any) => r.item_id);
+      const [stats] = await db.select().from(userStatsTable).where(eq(userStatsTable.userId, user.id)).limit(1);
+      coins = stats?.coins ?? 0;
     } catch {}
   }
-  res.json(BUILTIN_SHOP.map(item => ({ ...item, owned: owned.includes(item.id) })));
+
+  // Prefer DB items from admin panel, fall back to built-in if empty
+  let shopItems: any[];
+  try {
+    const dbItems = await db.select().from(shopItemsTable);
+    if (dbItems.length > 0) {
+      shopItems = dbItems.map(i => ({ id: i.id, name: i.name, description: i.description, type: i.type, priceCoins: i.priceCoins, pricePremium: i.pricePremium, rarity: i.rarity, iconUrl: i.iconUrl }));
+    } else {
+      shopItems = BUILTIN_SHOP;
+    }
+  } catch {
+    shopItems = BUILTIN_SHOP;
+  }
+
+  res.json({ items: shopItems.map(item => ({ ...item, owned: owned.includes(item.id) })), coins });
 });
 
 router.post("/shop/buy", async (req, res) => {
@@ -55,10 +73,24 @@ router.post("/shop/buy", async (req, res) => {
 
   if (stats.coins < item.priceCoins) { res.status(400).json({ error: `Not enough coins. Required: ${item.priceCoins}, Available: ${stats.coins}` }); return; }
 
-  await db.update(userStatsTable).set({ coins: stats.coins - item.priceCoins }).where(eq(userStatsTable.userId, user.id));
+  const newCoins = stats.coins - item.priceCoins;
+  await db.update(userStatsTable).set({ coins: newCoins }).where(eq(userStatsTable.userId, user.id));
   await db.execute(sql`INSERT INTO user_inventory (user_id, item_id, quantity, equipped) VALUES (${user.id}, ${itemId}, 1, false)`);
 
-  res.json({ success: true, item, coinsRemaining: stats.coins - item.priceCoins });
+  eventBus.emitSync("XP_EARNED", {
+    userId: user.id,
+    data: { source: "shop_purchase", itemId, itemName: item.name, coinsSpent: item.priceCoins },
+  });
+
+  // Query shop purchase count for achievement context
+  try {
+    const purchaseCount = await db.execute(sql`SELECT COUNT(*) as cnt FROM user_inventory WHERE user_id = ${user.id}`);
+    const shopPurchases = parseInt((purchaseCount.rows?.[0] as any)?.cnt || "0");
+    const { checkAchievements } = await import("@workspace/game-engine");
+    await checkAchievements(user.id, { shopPurchases });
+  } catch {}
+
+  res.json({ success: true, item, coinsRemaining: newCoins });
 });
 
 router.get("/shop/inventory", async (req, res) => {
