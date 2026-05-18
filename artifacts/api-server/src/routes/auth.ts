@@ -172,4 +172,21 @@ router.get("/auth/me", async (req, res) => {
   });
 });
 
+// Temporary: promote a user to admin (protected by setup key)
+router.post("/auth/setup-admin", async (req, res) => {
+  const { email, key } = req.body;
+  if (key !== "worldweaver_admin_setup_2026") {
+    res.status(403).json({ error: "Invalid setup key" });
+    return;
+  }
+  try {
+    const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
+    if (!user) { res.status(404).json({ error: "User not found" }); return; }
+    await db.update(usersTable).set({ role: "admin" } as any).where(eq(usersTable.id, user.id));
+    res.json({ success: true, message: `${user.username} is now admin` });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 export default router;
