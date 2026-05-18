@@ -99,7 +99,7 @@ function Router() {
       <Route path="/host-control">
         {() => <ProtectedRoute component={HostControl} />}
       </Route>
-      <Route path="/admin/:rest*">
+      <Route path="/admin/*?">
         {() => <ProtectedRoute component={AdminLayout} />}
       </Route>
       <Route component={NotFound} />
