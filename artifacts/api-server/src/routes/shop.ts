@@ -56,55 +56,43 @@ router.get("/shop/items", async (req, res) => {
 });
 
 router.post("/shop/buy", async (req, res) => {
-  const user = await getUserFromToken(req.headers.authorization);
-  if (!user) { res.status(401).json({ error: "Not authenticated" }); return; }
-
-  const { itemId } = req.body;
-
-  // Check both built-in and DB items
-  let item = BUILTIN_SHOP.find(i => i.id === itemId);
-  if (!item) {
-    try {
-      const [dbItem] = await db.select().from(shopItemsTable).where(eq(shopItemsTable.id, itemId)).limit(1);
-      if (dbItem) item = { id: dbItem.id, name: dbItem.name, description: dbItem.description, type: dbItem.type, priceCoins: dbItem.priceCoins, pricePremium: dbItem.pricePremium, rarity: dbItem.rarity, iconUrl: dbItem.iconUrl };
-    } catch {}
-  }
-
-  if (!item) { res.status(404).json({ error: "Item not found" }); return; }
-
-  const [stats] = await db.select().from(userStatsTable).where(eq(userStatsTable.userId, user.id)).limit(1);
-  if (!stats) { res.status(404).json({ error: "Stats not found" }); return; }
-
   try {
-    const checkRaw = await db.execute(sql`SELECT id FROM user_inventory WHERE user_id = ${user.id} AND item_id = ${itemId}`);
-    if (checkRaw.rows?.length) { res.status(400).json({ error: "Already owned" }); return; }
-  } catch {}
+    const user = await getUserFromToken(req.headers.authorization);
+    if (!user) { res.status(401).json({ error: "Not authenticated" }); return; }
 
-  if (stats.coins < item.priceCoins) { res.status(400).json({ error: `Not enough coins. Required: ${item.priceCoins}, Available: ${stats.coins}` }); return; }
+    const { itemId } = req.body;
 
-  const newCoins = stats.coins - item.priceCoins;
-  await db.update(userStatsTable).set({ coins: newCoins }).where(eq(userStatsTable.userId, user.id));
+    // Check both built-in and DB items
+    let item = BUILTIN_SHOP.find(i => i.id === itemId);
+    if (!item) {
+      try {
+        const [dbItem] = await db.select().from(shopItemsTable).where(eq(shopItemsTable.id, itemId)).limit(1);
+        if (dbItem) item = { id: dbItem.id, name: dbItem.name, description: dbItem.description, type: dbItem.type, priceCoins: dbItem.priceCoins, pricePremium: dbItem.pricePremium, rarity: dbItem.rarity, iconUrl: dbItem.iconUrl };
+      } catch {}
+    }
 
-  try {
+    if (!item) { res.status(404).json({ error: "Item not found" }); return; }
+
+    const [stats] = await db.select().from(userStatsTable).where(eq(userStatsTable.userId, user.id)).limit(1);
+    if (!stats) { res.status(404).json({ error: "Stats not found" }); return; }
+
+    if (stats.coins < item.priceCoins) { res.status(400).json({ error: `Not enough coins. Required: ${item.priceCoins}, Available: ${stats.coins}` }); return; }
+
+    const newCoins = stats.coins - item.priceCoins;
+    await db.update(userStatsTable).set({ coins: newCoins }).where(eq(userStatsTable.userId, user.id));
+
     await db.execute(sql`INSERT INTO user_inventory (user_id, item_id, quantity, equipped) VALUES (${user.id}, ${itemId}, 1, false)`);
-  } catch {
-    // Table may not exist yet
+
+    eventBus.emitSync("XP_EARNED", {
+      userId: user.id,
+      data: { source: "shop_purchase", itemId, itemName: item.name, coinsSpent: item.priceCoins },
+    });
+
+    res.json({ success: true, item, coinsRemaining: newCoins });
+  } catch (e: any) {
+    console.error("[shop/buy] error:", e);
+    res.status(500).json({ error: e?.message || "Internal server error" });
   }
-
-  eventBus.emitSync("XP_EARNED", {
-    userId: user.id,
-    data: { source: "shop_purchase", itemId, itemName: item.name, coinsSpent: item.priceCoins },
-  });
-
-  // Query shop purchase count for achievement context
-  try {
-    const purchaseCount = await db.execute(sql`SELECT COUNT(*) as cnt FROM user_inventory WHERE user_id = ${user.id}`);
-    const shopPurchases = parseInt((purchaseCount.rows?.[0] as any)?.cnt || "0");
-    const { checkAchievements } = await import("@workspace/game-engine");
-    await checkAchievements(user.id, { shopPurchases });
-  } catch {}
-
-  res.json({ success: true, item, coinsRemaining: newCoins });
 });
 
 router.get("/shop/inventory", async (req, res) => {
