@@ -18,8 +18,6 @@ interface Props {
 
 export default function AOSBoot({ steps, onComplete, pageKey, alreadyBooted }: Props) {
   const { booted } = useAOSStore();
-  if (alreadyBooted || booted[pageKey]) return null;
-
   const [stepIndex, setStepIndex] = useState(0);
   const [visible, setVisible] = useState(true);
 
@@ -33,6 +31,8 @@ export default function AOSBoot({ steps, onComplete, pageKey, alreadyBooted }: P
       }, 600);
     }
   }, [stepIndex, steps, onComplete]);
+
+  if (alreadyBooted || booted[pageKey]) return null;
 
   return (
     <AnimatePresence>
