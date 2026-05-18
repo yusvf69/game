@@ -367,9 +367,31 @@ router.delete("/admin/questions/:id", requirePermission("manage_questions"), asy
 
 // ─── Categories Management ─────────────────────────────────────────────
 
+async function ensureCategoriesTable() {
+  try {
+    await getPool().query(`CREATE TABLE IF NOT EXISTS categories (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL UNIQUE,
+      display_name TEXT NOT NULL DEFAULT '',
+      domain TEXT NOT NULL DEFAULT '',
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )`);
+  } catch {}
+}
+
 router.get("/admin/categories", requirePermission("manage_questions"), async (_req, res) => {
-  const allCats = await db.select().from(categoriesTable).orderBy(categoriesTable.domain, categoriesTable.name);
-  res.json({ categories: allCats });
+  try {
+    const allCats = await db.select().from(categoriesTable).orderBy(categoriesTable.domain, categoriesTable.name);
+    res.json({ categories: allCats });
+  } catch (e: any) {
+    if (e?.code === "42P01") {
+      await ensureCategoriesTable();
+      const allCats = await db.select().from(categoriesTable).orderBy(categoriesTable.domain, categoriesTable.name);
+      res.json({ categories: allCats });
+      return;
+    }
+    res.status(500).json({ error: e.message });
+  }
 });
 
 router.post("/admin/categories", requirePermission("manage_questions"), async (req, res) => {
@@ -385,17 +407,43 @@ router.post("/admin/categories", requirePermission("manage_questions"), async (r
     res.status(201).json(cat);
   } catch (e: any) {
     if (e?.code === "23505") return res.status(409).json({ error: "Category already exists" });
+    if (e?.code === "42P01") {
+      await ensureCategoriesTable();
+      try {
+        const [cat] = await db.insert(categoriesTable).values({
+          name,
+          displayName: displayName || name,
+          domain: domain || "",
+        }).returning();
+        logAdmin(req.user!.id, "ADMIN_CREATED_CATEGORY", "category", String(cat.id), { name, domain });
+        res.status(201).json(cat);
+        return;
+      } catch (e2: any) {
+        if (e2?.code === "23505") return res.status(409).json({ error: "Category already exists" });
+        res.status(500).json({ error: e2.message });
+        return;
+      }
+    }
     res.status(500).json({ error: e.message });
   }
 });
 
 router.delete("/admin/categories/:id", requirePermission("manage_questions"), async (req, res) => {
   const id = parseInt(req.params.id);
-  const [existing] = await db.select().from(categoriesTable).where(eq(categoriesTable.id, id)).limit(1);
-  if (!existing) return res.status(404).json({ error: "Category not found" });
-  await db.delete(categoriesTable).where(eq(categoriesTable.id, id));
-  logAdmin(req.user!.id, "ADMIN_DELETED_CATEGORY", "category", String(id), { name: existing.name });
-  res.json({ success: true });
+  try {
+    const [existing] = await db.select().from(categoriesTable).where(eq(categoriesTable.id, id)).limit(1);
+    if (!existing) return res.status(404).json({ error: "Category not found" });
+    await db.delete(categoriesTable).where(eq(categoriesTable.id, id));
+    logAdmin(req.user!.id, "ADMIN_DELETED_CATEGORY", "category", String(id), { name: existing.name });
+    res.json({ success: true });
+  } catch (e: any) {
+    if (e?.code === "42P01") {
+      await ensureCategoriesTable();
+      res.status(404).json({ error: "Category not found" });
+      return;
+    }
+    res.status(500).json({ error: e.message });
+  }
 });
 
 router.post("/admin/questions/generate", requirePermission("manage_questions"), async (req, res) => {
@@ -896,6 +944,13 @@ router.post("/admin/seed/defaults", async (req, res) => {
     await getPool().query(`CREATE TABLE IF NOT EXISTS player_progress (id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id) UNIQUE, current_chapter_id INTEGER NOT NULL DEFAULT 1, current_node_id INTEGER NOT NULL DEFAULT 1, reputation_score INTEGER NOT NULL DEFAULT 0, story_flags JSONB DEFAULT '{}', updated_at TIMESTAMPTZ DEFAULT NOW())`);
     await getPool().query(`CREATE TABLE IF NOT EXISTS lore_entries (id SERIAL PRIMARY KEY, title TEXT NOT NULL, content TEXT NOT NULL, category TEXT NOT NULL DEFAULT 'world', is_secret BOOLEAN NOT NULL DEFAULT false, unlock_condition TEXT, created_at TIMESTAMPTZ DEFAULT NOW())`);
     await getPool().query(`CREATE TABLE IF NOT EXISTS user_lore_unlocks (id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id), lore_id INTEGER NOT NULL REFERENCES lore_entries(id), unlocked_at TIMESTAMPTZ DEFAULT NOW())`);
+    await getPool().query(`CREATE TABLE IF NOT EXISTS categories (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL UNIQUE,
+      display_name TEXT NOT NULL DEFAULT '',
+      domain TEXT NOT NULL DEFAULT '',
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )`);
   } catch (e: any) {
     res.status(500).json({ error: "Failed to create tables", detail: e.message });
     return;
