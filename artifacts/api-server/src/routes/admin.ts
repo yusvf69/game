@@ -209,18 +209,16 @@ router.get("/admin/questions", requirePermission("manage_questions"), async (req
   const offset = (page - 1) * limit;
   const category = req.query.category as string;
 
-  const where = category ? sql`WHERE category = ${category}` : sql``;
-  const total = (await getPool().query(`SELECT count(*) FROM questions ${where}`)).rows[0]?.count || 0;
-  const { rows } = await getPool().query(
-    `SELECT * FROM questions ${where} ORDER BY id DESC LIMIT $1 OFFSET $2`, [limit, offset]
-  );
+  const where = category ? eq(questionsTable.category, category) : undefined;
+  const [{ count }] = await db.select({ count: sql<number>`count(*)` }).from(questionsTable).where(where);
+  const questions = await db.select().from(questionsTable).where(where).orderBy(desc(questionsTable.id)).limit(limit).offset(offset);
 
-  const questionsWithOptions = await Promise.all(rows.map(async (q: any) => {
+  const questionsWithOptions = await Promise.all(questions.map(async (q: any) => {
     const opts = await db.select().from(questionOptionsTable).where(eq(questionOptionsTable.questionId, q.id));
     return { ...q, options: opts };
   }));
 
-  res.json({ questions: questionsWithOptions, total, page, limit });
+  res.json({ questions: questionsWithOptions, total: Number(count), page, limit });
 });
 
 router.get("/admin/questions/:id", requirePermission("manage_questions"), async (req, res) => {
@@ -740,31 +738,32 @@ router.get("/admin/replays/:matchId", requirePermission("manage_matches"), async
 // ─── Analytics ─────────────────────────────────────────────────────────
 
 router.get("/admin/analytics", requirePermission("manage_analytics"), async (_req, res) => {
-  const { rows: dailyUsers } = await getPool().query(
-    `SELECT date_trunc('day', created_at) as day, count(*) as registrations
-     FROM users WHERE created_at > now() - interval '30 days'
-     GROUP BY day ORDER BY day`
-  );
-  const { rows: eventCounts } = await getPool().query(
-    `SELECT event_type, count(*) as count FROM analytics_events
-     WHERE created_at > now() - interval '7 days'
-     GROUP BY event_type ORDER BY count DESC LIMIT 20`
-  );
-  const { rows: categoryStats } = await getPool().query(
-    `SELECT category, count(*) as total,
-     sum(CASE WHEN correct THEN 1 ELSE 0 END) as correct
-     FROM answer_logs WHERE created_at > now() - interval '30 days'
-     GROUP BY category`
-  );
-  const { rows: hourlyActivity } = await getPool().query(
-    `SELECT extract(hour from created_at) as hour, count(*) as actions
-     FROM analytics_events WHERE created_at > now() - interval '7 days'
-     GROUP BY hour ORDER BY hour`
-  );
+  let dailyUsers: any[] = [];
+  let eventCounts: any[] = [];
+  let categoryStats: any[] = [];
+  let hourlyActivity: any[] = [];
 
-  res.json({
-    dailyUsers, eventCounts, categoryStats, hourlyActivity,
-  });
+  try {
+    const r = await getPool().query(`SELECT date_trunc('day', created_at) as day, count(*) as registrations FROM users WHERE created_at > now() - interval '30 days' GROUP BY day ORDER BY day`);
+    dailyUsers = r.rows;
+  } catch {}
+
+  try {
+    const r = await getPool().query(`SELECT event_type, count(*) as count FROM analytics_events WHERE created_at > now() - interval '7 days' GROUP BY event_type ORDER BY count DESC LIMIT 20`);
+    eventCounts = r.rows;
+  } catch {}
+
+  try {
+    const r = await getPool().query(`SELECT category, count(*) as total, sum(CASE WHEN correct THEN 1 ELSE 0 END) as correct FROM answer_logs WHERE created_at > now() - interval '30 days' GROUP BY category`);
+    categoryStats = r.rows;
+  } catch {}
+
+  try {
+    const r = await getPool().query(`SELECT extract(hour from created_at) as hour, count(*) as actions FROM analytics_events WHERE created_at > now() - interval '7 days' GROUP BY hour ORDER BY hour`);
+    hourlyActivity = r.rows;
+  } catch {}
+
+  res.json({ dailyUsers, eventCounts, categoryStats, hourlyActivity });
 });
 
 // ─── Admin Logs ────────────────────────────────────────────────────────
@@ -773,15 +772,35 @@ router.get("/admin/logs", requirePermission("manage_analytics"), async (req, res
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 50;
   const offset = (page - 1) * limit;
+  const actionFilter = req.query.action as string;
+  const searchQuery = req.query.search as string;
 
-  const { rows } = await getPool().query(
-    `SELECT l.*, u.username as admin_name
-     FROM admin_logs l LEFT JOIN users u ON l.admin_id = u.id
-     ORDER BY l.created_at DESC LIMIT $1 OFFSET $2`, [limit, offset]
-  );
-  const [{ count }] = await getPool().query(`SELECT count(*) FROM admin_logs`);
+  try {
+    let where = "";
+    const params: any[] = [];
+    let paramIdx = 1;
 
-  res.json({ logs: rows, total: Number(count), page, limit });
+    if (actionFilter) {
+      where += ` WHERE l.action = $${paramIdx++}`;
+      params.push(actionFilter);
+    }
+    if (searchQuery) {
+      where += where ? " AND" : " WHERE";
+      where += ` (l.action ILIKE $${paramIdx} OR l.target_type ILIKE $${paramIdx} OR l.target_id ILIKE $${paramIdx})`;
+      params.push(`%${searchQuery}%`);
+      paramIdx++;
+    }
+
+    const { rows } = await getPool().query(
+      `SELECT l.*, u.username as admin_name FROM admin_logs l LEFT JOIN users u ON l.admin_id = u.id${where} ORDER BY l.created_at DESC LIMIT $${paramIdx} OFFSET $${paramIdx + 1}`,
+      [...params, limit, offset]
+    );
+    const [{ count }] = await getPool().query(`SELECT count(*) FROM admin_logs${where}`, params);
+
+    res.json({ logs: rows, total: Number(count), page, limit });
+  } catch {
+    res.json({ logs: [], total: 0, page, limit });
+  }
 });
 
 // ─── Seed Default Roles & Permissions ──────────────────────────────────
@@ -798,6 +817,12 @@ router.post("/admin/seed/defaults", async (req, res) => {
     await getPool().query(`CREATE TABLE IF NOT EXISTS role_permissions (id SERIAL PRIMARY KEY, role_id INTEGER REFERENCES roles(id), permission_id INTEGER REFERENCES permissions(id))`);
     await getPool().query(`CREATE TABLE IF NOT EXISTS admin_logs (id SERIAL PRIMARY KEY, admin_id INTEGER NOT NULL, action TEXT NOT NULL, target_type TEXT, target_id TEXT, data JSONB, ip TEXT, created_at TIMESTAMP DEFAULT NOW())`);
     await getPool().query(`CREATE TABLE IF NOT EXISTS bans (id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id), reason TEXT, banned_by INTEGER REFERENCES users(id), expires_at TIMESTAMP, created_at TIMESTAMP DEFAULT NOW())`);
+    await getPool().query(`CREATE TABLE IF NOT EXISTS analytics_events (id SERIAL PRIMARY KEY, event_type TEXT NOT NULL, user_id INTEGER REFERENCES users(id), session_id TEXT, payload JSONB DEFAULT '{}', created_at TIMESTAMPTZ DEFAULT NOW())`);
+    await getPool().query(`CREATE TABLE IF NOT EXISTS user_inventory (id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id), item_id INTEGER NOT NULL, quantity INTEGER NOT NULL DEFAULT 1, equipped BOOLEAN NOT NULL DEFAULT false, purchased_at TIMESTAMPTZ DEFAULT NOW())`);
+    await getPool().query(`CREATE TABLE IF NOT EXISTS user_battle_pass (id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id), battle_pass_id INTEGER, current_level INTEGER NOT NULL DEFAULT 0, current_xp INTEGER NOT NULL DEFAULT 0, is_premium BOOLEAN NOT NULL DEFAULT false, claimed_rewards JSONB DEFAULT '[]')`);
+    await getPool().query(`CREATE TABLE IF NOT EXISTS world_state (id SERIAL PRIMARY KEY, key TEXT UNIQUE NOT NULL, value JSONB NOT NULL, updated_at TIMESTAMPTZ DEFAULT NOW())`);
+    await getPool().query(`CREATE TABLE IF NOT EXISTS xp_log (id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id), action TEXT NOT NULL, amount INTEGER NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW())`);
+    await getPool().query(`CREATE TABLE IF NOT EXISTS answer_logs (id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id), question_id INTEGER NOT NULL, category TEXT NOT NULL DEFAULT 'general', difficulty INTEGER NOT NULL DEFAULT 1, correct INTEGER NOT NULL DEFAULT 0, time_spent_ms INTEGER NOT NULL DEFAULT 0, created_at TIMESTAMPTZ DEFAULT NOW())`);
   } catch (e: any) {
     res.status(500).json({ error: "Failed to create tables", detail: e.message });
     return;

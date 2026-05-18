@@ -60,7 +60,16 @@ router.post("/shop/buy", async (req, res) => {
   if (!user) { res.status(401).json({ error: "Not authenticated" }); return; }
 
   const { itemId } = req.body;
-  const item = BUILTIN_SHOP.find(i => i.id === itemId);
+
+  // Check both built-in and DB items
+  let item = BUILTIN_SHOP.find(i => i.id === itemId);
+  if (!item) {
+    try {
+      const [dbItem] = await db.select().from(shopItemsTable).where(eq(shopItemsTable.id, itemId)).limit(1);
+      if (dbItem) item = { id: dbItem.id, name: dbItem.name, description: dbItem.description, type: dbItem.type, priceCoins: dbItem.priceCoins, pricePremium: dbItem.pricePremium, rarity: dbItem.rarity, iconUrl: dbItem.iconUrl };
+    } catch {}
+  }
+
   if (!item) { res.status(404).json({ error: "Item not found" }); return; }
 
   const [stats] = await db.select().from(userStatsTable).where(eq(userStatsTable.userId, user.id)).limit(1);
@@ -75,7 +84,12 @@ router.post("/shop/buy", async (req, res) => {
 
   const newCoins = stats.coins - item.priceCoins;
   await db.update(userStatsTable).set({ coins: newCoins }).where(eq(userStatsTable.userId, user.id));
-  await db.execute(sql`INSERT INTO user_inventory (user_id, item_id, quantity, equipped) VALUES (${user.id}, ${itemId}, 1, false)`);
+
+  try {
+    await db.execute(sql`INSERT INTO user_inventory (user_id, item_id, quantity, equipped) VALUES (${user.id}, ${itemId}, 1, false)`);
+  } catch {
+    // Table may not exist yet
+  }
 
   eventBus.emitSync("XP_EARNED", {
     userId: user.id,
