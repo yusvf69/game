@@ -604,6 +604,39 @@ router.get("/admin/story/nodes", requirePermission("manage_story"), async (req, 
   res.json({ nodes });
 });
 
+router.post("/admin/story/nodes", requirePermission("manage_story"), async (req, res) => {
+  const { chapterId, type, content, speakerName, mediaUrl, orderIndex } = req.body;
+  if (!chapterId || !content) { res.status(400).json({ error: "chapterId and content required" }); return; }
+  const [node] = await db.insert(storyNodesTable).values({
+    chapterId, type: type || "dialogue", content, speakerName, mediaUrl, orderIndex: orderIndex || 0,
+  }).returning();
+  logAdmin(req.user!.id, "ADMIN_CREATED_STORY_NODE", "story", String(node.id));
+  res.status(201).json(node);
+});
+
+router.put("/admin/story/nodes/:id", requirePermission("manage_story"), async (req, res) => {
+  const id = parseInt(req.params.id);
+  const [existing] = await db.select().from(storyNodesTable).where(eq(storyNodesTable.id, id)).limit(1);
+  if (!existing) return res.status(404).json({ error: "Node not found" });
+  const { type, content, speakerName, mediaUrl, orderIndex } = req.body;
+  await db.update(storyNodesTable).set({
+    ...(type && { type }), ...(content && { content }),
+    ...(speakerName !== undefined && { speakerName }),
+    ...(mediaUrl !== undefined && { mediaUrl }),
+    ...(orderIndex !== undefined && { orderIndex }),
+  }).where(eq(storyNodesTable.id, id));
+  logAdmin(req.user!.id, "ADMIN_EDITED_STORY_NODE", "story", String(id));
+  res.json({ success: true });
+});
+
+router.delete("/admin/story/nodes/:id", requirePermission("manage_story"), async (req, res) => {
+  const id = parseInt(req.params.id);
+  await db.delete(storyChoicesTable).where(eq(storyChoicesTable.nodeId, id));
+  await db.delete(storyNodesTable).where(eq(storyNodesTable.id, id));
+  logAdmin(req.user!.id, "ADMIN_DELETED_STORY_NODE", "story", String(id));
+  res.json({ success: true });
+});
+
 router.get("/admin/story/lore", requirePermission("manage_story"), async (_req, res) => {
   const lore = await db.select().from(loreEntriesTable).orderBy(desc(loreEntriesTable.createdAt));
   res.json({ lore });

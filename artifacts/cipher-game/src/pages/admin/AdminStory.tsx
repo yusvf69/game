@@ -4,7 +4,7 @@ import {
   AdminPage, AdminTable, AdminButton, AdminInput, AdminSelect, adminFetch,
 } from "./AdminLayout";
 import {
-  BookOpen, GitBranch, FileText, Plus, Save, X, Lock, Unlock,
+  BookOpen, GitBranch, FileText, Plus, Save, X, Lock, Unlock, Trash2,
 } from "lucide-react";
 
 type Tab = "chapters" | "graph" | "lore";
@@ -22,6 +22,8 @@ interface LoreEntry {
   isSecret: boolean; unlockCondition: string; created_at: string;
 }
 
+const NODE_TYPES = ["dialogue", "narration", "choice", "cutscene", "action"];
+
 export default function AdminStory() {
   const [tab, setTab] = useState<Tab>("chapters");
 
@@ -32,6 +34,9 @@ export default function AdminStory() {
   const [selectedChapterId, setSelectedChapterId] = useState("");
   const [nodes, setNodes] = useState<Node[]>([]);
   const [graphLoading, setGraphLoading] = useState(false);
+
+  const [nodeForm, setNodeForm] = useState<Partial<Node> | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const [lore, setLore] = useState<LoreEntry[]>([]);
   const [loreLoading, setLoreLoading] = useState(true);
@@ -76,6 +81,22 @@ export default function AdminStory() {
   async function deleteChapter(id: number) {
     try { await adminFetch(`/admin/story/chapters/${id}`, { method: "DELETE" }); } catch {}
     loadChapters();
+  }
+
+  async function saveNode() {
+    if (!nodeForm || !nodeForm.content || !nodeForm.chapterId) return;
+    setSaving(true);
+    try {
+      const method = nodeForm.id ? "PUT" : "POST";
+      const url = nodeForm.id ? `/admin/story/nodes/${nodeForm.id}` : "/admin/story/nodes";
+      await adminFetch(url, { method, body: JSON.stringify(nodeForm) });
+      setNodeForm(null);
+      loadNodes(Number(selectedChapterId));
+    } catch {} finally { setSaving(false); }
+  }
+
+  async function deleteNode(id: number) {
+    try { await adminFetch(`/admin/story/nodes/${id}`, { method: "DELETE" }); loadNodes(Number(selectedChapterId)); } catch {}
   }
 
   const tabs: { key: Tab; label: string; icon: typeof BookOpen }[] = [
@@ -170,15 +191,62 @@ export default function AdminStory() {
           <motion.div key="graph" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
             <div className="bg-zinc-900/50 border border-zinc-800/60 rounded-xl p-4 mb-4">
               <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">Select Chapter</label>
-              <AdminSelect
-                value={selectedChapterId}
-                onChange={setSelectedChapterId}
-                options={[
-                  { label: "Choose a chapter...", value: "" },
-                  ...chapters.map(c => ({ label: `${c.orderIndex}. ${c.title}`, value: String(c.id) })),
-                ]}
-              />
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <AdminSelect
+                    value={selectedChapterId}
+                    onChange={v => { setSelectedChapterId(v); setNodeForm(null); }}
+                    options={[
+                      { label: "Choose a chapter...", value: "" },
+                      ...chapters.map(c => ({ label: `${c.orderIndex}. ${c.title}`, value: String(c.id) })),
+                    ]}
+                  />
+                </div>
+                {selectedChapterId && (
+                  <AdminButton onClick={() => setNodeForm({ chapterId: Number(selectedChapterId), type: "dialogue", content: "", orderIndex: nodes.length + 1 })}>
+                    <Plus className="w-3.5 h-3.5 mr-1.5" />Add Node
+                  </AdminButton>
+                )}
+              </div>
             </div>
+
+            <AnimatePresence>
+              {nodeForm && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
+                  className="overflow-hidden mb-4"
+                >
+                  <div className="bg-zinc-900/50 border border-zinc-800/60 rounded-xl p-5">
+                    <h3 className="text-sm font-semibold text-primary mb-4 flex items-center gap-2">
+                      {nodeForm.id ? <Save className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                      {nodeForm.id ? "Edit Node" : "New Node"}
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <AdminSelect
+                        value={nodeForm.type || "dialogue"}
+                        onChange={v => setNodeForm({ ...nodeForm, type: v })}
+                        options={NODE_TYPES.map(t => ({ label: t, value: t }))}
+                      />
+                      <AdminInput value={String(nodeForm.orderIndex ?? "")} onChange={v => setNodeForm({ ...nodeForm, orderIndex: Number(v) || 0 })} placeholder="Order" type="number" />
+                      <AdminInput value={nodeForm.speakerName || ""} onChange={v => setNodeForm({ ...nodeForm, speakerName: v })} placeholder="Speaker name (optional)" />
+                      <AdminInput value={nodeForm.mediaUrl || ""} onChange={v => setNodeForm({ ...nodeForm, mediaUrl: v })} placeholder="Media URL (optional)" />
+                      <div className="sm:col-span-2">
+                        <textarea
+                          value={nodeForm.content || ""}
+                          onChange={e => setNodeForm({ ...nodeForm, content: e.target.value })}
+                          placeholder="Node content" rows={4}
+                          className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex gap-2 mt-4">
+                      <AdminButton onClick={saveNode} loading={saving}><Save className="w-3.5 h-3.5 mr-1.5" />Save</AdminButton>
+                      <AdminButton variant="ghost" onClick={() => setNodeForm(null)}><X className="w-3.5 h-3.5 mr-1.5" />Cancel</AdminButton>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {!selectedChapterId ? (
               <div className="text-sm text-muted-foreground py-12 text-center flex flex-col items-center gap-2">
@@ -187,8 +255,8 @@ export default function AdminStory() {
               </div>
             ) : graphLoading ? (
               <div className="text-sm text-muted-foreground py-8 text-center">Loading nodes...</div>
-            ) : nodes.length === 0 ? (
-              <div className="text-sm text-muted-foreground py-8 text-center">No nodes found for this chapter.</div>
+            ) : nodes.length === 0 && !nodeForm ? (
+              <div className="text-sm text-muted-foreground py-8 text-center">No nodes found for this chapter. Click "Add Node" to create one.</div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {nodes.map((node, i) => (
@@ -196,13 +264,21 @@ export default function AdminStory() {
                     key={node.id}
                     initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.04 }}
-                    className="bg-zinc-900/50 border border-zinc-800/60 rounded-xl p-4 hover:border-zinc-700/60 transition-colors"
+                    className="bg-zinc-900/50 border border-zinc-800/60 rounded-xl p-4 hover:border-zinc-700/60 transition-colors group"
                   >
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs font-mono text-primary/70">#{node.orderIndex}</span>
-                      <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                        {node.type}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                          {node.type}
+                        </span>
+                        <button onClick={() => setNodeForm(node)} className="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-muted-foreground hover:text-foreground p-1">
+                          <Save className="w-3 h-3" />
+                        </button>
+                        <button onClick={() => deleteNode(node.id)} className="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-red-400 hover:text-red-300 p-1">
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
                     </div>
                     <p className="text-sm text-foreground/80 line-clamp-2">{node.content}</p>
                     {node.speakerName && (
