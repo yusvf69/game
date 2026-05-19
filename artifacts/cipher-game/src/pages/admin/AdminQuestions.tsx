@@ -340,7 +340,7 @@ const DIFFICULTY_TIERS = [
       type: "multiple_choice",
       questionText: "",
       difficulty: 4,
-      category: "",
+      category: categories[0]?.name || "",
       correctAnswer: "",
       timeLimitSeconds: 30,
       explanation: "",

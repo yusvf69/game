@@ -9,7 +9,7 @@ import {
   categoriesTable,
 } from "@workspace/db";
 import { getPool } from "@workspace/db";
-import { eq, sql, inArray, and } from "drizzle-orm";
+import { eq, sql, inArray, and, gte, lte } from "drizzle-orm";
 import { eventBus } from "@workspace/game-engine";
 
 const router = Router();
@@ -380,6 +380,11 @@ router.post("/stage/start", async (req, res) => {
   if (selectedCategories.length > 0) {
     queryFilters.push(inArray(questionsTable.category, selectedCategories));
   }
+  const diffCfg = DIFFICULTY_CONFIG[match.difficulty];
+  if (diffCfg) {
+    const [minDiff, maxDiff] = diffCfg.diffRange;
+    queryFilters.push(gte(questionsTable.difficulty, minDiff), lte(questionsTable.difficulty, maxDiff));
+  }
   const questions = await db.select().from(questionsTable)
     .where(queryFilters.length > 0 ? and(...queryFilters) : undefined)
     .orderBy(match.shuffle ? sql`RANDOM()` : questionsTable.id)
@@ -628,9 +633,13 @@ router.get("/stage/:id", async (req, res) => {
 
 // POST /stage/timeout — handle timer expiry from frontend polling
 router.post("/stage/timeout", async (req, res) => {
+  const user = await getUserFromToken(req.headers.authorization);
+  if (!user) { res.status(401).json({ error: "Not authenticated" }); return; }
+
   const { matchId } = req.body;
   const match = await ensureMatch(matchId, true);
   if (!match) { res.status(404).json({ error: "Match not found" }); return; }
+  if (match.hostId !== user.id) { res.status(403).json({ error: "Only the host can trigger timeout" }); return; }
   if (match.phase === "question") {
     match.phase = "answered";
     recordEvent(match, "timer_expired", null, { questionIndex: match.currentQuestionIndex });
