@@ -271,10 +271,11 @@ router.post("/admin/questions", requirePermission("manage_questions"), async (re
     const validationErr = validateQuestionBody(req.body);
     if (validationErr) return res.status(400).json({ error: validationErr });
 
-    if (category) {
-      const [existingCat] = await db.select().from(categoriesTable).where(eq(categoriesTable.name, category)).limit(1);
-      if (!existingCat) return res.status(400).json({ error: `Category "${category}" does not exist. Add it in the Categories panel first.` });
+    if (!category) {
+      return res.status(400).json({ error: "Category is required. Select a category from the dropdown." });
     }
+    const [existingCat] = await db.select().from(categoriesTable).where(eq(categoriesTable.name, category)).limit(1);
+    if (!existingCat) return res.status(400).json({ error: `Category "${category}" does not exist. Add it in the Categories panel first.` });
 
     const qType = type || "multiple_choice";
     let resolvedOptions = options || [];
@@ -327,7 +328,7 @@ router.put("/admin/questions/:id", requirePermission("manage_questions"), async 
       if (validationErr) return res.status(400).json({ error: validationErr });
     }
 
-    if (body.category) {
+    if (body.category !== undefined) {
       const [existingCat] = await db.select().from(categoriesTable).where(eq(categoriesTable.name, body.category)).limit(1);
       if (!existingCat) return res.status(400).json({ error: `Category "${body.category}" does not exist. Add it in the Categories panel first.` });
     }
