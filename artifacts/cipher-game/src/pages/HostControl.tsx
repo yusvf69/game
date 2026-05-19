@@ -89,6 +89,7 @@ export default function HostControl() {
   const [timerActive, setTimerActive] = useState(false);
   const [buzzerTeamId, setBuzzerTeamId] = useState<number | null>(null);
   const [buzzerTeamName, setBuzzerTeamName] = useState("");
+  const [buzzerPlayerName, setBuzzerPlayerName] = useState<string | null>(null);
   const [selectedOptionId, setSelectedOptionId] = useState<number | null>(null);
   const [answerResult, setAnswerResult] = useState<{ correct: boolean; teamName: string; points: number; rebuzz?: boolean } | null>(null);
   const [scores, setScores] = useState<ScoreEntry[]>([]);
@@ -166,8 +167,12 @@ export default function HostControl() {
       if (d.phase === "buzzed" && d.buzzerTeamId) {
         const bt = d.teams?.find((t: any) => t.id === d.buzzerTeamId);
         if (bt) setBuzzerTeamName(bt.name);
+        setBuzzerPlayerName(d.buzzerName || null);
         setAnswerResult(null);
         setSelectedOptionId(null);
+      } else {
+        setBuzzerPlayerName(null);
+        setBuzzerTeamName("");
       }
 
       if (d.phase === "ended") setStep("ended");
@@ -676,6 +681,9 @@ export default function HostControl() {
                       className="inline-block bg-red-600/20 border-2 border-red-500 rounded-xl px-8 py-4">
                       <div className="font-mono text-xs text-red-400 tracking-widest mb-1">{wrongAttempts > 0 ? "◈ SECOND RESPONSE ◈" : "◈ FIRST RESPONSE ◈"}</div>
                       <div className="font-mono text-2xl font-black text-white">{buzzerTeamName}</div>
+                      {buzzerPlayerName && (
+                        <div className="font-mono text-sm text-red-300/70 mt-1">by {buzzerPlayerName}</div>
+                      )}
                       <div className="font-mono text-[10px] text-zinc-500 mt-1">HOST: click the option the team said</div>
                     </motion.div>
                   </motion.div>

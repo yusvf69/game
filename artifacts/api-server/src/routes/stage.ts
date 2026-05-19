@@ -59,6 +59,7 @@ interface StageMatchState {
   currentQuestionIndex: number;
   phase: "lobby" | "intro" | "question" | "buzzed" | "answered" | "rebuzz" | "ended";
   buzzerTeamId: number | null;
+  buzzerName: string | null;
   wrongAttempts: number;
   timerSeconds: number;
   timerStartedAt: number | null;
@@ -229,6 +230,7 @@ router.post("/stage/create", async (req, res) => {
     currentQuestionIndex: 0,
     phase: "lobby",
     buzzerTeamId: null,
+    buzzerName: null,
     wrongAttempts: 0,
     timerSeconds: timerSeconds || 30,
     timerStartedAt: null,
@@ -391,20 +393,21 @@ function stripAnswer(q: any) {
   return rest;
 }
 
-// POST /stage/buzz — team buzzes (no auth, supports rebuzz)
+// POST /stage/buzz — team buzzes (no auth, supports rebuzz, includes player name)
 router.post("/stage/buzz", async (req, res) => {
-  const { matchId, teamId } = req.body;
+  const { matchId, teamId, playerName } = req.body;
   const match = await ensureMatch(matchId, true);
   if (!match) { res.status(404).json({ error: "Match not found" }); return; }
   if (match.phase !== "question" && match.phase !== "rebuzz") { res.status(400).json({ error: "Not accepting buzzes" }); return; }
   if (match.buzzerTeamId !== null) { res.json({ success: false, reason: "already_buzzed" }); return; }
 
   match.buzzerTeamId = teamId;
+  match.buzzerName = playerName || null;
   match.phase = "buzzed";
-  recordEvent(match, "buzzer_pressed", teamId);
+  recordEvent(match, "buzzer_pressed", teamId, { playerName: playerName || null });
   await persistMatch(match);
 
-  res.json({ success: true, teamId });
+  res.json({ success: true, teamId, playerName: match.buzzerName });
 });
 
 // POST /stage/answer — host clicks an option (server validates correct/incorrect, supports rebuzz)
@@ -468,6 +471,7 @@ router.post("/stage/answer", async (req, res) => {
     // First wrong → give other teams a chance (rebuzz)
     match.wrongAttempts = 1;
     match.buzzerTeamId = null;
+    match.buzzerName = null;
     match.buzzedOptionId = optionId;
     match.phase = "rebuzz";
     recordEvent(match, "answer_incorrect", team.id, { rebuzz: true });
@@ -499,6 +503,7 @@ router.post("/stage/next", async (req, res) => {
 
   match.currentQuestionIndex++;
   match.buzzerTeamId = null;
+  match.buzzerName = null;
   match.buzzedOptionId = null;
   match.wrongAttempts = 0;
   match.timerSeconds = match.originalTimerSeconds;
@@ -537,6 +542,7 @@ router.post("/stage/skip", async (req, res) => {
   if (match.hostId !== user.id) { res.status(403).json({ error: "Only host can skip" }); return; }
 
   match.buzzerTeamId = null;
+  match.buzzerName = null;
   recordEvent(match, "question_skipped", null, { questionIndex: match.currentQuestionIndex });
   await persistMatch(match);
 
@@ -572,6 +578,7 @@ router.get("/stage/:id", async (req, res) => {
     totalQuestions: match.totalQuestions,
     currentDomain: match.currentDomain,
     buzzerTeamId: match.buzzerTeamId,
+    buzzerName: match.buzzerName,
     wrongAttempts: match.wrongAttempts,
     originalTimerSeconds: match.originalTimerSeconds,
     timerSeconds: match.timerSeconds,

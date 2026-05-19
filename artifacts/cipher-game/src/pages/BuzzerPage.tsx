@@ -25,6 +25,7 @@ export default function BuzzerPage() {
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [connected, setConnected] = useState(false);
   const [teamCode, setTeamCode] = useState("");
+  const [playerName, setPlayerName] = useState("");
   const [teamName, setTeamName] = useState("");
   const [teamId, setTeamId] = useState<number | null>(null);
   const [teamColor, setTeamColor] = useState("#ef4444");
@@ -104,9 +105,10 @@ export default function BuzzerPage() {
     setBuzzed(true); setLocked(true);
     playBuzzer();
     try {
+      const pName = playerName.trim() || "Agent";
       const res = await fetch(`${BASE_URL}/api/stage/buzz`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ matchId, teamId }),
+        body: JSON.stringify({ matchId, teamId, playerName: pName }),
       });
       const d = await res.json();
       // Poll will update state based on answer-result
@@ -115,7 +117,7 @@ export default function BuzzerPage() {
         setLocked(true);
       }
     } catch {}
-  }, [locked, buzzed, matchId, teamId]);
+  }, [locked, buzzed, matchId, teamId, playerName]);
 
   if (!connected) {
     return (
@@ -126,11 +128,19 @@ export default function BuzzerPage() {
             <div className="font-mono text-4xl mb-4 text-red-400">🔴</div>
             <h1 className="font-mono text-xl font-black text-zinc-100 mb-2">BUZZER <span className="text-red-400">TERMINAL</span></h1>
             <p className="font-mono text-[10px] text-zinc-600 tracking-widest mb-6">ENTER YOUR TEAM CODE</p>
-            <div>
-              <label className="font-mono text-[10px] text-zinc-600 tracking-widest mb-1 block text-left">TEAM CODE</label>
-              <input value={teamCode} onChange={e => setTeamCode(e.target.value.toUpperCase().slice(0, 4))}
-                placeholder="XK9M" maxLength={4}
-                className="w-full bg-black/40 border border-zinc-700/60 rounded px-4 py-3 font-mono text-2xl text-zinc-200 placeholder-zinc-700 text-center tracking-[0.4em] focus:border-blue-500/60 focus:outline-none uppercase" />
+            <div className="space-y-3">
+              <div>
+                <label className="font-mono text-[10px] text-zinc-600 tracking-widest mb-1 block text-left">YOUR NAME</label>
+                <input value={playerName} onChange={e => setPlayerName(e.target.value)}
+                  placeholder="Enter your name..." maxLength={20}
+                  className="w-full bg-black/40 border border-zinc-700/60 rounded px-4 py-3 font-mono text-sm text-zinc-200 placeholder-zinc-700 focus:border-blue-500/60 focus:outline-none" />
+              </div>
+              <div>
+                <label className="font-mono text-[10px] text-zinc-600 tracking-widest mb-1 block text-left">TEAM CODE</label>
+                <input value={teamCode} onChange={e => setTeamCode(e.target.value.toUpperCase().slice(0, 4))}
+                  placeholder="XK9M" maxLength={4}
+                  className="w-full bg-black/40 border border-zinc-700/60 rounded px-4 py-3 font-mono text-2xl text-zinc-200 placeholder-zinc-700 text-center tracking-[0.4em] focus:border-blue-500/60 focus:outline-none uppercase" />
+              </div>
             </div>
             {error && <div className="mt-3 font-mono text-[10px] text-red-400 bg-red-500/10 border border-red-500/30 rounded px-3 py-2">{error}</div>}
             <button onClick={connectToMatch} disabled={teamCode.length !== 4 || connecting}

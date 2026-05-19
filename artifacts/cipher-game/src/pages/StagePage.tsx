@@ -33,6 +33,7 @@ export default function StagePage() {
   const [timerActive, setTimerActive] = useState(false);
   const [timerTotal, setTimerTotal] = useState(30);
   const [buzzerTeam, setBuzzerTeam] = useState<{ id: number; name: string } | null>(null);
+  const [buzzerPlayerName, setBuzzerPlayerName] = useState<string | null>(null);
   const [winner, setWinner] = useState<StageTeam | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [wrongAttempts, setWrongAttempts] = useState(0);
@@ -83,8 +84,10 @@ export default function StagePage() {
         if (d.buzzerTeamId) {
           const bt = d.teams?.find((t: StageTeam) => t.id === d.buzzerTeamId);
           setBuzzerTeam(bt ? { id: bt.id, name: bt.name } : null);
+          setBuzzerPlayerName(d.buzzerName || null);
         } else {
           setBuzzerTeam(null);
+          setBuzzerPlayerName(null);
         }
 
         if (d.timerStartedAt && d.timerSeconds > 0) {
@@ -243,6 +246,9 @@ export default function StagePage() {
                         {wrongAttempts > 0 ? "SECOND RESPONSE" : "FIRST RESPONSE"}
                       </div>
                       <div className="font-mono text-3xl font-black text-white">{buzzerTeam.name}</div>
+                      {buzzerPlayerName && (
+                        <div className="font-mono text-sm text-red-300/70 mt-1">by {buzzerPlayerName}</div>
+                      )}
                     </motion.div>
                   </motion.div>
                 )}
