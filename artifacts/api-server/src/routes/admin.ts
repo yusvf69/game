@@ -265,95 +265,105 @@ function validateQuestionBody(body: any): string | null {
 }
 
 router.post("/admin/questions", requirePermission("manage_questions"), async (req, res) => {
-  const { type, questionText, difficulty, category, correctAnswer, timeLimitSeconds, explanation, options, mediaUrl } = req.body;
+  try {
+    const { type, questionText, difficulty, category, correctAnswer, timeLimitSeconds, explanation, options, mediaUrl } = req.body;
 
-  const validationErr = validateQuestionBody(req.body);
-  if (validationErr) return res.status(400).json({ error: validationErr });
-
-  const qType = type || "multiple_choice";
-  let resolvedOptions = options || [];
-
-  if (qType === "true_false") {
-    const isCorrect = correctAnswer?.toLowerCase() === "true";
-    resolvedOptions = [
-      { text: "True", isCorrect },
-      { text: "False", isCorrect: !isCorrect },
-    ];
-  }
-
-  const [question] = await db.insert(questionsTable).values({
-    type: qType,
-    questionText,
-    difficulty: difficulty || 3,
-    category: category || "general",
-    correctAnswer: correctAnswer || "",
-    timeLimitSeconds: timeLimitSeconds || 30,
-    explanation: explanation || "",
-    mediaUrl: mediaUrl || null,
-  }).returning();
-
-  for (let i = 0; i < resolvedOptions.length; i++) {
-    await db.insert(questionOptionsTable).values({
-      questionId: question.id,
-      optionText: resolvedOptions[i].text,
-      isCorrect: resolvedOptions[i].isCorrect ? 1 : 0,
-    });
-  }
-
-  logAdmin(req.user!.id, "ADMIN_CREATED_QUESTION", "question", String(question.id));
-  res.status(201).json({ success: true, questionId: question.id });
-});
-
-router.put("/admin/questions/:id", requirePermission("manage_questions"), async (req, res) => {
-  const id = parseInt(req.params.id);
-  const [existing] = await db.select().from(questionsTable).where(eq(questionsTable.id, id)).limit(1);
-  if (!existing) return res.status(404).json({ error: "Question not found" });
-
-  const body = req.body;
-
-  if (body.type || body.questionText || body.correctAnswer || body.mediaUrl || body.options) {
-    const validationErr = validateQuestionBody(body);
+    const validationErr = validateQuestionBody(req.body);
     if (validationErr) return res.status(400).json({ error: validationErr });
-  }
 
-  const qType = body.type || existing.type;
-  let resolvedOptions = body.options;
+    const qType = type || "multiple_choice";
+    let resolvedOptions = options || [];
 
-  if (qType === "true_false" && body.correctAnswer) {
-    const isCorrect = body.correctAnswer.toLowerCase() === "true";
-    resolvedOptions = [
-      { text: "True", isCorrect },
-      { text: "False", isCorrect: !isCorrect },
-    ];
-  }
+    if (qType === "true_false") {
+      const isCorrect = correctAnswer?.toLowerCase() === "true";
+      resolvedOptions = [
+        { text: "True", isCorrect },
+        { text: "False", isCorrect: !isCorrect },
+      ];
+    }
 
-  const updateData: Record<string, any> = {};
-  if (body.type) updateData.type = body.type;
-  if (body.questionText) updateData.questionText = body.questionText;
-  if (body.difficulty) updateData.difficulty = body.difficulty;
-  if (body.category) updateData.category = body.category;
-  if (body.correctAnswer !== undefined) updateData.correctAnswer = body.correctAnswer;
-  if (body.timeLimitSeconds) updateData.timeLimitSeconds = body.timeLimitSeconds;
-  if (body.explanation !== undefined) updateData.explanation = body.explanation;
-  if (body.mediaUrl !== undefined) updateData.mediaUrl = body.mediaUrl;
+    const [question] = await db.insert(questionsTable).values({
+      type: qType,
+      questionText,
+      difficulty: difficulty || 3,
+      category: category || "general",
+      correctAnswer: correctAnswer || "",
+      timeLimitSeconds: timeLimitSeconds || 30,
+      explanation: explanation || "",
+      mediaUrl: mediaUrl || null,
+    }).returning();
 
-  if (Object.keys(updateData).length > 0) {
-    await db.update(questionsTable).set(updateData).where(eq(questionsTable.id, id));
-  }
-
-  if (resolvedOptions) {
-    await db.delete(questionOptionsTable).where(eq(questionOptionsTable.questionId, id));
     for (let i = 0; i < resolvedOptions.length; i++) {
       await db.insert(questionOptionsTable).values({
-        questionId: id,
+        questionId: question.id,
         optionText: resolvedOptions[i].text,
         isCorrect: resolvedOptions[i].isCorrect ? 1 : 0,
       });
     }
-  }
 
-  logAdmin(req.user!.id, "ADMIN_EDITED_QUESTION", "question", String(id));
-  res.json({ success: true });
+    logAdmin(req.user!.id, "ADMIN_CREATED_QUESTION", "question", String(question.id));
+    res.status(201).json({ success: true, questionId: question.id });
+  } catch (e: any) {
+    console.error("[admin] create question error:", e?.message || e);
+    res.status(500).json({ error: "Failed to create question: " + (e?.message || "unknown") });
+  }
+});
+
+router.put("/admin/questions/:id", requirePermission("manage_questions"), async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const [existing] = await db.select().from(questionsTable).where(eq(questionsTable.id, id)).limit(1);
+    if (!existing) return res.status(404).json({ error: "Question not found" });
+
+    const body = req.body;
+
+    if (body.type || body.questionText || body.correctAnswer || body.mediaUrl || body.options) {
+      const validationErr = validateQuestionBody(body);
+      if (validationErr) return res.status(400).json({ error: validationErr });
+    }
+
+    const qType = body.type || existing.type;
+    let resolvedOptions = body.options;
+
+    if (qType === "true_false" && body.correctAnswer) {
+      const isCorrect = body.correctAnswer.toLowerCase() === "true";
+      resolvedOptions = [
+        { text: "True", isCorrect },
+        { text: "False", isCorrect: !isCorrect },
+      ];
+    }
+
+    const updateData: Record<string, any> = {};
+    if (body.type) updateData.type = body.type;
+    if (body.questionText) updateData.questionText = body.questionText;
+    if (body.difficulty) updateData.difficulty = body.difficulty;
+    if (body.category) updateData.category = body.category;
+    if (body.correctAnswer !== undefined) updateData.correctAnswer = body.correctAnswer;
+    if (body.timeLimitSeconds) updateData.timeLimitSeconds = body.timeLimitSeconds;
+    if (body.explanation !== undefined) updateData.explanation = body.explanation;
+    if (body.mediaUrl !== undefined) updateData.mediaUrl = body.mediaUrl;
+
+    if (Object.keys(updateData).length > 0) {
+      await db.update(questionsTable).set(updateData).where(eq(questionsTable.id, id));
+    }
+
+    if (resolvedOptions) {
+      await db.delete(questionOptionsTable).where(eq(questionOptionsTable.questionId, id));
+      for (let i = 0; i < resolvedOptions.length; i++) {
+        await db.insert(questionOptionsTable).values({
+          questionId: id,
+          optionText: resolvedOptions[i].text,
+          isCorrect: resolvedOptions[i].isCorrect ? 1 : 0,
+        });
+      }
+    }
+
+    logAdmin(req.user!.id, "ADMIN_EDITED_QUESTION", "question", String(id));
+    res.json({ success: true });
+  } catch (e: any) {
+    console.error("[admin] edit question error:", e?.message || e);
+    res.status(500).json({ error: "Failed to update question: " + (e?.message || "unknown") });
+  }
 });
 
 router.delete("/admin/questions/:id", requirePermission("manage_questions"), async (req, res) => {
