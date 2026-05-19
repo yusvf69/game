@@ -195,6 +195,8 @@ export default function AdminQuestions() {
   const [categoryFilter, setCategoryFilter] = useState("");
   const [editing, setEditing] = useState<any>(null);
   const [msg, setMsg] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [aiGenerating, setAiGenerating] = useState(false);
   const [showAiPanel, setShowAiPanel] = useState(false);
@@ -301,6 +303,8 @@ export default function AdminQuestions() {
 
   async function saveQuestion() {
     if (!editing) return;
+    setSaving(true);
+    setMsg("");
     const method = editing.id ? "PUT" : "POST";
     const url = editing.id ? `/admin/questions/${editing.id}` : "/admin/questions";
 
@@ -321,11 +325,16 @@ export default function AdminQuestions() {
       body.options = editing.options;
     }
 
-    const r = await adminFetch(url, { method, body: JSON.stringify(body) });
-    const d = await r.json();
-    setMsg(d.error || "Saved");
-    setEditing(null);
-    loadQuestions();
+    try {
+      const r = await adminFetch(url, { method, body: JSON.stringify(body) });
+      const d = await r.json();
+      setMsg(d.error || "Saved");
+      if (!d.error) { setEditing(null); loadQuestions(); }
+    } catch {
+      setMsg("Network error");
+    } finally {
+      setSaving(false);
+    }
   }
 
 const DIFFICULTY_TIERS = [
@@ -673,13 +682,29 @@ const DIFFICULTY_TIERS = [
                           onChange={e => {
                             const file = e.target.files?.[0];
                             if (!file) return;
+                            setUploadProgress(10);
                             const reader = new FileReader();
-                            reader.onload = () => updateEditing("mediaUrl", reader.result);
+                            reader.addEventListener("loadstart", () => setUploadProgress(20));
+                            reader.addEventListener("progress", (pe: ProgressEvent<FileReader>) => {
+                              if (pe.lengthComputable) {
+                                setUploadProgress(Math.min(90, Math.round((pe.loaded / pe.total) * 100)));
+                              }
+                            });
+                            reader.addEventListener("load", () => {
+                              setUploadProgress(100);
+                              setTimeout(() => setUploadProgress(0), 800);
+                              updateEditing("mediaUrl", reader.result);
+                            });
                             reader.readAsDataURL(file);
                           }}
                         />
                       </label>
                     </div>
+                    {uploadProgress > 0 && uploadProgress < 100 && (
+                      <div className="mt-2 w-full bg-zinc-800 rounded-full h-1.5 overflow-hidden">
+                        <div className="bg-gradient-to-r from-blue-500 to-cyan-400 h-full rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
+                      </div>
+                    )}
                     {editing.mediaUrl && (
                       <div className="mt-2 rounded-lg overflow-hidden border border-zinc-800/60 max-h-40">
                         {editing.type === "image" ? (
@@ -879,11 +904,24 @@ const DIFFICULTY_TIERS = [
                 </div>
 
                 <div className="flex gap-3 pt-2">
-                  <AdminButton onClick={saveQuestion}>
-                    {editing.id ? "Update Question" : "Create Question"}
+                  <AdminButton onClick={saveQuestion} disabled={saving}>
+                    {saving ? (
+                      <span className="flex items-center gap-2">
+                        <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                        Uploading...
+                      </span>
+                    ) : (editing.id ? "Update Question" : "Create Question")}
                   </AdminButton>
-                  <AdminButton variant="ghost" onClick={() => setEditing(null)}>Cancel</AdminButton>
+                  <AdminButton variant="ghost" onClick={() => setEditing(null)} disabled={saving}>Cancel</AdminButton>
                 </div>
+                {saving && (
+                  <div className="mt-3 w-full bg-zinc-800 rounded-full h-2 overflow-hidden">
+                    <div className="bg-gradient-to-r from-blue-500 to-purple-500 h-full rounded-full animate-pulse transition-all" style={{ width: "100%" }} />
+                  </div>
+                )}
               </div>
 
               <div ref={previewRef} className="lg:sticky lg:top-4 self-start">
