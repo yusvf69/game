@@ -368,29 +368,22 @@ router.delete("/admin/questions/:id", requirePermission("manage_questions"), asy
 // ─── Categories Management ─────────────────────────────────────────────
 
 async function ensureCategoriesTable() {
-  try {
-    await getPool().query(`CREATE TABLE IF NOT EXISTS categories (
-      id SERIAL PRIMARY KEY,
-      name TEXT NOT NULL UNIQUE,
-      display_name TEXT NOT NULL DEFAULT '',
-      domain TEXT NOT NULL DEFAULT '',
-      created_at TIMESTAMPTZ DEFAULT NOW()
-    )`);
-  } catch {}
+  await getPool().query(`CREATE TABLE IF NOT EXISTS categories (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE,
+    display_name TEXT NOT NULL DEFAULT '',
+    domain TEXT NOT NULL DEFAULT '',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+  )`);
 }
 
 router.get("/admin/categories", requirePermission("manage_questions"), async (_req, res) => {
   try {
+    await ensureCategoriesTable();
     const allCats = await db.select().from(categoriesTable).orderBy(categoriesTable.domain, categoriesTable.name);
     res.json({ categories: allCats });
   } catch (e: any) {
-    if (e?.code === "42P01") {
-      await ensureCategoriesTable();
-      const allCats = await db.select().from(categoriesTable).orderBy(categoriesTable.domain, categoriesTable.name);
-      res.json({ categories: allCats });
-      return;
-    }
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "Failed to load categories: " + (e?.message || "unknown") });
   }
 });
 
@@ -398,6 +391,7 @@ router.post("/admin/categories", requirePermission("manage_questions"), async (r
   const { name, displayName, domain } = req.body;
   if (!name) return res.status(400).json({ error: "name is required" });
   try {
+    await ensureCategoriesTable();
     const [cat] = await db.insert(categoriesTable).values({
       name,
       displayName: displayName || name,
@@ -406,43 +400,24 @@ router.post("/admin/categories", requirePermission("manage_questions"), async (r
     logAdmin(req.user!.id, "ADMIN_CREATED_CATEGORY", "category", String(cat.id), { name, domain });
     res.status(201).json(cat);
   } catch (e: any) {
-    if (e?.code === "23505") return res.status(409).json({ error: "Category already exists" });
-    if (e?.code === "42P01") {
-      await ensureCategoriesTable();
-      try {
-        const [cat] = await db.insert(categoriesTable).values({
-          name,
-          displayName: displayName || name,
-          domain: domain || "",
-        }).returning();
-        logAdmin(req.user!.id, "ADMIN_CREATED_CATEGORY", "category", String(cat.id), { name, domain });
-        res.status(201).json(cat);
-        return;
-      } catch (e2: any) {
-        if (e2?.code === "23505") return res.status(409).json({ error: "Category already exists" });
-        res.status(500).json({ error: e2.message });
-        return;
-      }
+    if (e?.code === "23505" || e?.message?.includes?.("unique") || e?.message?.includes?.("duplicate")) {
+      return res.status(409).json({ error: "Category already exists" });
     }
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "Failed to create category: " + (e?.message || "unknown") });
   }
 });
 
 router.delete("/admin/categories/:id", requirePermission("manage_questions"), async (req, res) => {
   const id = parseInt(req.params.id);
   try {
+    await ensureCategoriesTable();
     const [existing] = await db.select().from(categoriesTable).where(eq(categoriesTable.id, id)).limit(1);
     if (!existing) return res.status(404).json({ error: "Category not found" });
     await db.delete(categoriesTable).where(eq(categoriesTable.id, id));
     logAdmin(req.user!.id, "ADMIN_DELETED_CATEGORY", "category", String(id), { name: existing.name });
     res.json({ success: true });
   } catch (e: any) {
-    if (e?.code === "42P01") {
-      await ensureCategoriesTable();
-      res.status(404).json({ error: "Category not found" });
-      return;
-    }
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "Failed to delete category: " + (e?.message || "unknown") });
   }
 });
 
