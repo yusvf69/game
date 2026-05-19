@@ -7,16 +7,11 @@ import { initAudio, playMatchStart, playCorrect, playWrong, playMatchEnd, playTi
 
 const BASE_URL = import.meta.env.VITE_API_URL || "";
 
-const ALL_DOMAINS = [
-  { id: "cyber_systems", label: "CYBER SYSTEMS", icon: "⚡" },
-  { id: "cognitive_analysis", label: "COGNITIVE ANALYSIS", icon: "🧠" },
-  { id: "historical_archives", label: "HISTORICAL ARCHIVES", icon: "📜" },
-  { id: "threat_intelligence", label: "THREAT INTELLIGENCE", icon: "🛡️" },
-  { id: "scientific_division", label: "SCIENTIFIC DIVISION", icon: "🔬" },
-  { id: "behavioral_analysis", label: "BEHAVIORAL ANALYSIS", icon: "🎭" },
-  { id: "global_mapping", label: "GLOBAL MAPPING", icon: "🌍" },
-  { id: "cipher_division", label: "CIPHER DIVISION", icon: "🔐" },
-];
+const DOMAIN_ICONS: Record<string, string> = {
+  cyber_systems: "⚡", cognitive_analysis: "🧠", historical_archives: "📜",
+  threat_intelligence: "🛡️", scientific_division: "🔬", behavioral_analysis: "🎭",
+  global_mapping: "🌍", cipher_division: "🔐", general: "📁",
+};
 
 const DIFFICULTIES = [
   { id: "recruit", label: "RECRUIT", color: "text-green-400", mult: "×0.5" },
@@ -70,8 +65,10 @@ export default function HostControl() {
 
   const [step, setStep] = useState<"create" | "config" | "loadout" | "lobby" | "stage" | "ended">("create");
 
+  const [domainsList, setDomainsList] = useState<{ id: string; label: string; categories: string[] }[]>([]);
   const [teamCount, setTeamCount] = useState(3);
-  const [selectedDomains, setSelectedDomains] = useState<string[]>(["cyber_systems"]);
+  const [selectedDomains, setSelectedDomains] = useState<string[]>([]);
+  const [shuffle, setShuffle] = useState(true);
   const [difficulty, setDifficulty] = useState("agent");
   const [timerSeconds, setTimerSeconds] = useState(30);
   const [questionCount, setQuestionCount] = useState(10);
@@ -101,6 +98,16 @@ export default function HostControl() {
   const [connectedTeamIds, setConnectedTeamIds] = useState<number[]>([]);
 
   useEffect(() => { initAudio(); }, []);
+
+  // Load domains/categories from admin-managed categories table
+  useEffect(() => {
+    fetch(`${BASE_URL}/api/stage/categories`).then(r => r.json()).then(d => {
+      if (d.domains && d.domains.length > 0) {
+        setDomainsList(d.domains);
+        setSelectedDomains([d.domains[0].id]);
+      }
+    }).catch(() => {});
+  }, []);
 
   const prevHostPhase = useRef<string>("lobby");
   const prevHostTick = useRef<number>(-1);
@@ -216,7 +223,7 @@ export default function HostControl() {
     try {
       const res = await fetch(`${BASE_URL}/api/stage/create`, {
         method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ teamCount, domains: selectedDomains, difficulty, timerSeconds, questionCount }),
+        body: JSON.stringify({ teamCount, domains: selectedDomains, difficulty, timerSeconds, questionCount, shuffle }),
       });
       const d = await res.json();
       if (!res.ok) throw new Error(d.error || "Failed");
@@ -232,7 +239,7 @@ export default function HostControl() {
       setStep("config");
     } catch (e: any) { setError(e.message); }
     setLoading(false);
-  }, [teamCount, selectedDomains, difficulty, timerSeconds, questionCount, token]);
+  }, [teamCount, selectedDomains, difficulty, timerSeconds, questionCount, shuffle, token]);
 
   const updateTeam = useCallback((index: number, updates: Partial<TeamSetup>) => {
     setTeams(prev => prev.map((t, i) => i === index ? { ...t, ...updates } : t));
@@ -355,15 +362,31 @@ export default function HostControl() {
                 </div>
               </div>
               <div>
-                <label className="font-mono text-[10px] text-zinc-600 tracking-widest block mb-2">DOMAINS</label>
+                <label className="font-mono text-[10px] text-zinc-600 tracking-widest block mb-2">DOMAINS <span className="text-zinc-800">(max 6)</span></label>
                 <div className="flex flex-wrap gap-2">
-                  {ALL_DOMAINS.map(d => (
-                    <button key={d.id} onClick={() => setSelectedDomains(p => p.includes(d.id) ? p.filter(x => x !== d.id) : [...p, d.id])}
-                      className={`px-3 py-1.5 font-mono text-[11px] tracking-wider rounded ${selectedDomains.includes(d.id) ? "bg-blue-600/30 text-blue-300 border border-blue-500/40" : "bg-zinc-900 text-zinc-600 border border-zinc-800 hover:text-zinc-400"}`}>
-                      {d.icon} {d.label}
-                    </button>
-                  ))}
+                  {domainsList.map(d => {
+                    const selected = selectedDomains.includes(d.id);
+                    const atMax = selectedDomains.length >= 6 && !selected;
+                    return (
+                      <button key={d.id} onClick={() => {
+                        if (selected) setSelectedDomains(p => p.filter(x => x !== d.id));
+                        else if (!atMax) setSelectedDomains(p => [...p, d.id]);
+                      }}
+                        className={`px-3 py-1.5 font-mono text-[11px] tracking-wider rounded transition-all ${selected ? "bg-blue-600/30 text-blue-300 border border-blue-500/40" : atMax ? "bg-zinc-950 text-zinc-800 border border-zinc-900 cursor-not-allowed" : "bg-zinc-900 text-zinc-600 border border-zinc-800 hover:text-zinc-400"}`}>
+                        {DOMAIN_ICONS[d.id] || "📁"} {d.label}
+                      </button>
+                    );
+                  })}
+                  {domainsList.length === 0 && <span className="font-mono text-[10px] text-zinc-700">No domains available. Add categories in admin panel.</span>}
                 </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <label className="font-mono text-[10px] text-zinc-600 tracking-widest">SHUFFLE QUESTIONS</label>
+                <button onClick={() => setShuffle(!shuffle)}
+                  className={`w-12 h-6 rounded-full transition-all border ${shuffle ? "bg-blue-600 border-blue-400" : "bg-zinc-900 border-zinc-700"}`}>
+                  <div className={`w-4 h-4 rounded-full bg-white transition-all ${shuffle ? "ml-6" : "ml-1"}`} />
+                </button>
+                <span className={`font-mono text-[10px] ${shuffle ? "text-blue-400" : "text-zinc-700"}`}>{shuffle ? "RANDOM" : "ORDERED"}</span>
               </div>
               <div>
                 <label className="font-mono text-[10px] text-zinc-600 tracking-widest block mb-2">DIFFICULTY</label>

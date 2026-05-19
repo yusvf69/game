@@ -70,6 +70,7 @@ interface StageMatchState {
   domains: string[];
   difficulty: string;
   totalQuestions: number;
+  shuffle: boolean;
   buzzedOptionId: number | null;
   log: StageEvent[];
 }
@@ -190,12 +191,40 @@ const DIFFICULTY_CONFIG: Record<string, { diffRange: number[] }> = {
 const TEAM_COLORS = ["#3b82f6", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#14b8a6", "#f97316"];
 const TEAM_EMBLEMS = ["raven", "wolf", "phoenix", "viper", "titan", "shadow", "ghost", "cipher"];
 
+// GET /stage/categories — public endpoint returning domains/categories from admin-managed categories table
+router.get("/stage/categories", async (_req, res) => {
+  try {
+    await getPool().query(`CREATE TABLE IF NOT EXISTS categories (
+      id SERIAL PRIMARY KEY, name TEXT NOT NULL UNIQUE,
+      display_name TEXT NOT NULL DEFAULT '', domain TEXT NOT NULL DEFAULT '',
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )`);
+  } catch {}
+  try {
+    const all = await db.select().from(categoriesTable);
+    const domainMap: Record<string, { categories: string[] }> = {};
+    for (const cat of all) {
+      const domain = cat.domain || "general";
+      if (!domainMap[domain]) domainMap[domain] = { categories: [] };
+      if (!domainMap[domain].categories.includes(cat.name)) domainMap[domain].categories.push(cat.name);
+    }
+    const domains = Object.entries(domainMap).map(([id, val]) => ({
+      id, label: id.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()),
+      categories: val.categories,
+    }));
+    const allCategoryNames = [...new Set(all.map(c => c.name))];
+    res.json({ domains, categories: allCategoryNames });
+  } catch {
+    res.json({ domains: [], categories: [] });
+  }
+});
+
 // POST /stage/create — create a stage match with per-team codes
 router.post("/stage/create", async (req, res) => {
   const user = await getUserFromToken(req.headers.authorization);
   if (!user) { res.status(401).json({ error: "Not authenticated" }); return; }
 
-  const { teamCount, domains, difficulty, timerSeconds, questionCount } = req.body;
+  const { teamCount, domains, difficulty, timerSeconds, questionCount, shuffle } = req.body;
   if (!domains || domains.length === 0) { res.status(400).json({ error: "Select at least one domain" }); return; }
 
   const roomCode = generateCode(5);
@@ -241,6 +270,7 @@ router.post("/stage/create", async (req, res) => {
     domains: domains || [],
     difficulty: difficulty || "agent",
     totalQuestions: questionCount || 10,
+    shuffle: shuffle !== false,
     buzzedOptionId: null,
     log: [],
   };
@@ -350,7 +380,7 @@ router.post("/stage/start", async (req, res) => {
     .where(selectedCategories.length > 0
       ? sql`${questionsTable.category} IN (${sql.join(selectedCategories.map(c => sql`${c}`), sql`, `)})`
       : undefined)
-    .orderBy(sql`RANDOM()`)
+    .orderBy(match.shuffle ? sql`RANDOM()` : questionsTable.id)
     .limit(match.totalQuestions);
 
   const fullQs = await Promise.all(questions.map(async (q) => {
@@ -577,6 +607,7 @@ router.get("/stage/:id", async (req, res) => {
     currentQuestionIndex: match.currentQuestionIndex,
     totalQuestions: match.totalQuestions,
     currentDomain: match.currentDomain,
+    shuffle: match.shuffle,
     buzzerTeamId: match.buzzerTeamId,
     buzzerName: match.buzzerName,
     wrongAttempts: match.wrongAttempts,
