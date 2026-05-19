@@ -227,6 +227,19 @@ export default function AdminQuestions() {
 
   useEffect(() => { loadQuestions(); }, [page, categoryFilter]);
   useEffect(() => { loadCategories(); }, []);
+  // When categories first load, update the editing form's category for new questions
+  const initialCatLoaded = useRef(false);
+  useEffect(() => {
+    if (categories.length > 0 && !initialCatLoaded.current) {
+      initialCatLoaded.current = true;
+      setEditing((prev: any) => {
+        if (prev && !prev.id && (!prev.category || prev.category === "general")) {
+          return { ...prev, category: categories[0].name };
+        }
+        return prev;
+      });
+    }
+  }, [categories]);
 
   async function deleteQuestion(id: number) {
     if (!confirm("Delete this question?")) return;
@@ -323,12 +336,11 @@ const DIFFICULTY_TIERS = [
 ];
 
   function initNewQuestion() {
-    const defaultCategory = categories.length > 0 ? categories[0].name : "general";
     setEditing({
       type: "multiple_choice",
       questionText: "",
       difficulty: 4,
-      category: defaultCategory,
+      category: "",
       correctAnswer: "",
       timeLimitSeconds: 30,
       explanation: "",
@@ -800,8 +812,8 @@ const DIFFICULTY_TIERS = [
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider block mb-1.5">Category</label>
-                    <AdminSelect
-                      value={editing.category || "general"}
+                    <AdminSelect key={categories.length}
+                      value={editing.category || categories[0]?.name || "general"}
                       onChange={v => updateEditing("category", v)}
                       options={categoryOptions.length > 0 ? categoryOptions : [{ label: "general", value: "general" }]}
                     />
