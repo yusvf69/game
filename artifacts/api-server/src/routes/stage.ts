@@ -9,7 +9,7 @@ import {
   categoriesTable,
 } from "@workspace/db";
 import { getPool } from "@workspace/db";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, inArray, and } from "drizzle-orm";
 import { eventBus } from "@workspace/game-engine";
 
 const router = Router();
@@ -376,10 +376,12 @@ router.post("/stage/start", async (req, res) => {
     if (cats) selectedCategories.push(...cats);
   }
 
+  const queryFilters = [];
+  if (selectedCategories.length > 0) {
+    queryFilters.push(inArray(questionsTable.category, selectedCategories));
+  }
   const questions = await db.select().from(questionsTable)
-    .where(selectedCategories.length > 0
-      ? sql`${questionsTable.category} IN (${sql.join(selectedCategories.map(c => sql`${c}`), sql`, `)})`
-      : undefined)
+    .where(queryFilters.length > 0 ? and(...queryFilters) : undefined)
     .orderBy(match.shuffle ? sql`RANDOM()` : questionsTable.id)
     .limit(match.totalQuestions);
 
@@ -398,6 +400,11 @@ router.post("/stage/start", async (req, res) => {
       correctOptionIds: correctIds,
     };
   }));
+
+  if (fullQs.length === 0) {
+    res.status(400).json({ error: "No questions found for the selected domains. Add questions with matching categories first." });
+    return;
+  }
 
   match.questions = fullQs;
   match.totalQuestions = fullQs.length;
