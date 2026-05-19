@@ -323,11 +323,12 @@ const DIFFICULTY_TIERS = [
 ];
 
   function initNewQuestion() {
+    const defaultCategory = categories.length > 0 ? categories[0].name : "general";
     setEditing({
       type: "multiple_choice",
       questionText: "",
       difficulty: 4,
-      category: "general",
+      category: defaultCategory,
       correctAnswer: "",
       timeLimitSeconds: 30,
       explanation: "",
