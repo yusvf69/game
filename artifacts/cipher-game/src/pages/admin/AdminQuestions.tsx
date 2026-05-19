@@ -315,11 +315,18 @@ export default function AdminQuestions() {
     loadQuestions();
   }
 
+const DIFFICULTY_TIERS = [
+  { id: "recruit", label: "RECRUIT", mult: "×0.5", value: 2, color: "text-green-400" },
+  { id: "agent", label: "AGENT", mult: "×1.0", value: 4, color: "text-blue-400" },
+  { id: "elite", label: "ELITE", mult: "×1.8", value: 7, color: "text-purple-400" },
+  { id: "omega", label: "OMEGA", mult: "×3.0", value: 9, color: "text-red-400" },
+];
+
   function initNewQuestion() {
     setEditing({
       type: "multiple_choice",
       questionText: "",
-      difficulty: 3,
+      difficulty: 4,
       category: "general",
       correctAnswer: "",
       timeLimitSeconds: 30,
@@ -637,7 +644,7 @@ export default function AdminQuestions() {
                 {["image", "audio", "video"].includes(editing.type) && (
                   <div>
                     <label className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider block mb-1.5">
-                      {editing.type === "image" ? "Image URL" : editing.type === "audio" ? "Audio URL" : "Video URL"}
+                      {editing.type === "image" ? "Image" : editing.type === "audio" ? "Audio" : "Video"}
                     </label>
                     <div className="flex gap-2">
                       <AdminInput
@@ -646,6 +653,19 @@ export default function AdminQuestions() {
                         placeholder={`Enter ${editing.type} URL...`}
                         style={{ flex: 1 }}
                       />
+                      <label className="px-3 py-2 font-mono text-[11px] bg-zinc-900 text-zinc-400 border border-zinc-800 rounded-lg hover:bg-zinc-800 hover:text-zinc-200 transition-all cursor-pointer whitespace-nowrap">
+                        Upload
+                        <input type="file" accept={editing.type === "image" ? "image/*" : editing.type === "audio" ? "audio/*" : "video/*"}
+                          className="hidden"
+                          onChange={e => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            const reader = new FileReader();
+                            reader.onload = () => updateEditing("mediaUrl", reader.result);
+                            reader.readAsDataURL(file);
+                          }}
+                        />
+                      </label>
                     </div>
                     {editing.mediaUrl && (
                       <div className="mt-2 rounded-lg overflow-hidden border border-zinc-800/60 max-h-40">
@@ -786,19 +806,21 @@ export default function AdminQuestions() {
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider block mb-1.5">Difficulty (1-10)</label>
-                    <input
-                      type="range"
-                      min={1}
-                      max={10}
-                      value={editing.difficulty || 3}
-                      onChange={e => updateEditing("difficulty", parseInt(e.target.value))}
-                      className="w-full accent-cyan-500"
-                    />
-                    <div className="flex justify-between text-[10px] font-mono text-zinc-600 mt-0.5">
-                      <span>1</span>
-                      <span className="text-zinc-400">{editing.difficulty || 3}</span>
-                      <span>10</span>
+                    <label className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider block mb-1.5">Difficulty</label>
+                    <div className="flex flex-wrap gap-2">
+                      {DIFFICULTY_TIERS.map(tier => {
+                        const selected = editing.difficulty === tier.value;
+                        return (
+                          <button key={tier.id} onClick={() => updateEditing("difficulty", tier.value)}
+                            className={`px-3 py-1.5 font-mono text-[11px] tracking-wider rounded transition-all ${
+                              selected
+                                ? "bg-blue-600/30 text-blue-300 border border-blue-500/40"
+                                : "bg-zinc-900 text-zinc-600 border border-zinc-800 hover:text-zinc-400"
+                            }`}>
+                            {tier.label} <span className="text-zinc-700">{tier.mult}</span>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
