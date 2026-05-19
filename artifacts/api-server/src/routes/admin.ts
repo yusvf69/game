@@ -245,7 +245,6 @@ function validateQuestionBody(body: any): string | null {
     case "audio":
     case "video":
       if (!body.mediaUrl) return "mediaUrl is required for media questions";
-      if (!correctAnswer) return "correctAnswer is required";
       break;
     case "multi_answer":
       if (!body.options || body.options.length < 2)
