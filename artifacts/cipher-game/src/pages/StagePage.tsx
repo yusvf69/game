@@ -14,6 +14,7 @@ interface StageQuestion {
   id: number; questionText: string;
   options: { id: number; text: string }[];
   timeLimit: number; category: string; difficulty: number;
+  mediaUrl?: string | null; type?: string;
 }
 
 export default function StagePage() {
@@ -219,6 +220,19 @@ export default function StagePage() {
               <div className="font-mono text-2xl md:text-4xl lg:text-5xl font-bold text-zinc-100 leading-relaxed mb-8 max-w-4xl mx-auto">
                 {question.questionText}
               </div>
+              {question.mediaUrl && (
+                <div className="max-w-2xl mx-auto mb-6 rounded-lg overflow-hidden border border-zinc-800/60">
+                  {question.type === "image" ? (
+                    <img src={question.mediaUrl} alt="Question media" className="w-full max-h-64 object-contain bg-black/40" />
+                  ) : question.type === "audio" ? (
+                    <audio src={question.mediaUrl} controls className="w-full p-4 bg-black/40" />
+                  ) : question.type === "video" ? (
+                    <video src={question.mediaUrl} controls className="w-full max-h-64 bg-black/40" />
+                  ) : (
+                    <img src={question.mediaUrl} alt="Media" className="w-full max-h-64 object-contain bg-black/40" />
+                  )}
+                </div>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-3xl mx-auto mb-6">
                 {question.options.map((opt, i) => (
                   <div key={opt.id} className="glass-strong border border-zinc-800/60 rounded-lg px-6 py-4 font-mono text-lg text-zinc-300">

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { sessionsTable, usersTable, userStatsTable, xpLogTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { sessionsTable, usersTable, userStatsTable, xpLogTable, playerSkillsTable } from "@workspace/db";
+import { eq, sql } from "drizzle-orm";
 
 const router = Router();
 
@@ -100,7 +100,11 @@ router.post("/skill-tree/upgrade", async (req, res) => {
   const newXp = stats.xp - cost;
 
   await db.update(userStatsTable).set({ xp: newXp }).where(eq(userStatsTable.userId, user.id));
-  await db.insert(xpLogTable).values({ userId: user.id, action: `skill_upgrade_${skill.name.replace(/\s+/g, '_').toLowerCase()}`, amount: -cost });
+  try {
+    await db.insert(xpLogTable).values({ userId: user.id, action: `skill_upgrade_${skill.name.replace(/\s+/g, '_').toLowerCase()}`, amount: -cost });
+  } catch (e: any) {
+    console.error("[skillTree] xp_log insert failed:", e?.message);
+  }
 
   try {
     if (currentLevel === 0) {
@@ -122,7 +126,5 @@ router.post("/skill-tree/upgrade", async (req, res) => {
     statBonus: skill.statBonus,
   });
 });
-
-import { sql } from "drizzle-orm";
 
 export default router;

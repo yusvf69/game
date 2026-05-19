@@ -399,6 +399,7 @@ router.post("/stage/start", async (req, res) => {
       questionText: q.questionText,
       difficulty: q.difficulty,
       category: q.category,
+      mediaUrl: q.mediaUrl,
       options: options.map(o => ({ id: o.id, text: o.text })),
       timeLimit: q.timeLimitSeconds || match.timerSeconds,
       type: q.type,
