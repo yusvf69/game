@@ -250,6 +250,20 @@ export default function AdminQuestions() {
     loadQuestions();
   }
 
+  async function deleteAllQuestions() {
+    if (!confirm("Delete ALL questions? This cannot be undone!")) return;
+    if (!confirm("Are you sure? All questions and their options will be permanently deleted.")) return;
+    setLoading(true);
+    try {
+      await adminFetch("/admin/questions", { method: "DELETE" });
+      setMsg("All questions deleted");
+      loadQuestions();
+    } catch {
+      setMsg("Failed to delete all questions");
+      setLoading(false);
+    }
+  }
+
   async function exportQuestions() {
     const r = await adminFetch("/admin/questions/export");
     const data = await r.json();
@@ -496,6 +510,9 @@ const DIFFICULTY_TIERS = [
         </AdminButton>
         <AdminButton onClick={() => setShowCategoryPanel(!showCategoryPanel)}>
           <Tag className="w-4 h-4 inline mr-1" /> Categories
+        </AdminButton>
+        <AdminButton variant="danger" onClick={deleteAllQuestions}>
+          <Trash2 className="w-4 h-4 inline mr-1" /> Delete All
         </AdminButton>
         {msg && <span className="text-cyan-400 text-xs">{msg}</span>}
       </div>

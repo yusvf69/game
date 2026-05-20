@@ -385,6 +385,13 @@ router.delete("/admin/questions/:id", requirePermission("manage_questions"), asy
   res.json({ success: true });
 });
 
+router.delete("/admin/questions", requirePermission("manage_questions"), async (req, res) => {
+  await db.delete(questionOptionsTable);
+  await db.delete(questionsTable);
+  logAdmin(req.user!.id, "ADMIN_DELETED_ALL_QUESTIONS", "question", "all");
+  res.json({ success: true, deleted: true });
+});
+
 // ─── Categories Management ─────────────────────────────────────────────
 
 async function ensureCategoriesTable() {
