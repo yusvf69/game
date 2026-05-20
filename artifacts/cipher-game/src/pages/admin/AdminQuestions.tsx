@@ -705,18 +705,18 @@ const DIFFICULTY_TIERS = [
                 </button>
               </div>
 
-              <div className="text-[10px] font-mono text-zinc-500 mb-3 leading-relaxed space-y-1">
-                <p>Q: Question text here</p>
-                <p>A: Correct option* <span className="text-zinc-700">// * = correct</span></p>
-                <p>B: Wrong option</p>
-                <p>TYPE: multiple_choice <span className="text-zinc-700">// multiple_choice, true_false, multi_answer, cipher, image, audio, video</span></p>
-                <p>CAT: category_name</p>
-                <p>DIFF: AGENT <span className="text-zinc-700">// RECRUIT / AGENT / ELITE / OMEGA</span></p>
-                <p>PTS: 100 <span className="text-zinc-700">// optional, default 100</span></p>
-                <p>EXP: Explanation text</p>
-                <p>URL: https://... <span className="text-zinc-700">// media URL or data URL</span></p>
-                <p className="text-zinc-700">--- <span className="text-zinc-800">// separator between questions</span></p>
-              </div>
+              <pre className="text-[10px] font-mono text-zinc-400 mb-3 leading-relaxed p-3 bg-zinc-950/80 rounded-lg border border-zinc-800/60 select-all cursor-text overflow-x-auto">
+                <span className="text-zinc-600">Q:</span> Question text here<br />
+                <span className="text-zinc-600">A:</span> Correct option<span className="text-yellow-500">*</span>  <span className="text-zinc-700">// * = correct</span><br />
+                <span className="text-zinc-600">B:</span> Wrong option<br />
+                <span className="text-zinc-600">TYPE:</span> multiple_choice  <span className="text-zinc-700">// multiple_choice, true_false, multi_answer, cipher, image, audio, video</span><br />
+                <span className="text-zinc-600">CAT:</span> category_name<br />
+                <span className="text-zinc-600">DIFF:</span> AGENT  <span className="text-zinc-700">// RECRUIT / AGENT / ELITE / OMEGA</span><br />
+                <span className="text-zinc-600">PTS:</span> 100  <span className="text-zinc-700">// optional, default 100</span><br />
+                <span className="text-zinc-600">EXP:</span> Explanation text<br />
+                <span className="text-zinc-600">URL:</span> https://...  <span className="text-zinc-700">// media URL or data URL</span><br />
+                <span className="text-zinc-600" style={{ letterSpacing: "0.2em" }}>---</span>  <span className="text-zinc-700">// separator between questions</span>
+              </pre>
 
               <textarea value={bulkText} onChange={e => setBulkText(e.target.value)}
                 rows={12}
