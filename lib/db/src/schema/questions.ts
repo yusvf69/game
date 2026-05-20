@@ -11,6 +11,7 @@ export const questionsTable = pgTable("questions", {
   mediaUrl: text("media_url"),
   correctAnswer: text("correct_answer").notNull(),
   timeLimitSeconds: integer("time_limit_seconds").notNull().default(30),
+  points: integer("points").notNull().default(100),
   explanation: text("explanation").notNull().default(""),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });

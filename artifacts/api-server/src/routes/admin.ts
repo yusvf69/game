@@ -266,7 +266,7 @@ function validateQuestionBody(body: any): string | null {
 
 router.post("/admin/questions", requirePermission("manage_questions"), async (req, res) => {
   try {
-    const { type, questionText, difficulty, category, correctAnswer, timeLimitSeconds, explanation, options, mediaUrl } = req.body;
+    const { type, questionText, difficulty, category, correctAnswer, timeLimitSeconds, points, explanation, options, mediaUrl } = req.body;
 
     const validationErr = validateQuestionBody(req.body);
     if (validationErr) return res.status(400).json({ error: validationErr });
@@ -295,6 +295,7 @@ router.post("/admin/questions", requirePermission("manage_questions"), async (re
       category: category || "general",
       correctAnswer: correctAnswer || "",
       timeLimitSeconds: timeLimitSeconds || 30,
+      points: points || 100,
       explanation: explanation || "",
       mediaUrl: mediaUrl || null,
     }).returning();
@@ -351,6 +352,7 @@ router.put("/admin/questions/:id", requirePermission("manage_questions"), async 
     if (body.category) updateData.category = body.category;
     if (body.correctAnswer !== undefined) updateData.correctAnswer = body.correctAnswer;
     if (body.timeLimitSeconds) updateData.timeLimitSeconds = body.timeLimitSeconds;
+    if (body.points !== undefined) updateData.points = body.points;
     if (body.explanation !== undefined) updateData.explanation = body.explanation;
     if (body.mediaUrl !== undefined) updateData.mediaUrl = body.mediaUrl;
 

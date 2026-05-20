@@ -405,6 +405,7 @@ router.post("/stage/start", async (req, res) => {
       mediaUrl: q.mediaUrl,
       options: options.map(o => ({ id: o.id, text: o.text })),
       timeLimit: q.timeLimitSeconds || match.timerSeconds,
+      points: (q as any).points ?? 100,
       type: q.type,
       correctOptionIds: correctIds,
     };
@@ -456,7 +457,9 @@ router.post("/stage/buzz", async (req, res) => {
   res.json({ success: true, teamId, playerName: match.buzzerName });
 });
 
-// POST /stage/answer — host clicks an option (server validates correct/incorrect, supports rebuzz)
+// POST /stage/answer — host clicks an option after revealing choices
+// Scoring: 1st team correct=1/4pts, wrong=lose 1/2pts + rebuzz
+//          2nd team correct=1/2pts, wrong=lose 1/4pts
 router.post("/stage/answer", async (req, res) => {
   const user = await getUserFromToken(req.headers.authorization);
   if (!user) { res.status(401).json({ error: "Not authenticated" }); return; }
@@ -472,16 +475,14 @@ router.post("/stage/answer", async (req, res) => {
 
   const q = match.questions[match.currentQuestionIndex];
   const isCorrect = q && q.correctOptionIds?.includes(optionId);
+  const qPoints = q?.points ?? 100;
 
   team.total += 1;
 
-  // Points scale: rebuzz = half points
-  const pointsMultiplier = match.wrongAttempts > 0 ? 0.5 : 1.0;
-  const speedBonus = match.timerStartedAt ? (Date.now() - match.timerStartedAt < 5000 ? 25 : 15) : 0;
-  const streakBonus = isCorrect && team.streak > 0 ? 50 : 0;
-  const pointsGained = isCorrect ? Math.round((100 + speedBonus + streakBonus) * pointsMultiplier) : 0;
-
   if (isCorrect) {
+    // Award points based on attempt number
+    const gainMultiplier = match.wrongAttempts === 0 ? 0.25 : 0.5;
+    const pointsGained = Math.round(qPoints * gainMultiplier);
     team.correct += 1;
     team.score += pointsGained;
     team.streak += 1;
@@ -491,39 +492,27 @@ router.post("/stage/answer", async (req, res) => {
     recordEvent(match, "answer_correct", team.id, { pointsGained, newScore: team.score });
     await persistMatch(match);
 
-    const answerTimeMs = match.timerStartedAt ? Date.now() - match.timerStartedAt : 0;
-    eventBus.emitSync("ANSWER_CORRECT", {
-      matchId: match.id,
-      teamId: team.id,
-      userId: match.hostId,
-      data: { xpAmount: pointsGained, questionIndex: match.currentQuestionIndex, answerTimeMs },
-    });
-
     res.json({ success: true, correct: true, pointsGained, newScore: team.score });
     return;
   }
 
   // Wrong answer
   team.streak = 0;
-
-  eventBus.emitSync("ANSWER_INCORRECT", {
-    matchId: match.id,
-    teamId: team.id,
-    userId: match.hostId,
-    data: { wrongAttempts: match.wrongAttempts },
-  });
+  const loseMultiplier = match.wrongAttempts === 0 ? 0.5 : 0.25;
+  const pointsLost = Math.round(qPoints * loseMultiplier);
+  team.score = Math.max(0, team.score - pointsLost);
 
   if (match.wrongAttempts === 0) {
-    // First wrong → give other teams a chance (rebuzz)
+    // First wrong → rebuzz for other teams
     match.wrongAttempts = 1;
     match.buzzerTeamId = null;
     match.buzzerName = null;
     match.buzzedOptionId = optionId;
     match.phase = "rebuzz";
-    recordEvent(match, "answer_incorrect", team.id, { rebuzz: true });
+    recordEvent(match, "answer_incorrect", team.id, { rebuzz: true, pointsLost, newScore: team.score });
     await persistMatch(match);
 
-    res.json({ success: true, correct: false, pointsGained: 0, rebuzz: true });
+    res.json({ success: true, correct: false, pointsGained: 0, pointsLost, newScore: team.score, rebuzz: true });
     return;
   }
 
@@ -531,10 +520,40 @@ router.post("/stage/answer", async (req, res) => {
   match.phase = "answered";
   match.wrongAttempts = 0;
   match.buzzedOptionId = optionId;
-  recordEvent(match, "answer_incorrect", team.id, { final: true });
+  recordEvent(match, "answer_incorrect", team.id, { final: true, pointsLost, newScore: team.score });
   await persistMatch(match);
 
-  res.json({ success: true, correct: false, pointsGained: 0, newScore: team.score });
+  res.json({ success: true, correct: false, pointsGained: 0, pointsLost, newScore: team.score });
+});
+
+// POST /stage/mark-correct — host marks buzzer's answer as correct verbally → full points, advance
+router.post("/stage/mark-correct", async (req, res) => {
+  const user = await getUserFromToken(req.headers.authorization);
+  if (!user) { res.status(401).json({ error: "Not authenticated" }); return; }
+
+  const { matchId } = req.body;
+  const match = await ensureMatch(matchId, true);
+  if (!match) { res.status(404).json({ error: "Match not found" }); return; }
+  if (match.hostId !== user.id) { res.status(403).json({ error: "Only host can mark correct" }); return; }
+  if (match.buzzerTeamId === null) { res.status(400).json({ error: "No team has buzzed" }); return; }
+
+  const team = match.teams.find(t => t.id === match.buzzerTeamId);
+  if (!team) { res.status(404).json({ error: "Team not found" }); return; }
+
+  const q = match.questions[match.currentQuestionIndex];
+  const qPoints = q?.points ?? 100;
+
+  team.total += 1;
+  team.correct += 1;
+  team.score += qPoints;
+  team.streak += 1;
+  match.phase = "answered";
+  match.wrongAttempts = 0;
+  match.buzzedOptionId = null;
+  recordEvent(match, "verbal_correct", team.id, { pointsGained: qPoints, newScore: team.score });
+  await persistMatch(match);
+
+  res.json({ success: true, correct: true, pointsGained: qPoints, newScore: team.score, mode: "verbal" });
 });
 
 // POST /stage/next — host advances to next question

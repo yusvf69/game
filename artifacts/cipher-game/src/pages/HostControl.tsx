@@ -89,7 +89,7 @@ export default function HostControl() {
   const [buzzerTeamName, setBuzzerTeamName] = useState("");
   const [buzzerPlayerName, setBuzzerPlayerName] = useState<string | null>(null);
   const [selectedOptionId, setSelectedOptionId] = useState<number | null>(null);
-  const [answerResult, setAnswerResult] = useState<{ correct: boolean; teamName: string; points: number; rebuzz?: boolean } | null>(null);
+  const [answerResult, setAnswerResult] = useState<{ correct: boolean; teamName: string; points: number; pointsLost?: number; newScore?: number; rebuzz?: boolean; mode?: string } | null>(null);
   const [scores, setScores] = useState<ScoreEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -98,6 +98,7 @@ export default function HostControl() {
   const [rebuzzExcludedTeam, setRebuzzExcludedTeam] = useState("");
   const [connectedTeamIds, setConnectedTeamIds] = useState<number[]>([]);
   const [mediaBlobUrl, setMediaBlobUrl] = useState<string | null>(null);
+  const [showOptions, setShowOptions] = useState(false);
 
   useEffect(() => { initAudio(); }, []);
 
@@ -113,6 +114,7 @@ export default function HostControl() {
 
   const prevHostPhase = useRef<string>("lobby");
   const prevHostTick = useRef<number>(-1);
+  const prevQIndex = useRef<number>(-1);
 
   useEffect(() => {
     if (phase === "intro" && prevHostPhase.current === "idle") {
@@ -157,6 +159,10 @@ export default function HostControl() {
       const d = await res.json();
 
       setPhase(d.phase);
+      if (d.currentQuestionIndex !== prevQIndex.current) {
+        setShowOptions(false);
+        prevQIndex.current = d.currentQuestionIndex;
+      }
       setQuestionIndex(d.currentQuestionIndex);
       setTotalQuestions(d.totalQuestions);
       setQuestion(d.question);
@@ -319,7 +325,7 @@ export default function HostControl() {
       if (!res.ok) throw new Error(d.error || "Failed");
 
       if (d.rebuzz) {
-        setAnswerResult({ correct: false, teamName: buzzerTeamName, points: 0, rebuzz: true });
+        setAnswerResult({ correct: false, teamName: buzzerTeamName, points: 0, pointsLost: d.pointsLost, newScore: d.newScore, rebuzz: true });
         setRebuzzOpen(true);
         setRebuzzExcludedTeam(buzzerTeamName);
         setWrongAttempts(1);
@@ -327,15 +333,30 @@ export default function HostControl() {
         setBuzzerTeamName("");
         setSelectedOptionId(null);
       } else {
-        setAnswerResult({ correct: d.correct, teamName: buzzerTeamName, points: d.pointsGained });
+        setAnswerResult({ correct: d.correct, teamName: buzzerTeamName, points: d.pointsGained || 0, pointsLost: d.pointsLost, newScore: d.newScore });
       }
     } catch (e: any) { setError(e.message); }
   }, [matchId, buzzerTeamId, buzzerTeamName, selectedOptionId, answerResult, token]);
+
+  const handleMarkCorrect = useCallback(async () => {
+    if (!matchId || buzzerTeamId === null) return;
+    setSelectedOptionId(null);
+    try {
+      const res = await fetch(`${BASE_URL}/api/stage/mark-correct`, {
+        method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ matchId }),
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || "Failed");
+      setAnswerResult({ correct: true, teamName: buzzerTeamName, points: d.pointsGained, mode: "verbal", newScore: d.newScore });
+    } catch (e: any) { setError(e.message); }
+  }, [matchId, buzzerTeamId, buzzerTeamName, token]);
 
   const nextQuestion = useCallback(async () => {
     if (!matchId) return;
     setBuzzerTeamId(null); setSelectedOptionId(null); setAnswerResult(null);
     setRebuzzOpen(false); setWrongAttempts(0); setTimerActive(false);
+    setShowOptions(false);
     try {
       const res = await fetch(`${BASE_URL}/api/stage/next`, {
         method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -667,6 +688,8 @@ export default function HostControl() {
                 <span className="text-zinc-800 mx-2">//</span>
                 <span className="text-blue-400">{question.category?.toUpperCase()}</span>
                 <span className="text-zinc-800 mx-2">DIFF {question.difficulty}</span>
+                <span className="text-zinc-800 mx-2">|</span>
+                <span className="text-yellow-400">{question.points ?? 100} PTS</span>
                 {wrongAttempts > 0 && <span className="text-yellow-400 mx-2">◈ SECOND CHANCE ◈</span>}
               </div>
               <div className="font-mono text-2xl md:text-4xl font-bold text-zinc-100 leading-relaxed mb-6 text-center max-w-4xl mx-auto">
@@ -689,26 +712,30 @@ export default function HostControl() {
                   )}
                 </div>
               )}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-3xl mx-auto mb-4">
-                {question.options?.map((opt: any, i: number) => {
-                  const isSelected = selectedOptionId === opt.id;
-                  const showCorrect = answerResult !== null && !answerResult.rebuzz;
-                  const isCorrectOpt = showCorrect && answerResult?.correct && isSelected;
-                  const isWrongOpt = showCorrect && isSelected && !answerResult?.correct;
-                  return (
-                    <button key={opt.id} onClick={() => handleOptionClick(opt.id)}
-                      disabled={selectedOptionId !== null || buzzerTeamId === null || answerResult?.rebuzz === true}
-                      className={`text-left glass-strong border rounded-lg px-5 py-4 font-mono text-base md:text-lg text-zinc-300 transition-all ${
-                        isCorrectOpt ? "border-green-500 bg-green-500/20 text-green-300" : ""
-                      } ${isWrongOpt ? "border-red-500 bg-red-500/20 text-red-300" : ""}
-                        ${!isSelected && !showCorrect ? "border-zinc-800/60 hover:border-blue-500/40 hover:bg-blue-500/10" : ""}
-                        ${!isSelected && showCorrect ? "border-zinc-800/60 opacity-50" : ""}`}>
-                      <span className="text-zinc-600 mr-3">{String.fromCharCode(65 + i)}.</span>
-                      {opt.text}
-                    </button>
-                  );
-                })}
-              </div>
+
+              {/* Options — only shown when host clicks Show Options, or after answer, or during rebuzz */}
+              {(showOptions || answerResult || rebuzzOpen) && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-3xl mx-auto mb-4">
+                  {question.options?.map((opt: any, i: number) => {
+                    const isSelected = selectedOptionId === opt.id;
+                    const showCorrect = answerResult !== null && !answerResult.rebuzz;
+                    const isCorrectOpt = showCorrect && answerResult?.correct && isSelected;
+                    const isWrongOpt = showCorrect && isSelected && !answerResult?.correct;
+                    return (
+                      <button key={opt.id} onClick={() => handleOptionClick(opt.id)}
+                        disabled={selectedOptionId !== null || buzzerTeamId === null || answerResult?.rebuzz === true}
+                        className={`text-left glass-strong border rounded-lg px-5 py-4 font-mono text-base md:text-lg text-zinc-300 transition-all ${
+                          isCorrectOpt ? "border-green-500 bg-green-500/20 text-green-300" : ""
+                        } ${isWrongOpt ? "border-red-500 bg-red-500/20 text-red-300" : ""}
+                          ${!isSelected && !showCorrect ? "border-zinc-800/60 hover:border-blue-500/40 hover:bg-blue-500/10" : ""}
+                          ${!isSelected && showCorrect ? "border-zinc-800/60 opacity-50" : ""}`}>
+                        <span className="text-zinc-600 mr-3">{String.fromCharCode(65 + i)}.</span>
+                        {opt.text}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
 
               {timerActive && (
                 <div className="max-w-md mx-auto mb-4">
@@ -727,14 +754,25 @@ export default function HostControl() {
                   <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} className="text-center">
                     <motion.div animate={{ boxShadow: ["0 0 20px rgba(239,68,68,0.3)", "0 0 80px rgba(239,68,68,0.8)", "0 0 20px rgba(239,68,68,0.3)"] }}
                       transition={{ duration: 0.5, repeat: Infinity }}
-                      className="inline-block bg-red-600/20 border-2 border-red-500 rounded-xl px-8 py-4">
+                      className="inline-block bg-red-600/20 border-2 border-red-500 rounded-xl px-8 py-4 mb-4">
                       <div className="font-mono text-xs text-red-400 tracking-widest mb-1">{wrongAttempts > 0 ? "◈ SECOND RESPONSE ◈" : "◈ FIRST RESPONSE ◈"}</div>
                       <div className="font-mono text-2xl font-black text-white">{buzzerTeamName}</div>
                       {buzzerPlayerName && (
                         <div className="font-mono text-sm text-red-300/70 mt-1">by {buzzerPlayerName}</div>
                       )}
-                      <div className="font-mono text-[10px] text-zinc-500 mt-1">HOST: click the option the team said</div>
                     </motion.div>
+                    <div className="flex justify-center gap-4">
+                      {!showOptions && (
+                        <button onClick={() => setShowOptions(true)}
+                          className="px-8 py-3 font-mono text-sm bg-blue-600/30 text-blue-300 border border-blue-500/50 rounded-lg hover:bg-blue-600/50 transition-all">
+                          ◈ SHOW OPTIONS — ¼ PTS ◈
+                        </button>
+                      )}
+                      <button onClick={handleMarkCorrect}
+                        className="px-8 py-3 font-mono text-sm bg-green-600/30 text-green-300 border border-green-500/50 rounded-lg hover:bg-green-600/50 transition-all">
+                        ✓ CORRECT — FULL PTS
+                      </button>
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -747,7 +785,7 @@ export default function HostControl() {
                       className="inline-block bg-yellow-600/20 border-2 border-yellow-500 rounded-xl px-8 py-4">
                       <div className="font-mono text-xs text-yellow-400 tracking-widest mb-1">◈ SECOND CHANCE ◈</div>
                       <div className="font-mono text-base text-zinc-300">{rebuzzExcludedTeam} WAS WRONG</div>
-                      <div className="font-mono text-sm text-yellow-300 mt-1">REMAINING TEAMS MAY BUZZ — HALF POINTS</div>
+                      <div className="font-mono text-sm text-yellow-300 mt-1">REMAINING TEAMS MAY BUZZ — ½ PTS IF CORRECT</div>
                     </motion.div>
                   </motion.div>
                 )}
@@ -761,6 +799,10 @@ export default function HostControl() {
                         {answerResult.correct ? "✓ ACCESS GRANTED" : "✗ ACCESS DENIED"}
                       </div>
                       {answerResult.correct && <div className="font-mono text-xl text-green-300">+{answerResult.points} PTS</div>}
+                      {answerResult.pointsLost && <div className="font-mono text-xl text-red-300">-{answerResult.pointsLost} PTS</div>}
+                      {answerResult.newScore !== undefined && (
+                        <div className="font-mono text-sm text-zinc-500 mt-1">NEW SCORE: {answerResult.newScore}</div>
+                      )}
                     </div>
                   </motion.div>
                 )}

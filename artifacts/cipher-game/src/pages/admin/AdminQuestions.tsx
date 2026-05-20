@@ -329,6 +329,7 @@ export default function AdminQuestions() {
       category: editing.category,
       correctAnswer: editing.correctAnswer || "",
       timeLimitSeconds: editing.timeLimitSeconds,
+      points: editing.points ?? 100,
       explanation: editing.explanation || "",
       mediaUrl: editing.mediaUrl || null,
     };
@@ -366,6 +367,7 @@ const DIFFICULTY_TIERS = [
       category: categories[0]?.name || "",
       correctAnswer: "",
       timeLimitSeconds: 30,
+      points: 100,
       explanation: "",
       mediaUrl: "",
       options: [{ text: "", isCorrect: false }, { text: "", isCorrect: false }],
@@ -381,6 +383,7 @@ const DIFFICULTY_TIERS = [
       category: q.category,
       correctAnswer: q.correctAnswer || "",
       timeLimitSeconds: q.timeLimitSeconds,
+      points: (q as any).points ?? 100,
       explanation: q.explanation || "",
       mediaUrl: q.mediaUrl || "",
       options: q.options.map(o => ({ text: o.text, isCorrect: o.isCorrect === 1 })),
@@ -892,6 +895,21 @@ const DIFFICULTY_TIERS = [
                       className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-200 text-sm font-mono focus:outline-none focus:border-zinc-600"
                     />
                   </div>
+                  <div>
+                    <label className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider block mb-1.5">Points</label>
+                    <input
+                      type="number"
+                      min={10}
+                      max={10000}
+                      step={10}
+                      value={editing.points ?? 100}
+                      onChange={e => updateEditing("points", parseInt(e.target.value) || 100)}
+                      className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-200 text-sm font-mono focus:outline-none focus:border-zinc-600"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider block mb-1.5">Correct Answer (text)</label>
                     <input
