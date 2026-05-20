@@ -226,7 +226,7 @@ export default function HostControl() {
     timeoutRef.current = true;
     if (matchId) {
       fetch(`${BASE_URL}/api/stage/timeout`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
+        method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ matchId }),
       }).catch(() => {});
     }
