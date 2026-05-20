@@ -576,8 +576,16 @@ export default function HostControl() {
               <p className="font-mono text-[10px] text-zinc-600 tracking-widest mt-1">DISTRIBUTE CODES TO TEAMS</p>
             </motion.div>
             <div className="glass-strong rounded-lg p-4 mb-4">
-              <div className="font-mono text-[10px] text-zinc-700 tracking-widest mb-2">ROOM CODE</div>
-              <div className="font-mono text-3xl font-black tracking-[0.3em] text-yellow-400 mb-6">{roomCode}</div>
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <div className="font-mono text-[10px] text-zinc-700 tracking-widest mb-2">ROOM CODE</div>
+                  <div className="font-mono text-3xl font-black tracking-[0.3em] text-yellow-400">{roomCode}</div>
+                </div>
+                <div className="text-right">
+                  <div className="font-mono text-[10px] text-zinc-700 tracking-widest mb-2">MATCH ID</div>
+                  <div className="font-mono text-lg text-zinc-400 select-all cursor-pointer" onClick={() => navigator.clipboard?.writeText(String(matchId))} title="Click to copy">{matchId}</div>
+                </div>
+              </div>
               <div className="space-y-3">
                 {teams.map((team, i) => {
                   const tc = COLORS.find(c => c.id === team.color);
@@ -625,6 +633,7 @@ export default function HostControl() {
             STAGE <span className="text-blue-400">MODE</span>
             {question && <span className="ml-3 text-zinc-800">Q{questionIndex + 1}/{totalQuestions}</span>}
             {wrongAttempts > 0 && <span className="ml-3 text-yellow-400">REBUZZ</span>}
+            <span className="ml-3 text-zinc-800 cursor-pointer select-all" onClick={() => navigator.clipboard?.writeText(String(matchId))} title="Copy match ID">ID: {matchId}</span>
           </div>
           <div className="flex items-center gap-4">
             {scores.map(t => (
@@ -675,11 +684,18 @@ export default function HostControl() {
                 ))}
               </div>
 
-              <motion.button onClick={() => { setStep("create"); setMatchId(null); setAnswerResult(null); setSelectedOptionId(null); setRebuzzOpen(false); setWrongAttempts(0); }}
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}
-                className="px-8 py-3 font-mono text-sm bg-blue-600/20 text-blue-400 border border-blue-500/40 rounded-lg hover:bg-blue-600/40 transition-all">
-                ◈ PLAY AGAIN ◈
-              </motion.button>
+              <div className="flex items-center justify-center gap-4">
+                <motion.button onClick={() => { setStep("create"); setMatchId(null); setAnswerResult(null); setSelectedOptionId(null); setRebuzzOpen(false); setWrongAttempts(0); }}
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}
+                  className="px-8 py-3 font-mono text-sm bg-blue-600/20 text-blue-400 border border-blue-500/40 rounded-lg hover:bg-blue-600/40 transition-all">
+                  ◈ PLAY AGAIN ◈
+                </motion.button>
+                <motion.a href={`/stage-results?matchId=${matchId}`} target="_blank"
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }}
+                  className="px-8 py-3 font-mono text-sm bg-yellow-600/20 text-yellow-400 border border-yellow-500/40 rounded-lg hover:bg-yellow-600/40 transition-all inline-block">
+                  📋 VIEW RESULTS
+                </motion.a>
+              </div>
             </motion.div>
           ) : question && (
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-5xl">
