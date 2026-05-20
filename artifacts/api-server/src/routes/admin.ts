@@ -222,6 +222,23 @@ router.get("/admin/questions", requirePermission("manage_questions"), async (req
   res.json({ questions: questionsWithOptions, total: Number(count), page, limit });
 });
 
+// IMPORTANT: /export must be before /:id or Express matches "export" as :id
+router.get("/admin/questions/export", requirePermission("manage_questions"), async (req, res) => {
+  try {
+    const { rows: qRows } = await getPool().query(`SELECT * FROM questions ORDER BY id`);
+    const questions = await Promise.all(qRows.map(async (q: any) => {
+      const { rows: optRows } = await getPool().query(`SELECT * FROM question_options WHERE question_id = $1`, [q.id]);
+      return { ...q, options: optRows };
+    }));
+    res.setHeader("Content-Type", "application/json");
+    res.setHeader("Content-Disposition", `attachment; filename="questions-export-${Date.now()}.json"`);
+    res.json(questions);
+  } catch (e: any) {
+    console.error("[admin] export error:", e?.message || e);
+    res.status(500).json({ error: "Export failed: " + (e?.message || "unknown") });
+  }
+});
+
 router.get("/admin/questions/:id", requirePermission("manage_questions"), async (req, res) => {
   const [q] = await db.select().from(questionsTable).where(eq(questionsTable.id, parseInt(req.params.id))).limit(1);
   if (!q) return res.status(404).json({ error: "Question not found" });
@@ -593,25 +610,6 @@ router.post("/admin/questions/generate", requirePermission("manage_questions"), 
   logAdmin(req.user!.id, "ADMIN_COPIED_QUESTIONS", "question", null, { count: questionsWithOptions.length });
   res.json({ questions: questionsWithOptions });
 });
-
-// ─── Import / Export Questions ──────────────────────────────────────────
-
-router.get("/admin/questions/export", requirePermission("manage_questions"), async (req, res) => {
-  try {
-    const { rows: qRows } = await getPool().query(`SELECT * FROM questions ORDER BY id`);
-    const questions = await Promise.all(qRows.map(async (q: any) => {
-      const { rows: optRows } = await getPool().query(`SELECT * FROM question_options WHERE question_id = $1`, [q.id]);
-      return { ...q, options: optRows };
-    }));
-    res.setHeader("Content-Type", "application/json");
-    res.setHeader("Content-Disposition", `attachment; filename="questions-export-${Date.now()}.json"`);
-    res.json(questions);
-  } catch (e: any) {
-    console.error("[admin] export error:", e?.message || e);
-    res.status(500).json({ error: "Export failed: " + (e?.message || "unknown") });
-  }
-});
-
 router.post("/admin/questions/import", requirePermission("manage_questions"), async (req, res) => {
   const questions = req.body;
   if (!Array.isArray(questions) || questions.length === 0) {
