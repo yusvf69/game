@@ -271,7 +271,7 @@ export default function AdminQuestions() {
   async function exportQuestions() {
     try {
       const r = await adminFetch("/admin/questions/export");
-      if (!r.ok) { setMsg(`Export failed (${r.status})`); return; }
+      if (!r.ok) { const body = await r.text().catch(() => ""); setMsg(`Export failed (${r.status}): ${body}`); return; }
       const data = await r.json();
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
