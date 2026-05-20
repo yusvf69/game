@@ -154,11 +154,11 @@ export function AdminBadge({ variant = "default", children }: { variant?: "defau
 }
 
 // Legacy helpers for pages not yet migrated
-export function AdminButton({ children, onClick, variant = "primary", disabled, style }: {
-  children: ReactNode; onClick?: () => void; variant?: "primary" | "danger" | "ghost"; disabled?: boolean; style?: any;
+export function AdminButton({ children, onClick, variant = "primary", disabled, loading, style }: {
+  children: ReactNode; onClick?: () => void; variant?: "primary" | "danger" | "ghost"; disabled?: boolean; loading?: boolean; style?: any;
 }) {
   const shadcnVariant = variant === "danger" ? "destructive" : variant === "ghost" ? "ghost" : "default";
-  return <Button variant={shadcnVariant as any} size="sm" onClick={onClick} disabled={disabled} style={style}>{children}</Button>;
+  return <Button variant={shadcnVariant as any} size="sm" onClick={onClick} disabled={disabled || loading} style={style}>{children}</Button>;
 }
 
 export function AdminInput({ value, onChange, placeholder, type = "text", style }: {

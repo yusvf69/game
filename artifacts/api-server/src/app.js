@@ -862,8 +862,8 @@ var require_depd = __commonJS({
       return typeName && callSite.getMethodName() ? typeName + "." + funcName : funcName;
     }
     function formatPlain(msg, caller, stack) {
-      var timestamp21 = (/* @__PURE__ */ new Date()).toUTCString();
-      var formatted = timestamp21 + " " + this._namespace + " deprecated " + msg;
+      var timestamp22 = (/* @__PURE__ */ new Date()).toUTCString();
+      var formatted = timestamp22 + " " + this._namespace + " deprecated " + msg;
       if (this._traced) {
         for (var i = 0; i < stack.length; i++) {
           formatted += "\n    at " + stack[i].toString();
@@ -15736,8 +15736,8 @@ var require_text = __commonJS({
     var debug = require_src()("body-parser:text");
     var read = require_read();
     var { normalizeOptions, passthrough } = require_utils();
-    module.exports = text20;
-    function text20(options) {
+    module.exports = text21;
+    function text21(options) {
       const normalizedOptions = normalizeOptions(options, "text/plain");
       return function textParser(req, res, next) {
         read(req, res, next, passthrough, debug, normalizedOptions);
@@ -19880,11 +19880,11 @@ var require_dist = __commonJS({
     exports.TokenData = TokenData;
     var PathError = class extends TypeError {
       constructor(message, originalPath) {
-        let text20 = message;
+        let text21 = message;
         if (originalPath)
-          text20 += `: ${originalPath}`;
-        text20 += `; visit https://git.new/pathToRegexpError for info`;
-        super(text20);
+          text21 += `: ${originalPath}`;
+        text21 += `; visit https://git.new/pathToRegexpError for info`;
+        super(text21);
         this.originalPath = originalPath;
       }
     };
@@ -20502,27 +20502,27 @@ var require_router = __commonJS({
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var methods = METHODS.map((method) => method.toLowerCase());
-    module.exports = Router25;
+    module.exports = Router26;
     module.exports.Route = Route;
-    function Router25(options) {
-      if (!(this instanceof Router25)) {
-        return new Router25(options);
+    function Router26(options) {
+      if (!(this instanceof Router26)) {
+        return new Router26(options);
       }
       const opts = options || {};
-      function router25(req, res, next) {
-        router25.handle(req, res, next);
+      function router26(req, res, next) {
+        router26.handle(req, res, next);
       }
-      Object.setPrototypeOf(router25, this);
-      router25.caseSensitive = opts.caseSensitive;
-      router25.mergeParams = opts.mergeParams;
-      router25.params = {};
-      router25.strict = opts.strict;
-      router25.stack = [];
-      return router25;
+      Object.setPrototypeOf(router26, this);
+      router26.caseSensitive = opts.caseSensitive;
+      router26.mergeParams = opts.mergeParams;
+      router26.params = {};
+      router26.strict = opts.strict;
+      router26.stack = [];
+      return router26;
     }
-    Router25.prototype = function() {
+    Router26.prototype = function() {
     };
-    Router25.prototype.param = function param(name, fn) {
+    Router26.prototype.param = function param(name, fn) {
       if (!name) {
         throw new TypeError("argument name is required");
       }
@@ -20542,7 +20542,7 @@ var require_router = __commonJS({
       params.push(fn);
       return this;
     };
-    Router25.prototype.handle = function handle(req, res, callback) {
+    Router26.prototype.handle = function handle(req, res, callback) {
       if (!callback) {
         throw new TypeError("argument callback is required");
       }
@@ -20669,7 +20669,7 @@ var require_router = __commonJS({
         }
       }
     };
-    Router25.prototype.use = function use(handler) {
+    Router26.prototype.use = function use(handler) {
       let offset = 0;
       let path = "/";
       if (typeof handler !== "function") {
@@ -20702,7 +20702,7 @@ var require_router = __commonJS({
       }
       return this;
     };
-    Router25.prototype.route = function route(path) {
+    Router26.prototype.route = function route(path) {
       const route2 = new Route(path);
       const layer = new Layer(path, {
         sensitive: this.caseSensitive,
@@ -20717,7 +20717,7 @@ var require_router = __commonJS({
       return route2;
     };
     methods.concat("all").forEach(function(method) {
-      Router25.prototype[method] = function(path) {
+      Router26.prototype[method] = function(path) {
         const route = this.route(path);
         route[method].apply(route, slice.call(arguments, 1));
         return this;
@@ -20900,13 +20900,13 @@ var require_application = __commonJS({
     var compileTrust = require_utils3().compileTrust;
     var resolve = __require("node:path").resolve;
     var once = require_once();
-    var Router25 = require_router();
+    var Router26 = require_router();
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var app2 = exports = module.exports = {};
     var trustProxyDefaultSymbol = "@@symbol:trust_proxy_default";
     app2.init = function init3() {
-      var router25 = null;
+      var router26 = null;
       this.cache = /* @__PURE__ */ Object.create(null);
       this.engines = /* @__PURE__ */ Object.create(null);
       this.settings = /* @__PURE__ */ Object.create(null);
@@ -20915,13 +20915,13 @@ var require_application = __commonJS({
         configurable: true,
         enumerable: true,
         get: function getrouter() {
-          if (router25 === null) {
-            router25 = new Router25({
+          if (router26 === null) {
+            router26 = new Router26({
               caseSensitive: this.enabled("case sensitive routing"),
               strict: this.enabled("strict routing")
             });
           }
-          return router25;
+          return router26;
         }
       });
     };
@@ -20992,15 +20992,15 @@ var require_application = __commonJS({
       if (fns.length === 0) {
         throw new TypeError("app.use() requires a middleware function");
       }
-      var router25 = this.router;
+      var router26 = this.router;
       fns.forEach(function(fn2) {
         if (!fn2 || !fn2.handle || !fn2.set) {
-          return router25.use(path, fn2);
+          return router26.use(path, fn2);
         }
         debug(".use app under %s", path);
         fn2.mountpath = path;
         fn2.parent = this;
-        router25.use(path, function mounted_app(req, res, next) {
+        router26.use(path, function mounted_app(req, res, next) {
           var orig = req.app;
           fn2.handle(req, res, function(err) {
             Object.setPrototypeOf(req, orig.request);
@@ -21784,8 +21784,8 @@ var require_fresh = __commonJS({
       return true;
     }
     function parseHttpDate(date5) {
-      var timestamp21 = date5 && Date.parse(date5);
-      return typeof timestamp21 === "number" ? timestamp21 : NaN;
+      var timestamp22 = date5 && Date.parse(date5);
+      return typeof timestamp22 === "number" ? timestamp22 : NaN;
     }
     function parseTokenList(str) {
       var end = 0;
@@ -22878,8 +22878,8 @@ var require_send = __commonJS({
       return list;
     }
     function parseHttpDate(date5) {
-      var timestamp21 = date5 && Date.parse(date5);
-      return typeof timestamp21 === "number" ? timestamp21 : NaN;
+      var timestamp22 = date5 && Date.parse(date5);
+      return typeof timestamp22 === "number" ? timestamp22 : NaN;
     }
     function parseTokenList(str) {
       var end = 0;
@@ -23573,7 +23573,7 @@ var require_express = __commonJS({
     var EventEmitter = __require("node:events").EventEmitter;
     var mixin = require_merge_descriptors();
     var proto = require_application();
-    var Router25 = require_router();
+    var Router26 = require_router();
     var req = require_request();
     var res = require_response();
     exports = module.exports = createApplication;
@@ -23595,8 +23595,8 @@ var require_express = __commonJS({
     exports.application = proto;
     exports.request = req;
     exports.response = res;
-    exports.Route = Router25.Route;
-    exports.Router = Router25;
+    exports.Route = Router26.Route;
+    exports.Router = Router26;
     exports.json = bodyParser.json;
     exports.raw = bodyParser.raw;
     exports.static = require_serve_static();
@@ -35500,7 +35500,7 @@ var init_v4 = __esm({
   }
 });
 
-// ../../node_modules/.pnpm/drizzle-zod@0.8.3_drizzle-orm@0.45.2_@types+pg@8.20.0_pg@8.20.0__zod@3.25.76/node_modules/drizzle-zod/index.mjs
+// ../../node_modules/.pnpm/drizzle-zod@0.8.3_drizzle-orm@0.45.2_@opentelemetry+api@1.9.1_@types+pg@8.20.0_pg@8.20.0__zod@3.25.76/node_modules/drizzle-zod/index.mjs
 import { isTable, getTableColumns, getViewSelectedFields, is, Column, SQL, isView } from "drizzle-orm";
 function isColumnType(column, columnTypes) {
   return columnTypes.includes(column.columnType);
@@ -35713,7 +35713,7 @@ function handleColumns(columns, refinements, conditions, factory) {
 }
 var CONSTANTS, literalSchema, jsonSchema, bufferSchema, insertConditions, createInsertSchema;
 var init_drizzle_zod = __esm({
-  "../../node_modules/.pnpm/drizzle-zod@0.8.3_drizzle-orm@0.45.2_@types+pg@8.20.0_pg@8.20.0__zod@3.25.76/node_modules/drizzle-zod/index.mjs"() {
+  "../../node_modules/.pnpm/drizzle-zod@0.8.3_drizzle-orm@0.45.2_@opentelemetry+api@1.9.1_@types+pg@8.20.0_pg@8.20.0__zod@3.25.76/node_modules/drizzle-zod/index.mjs"() {
     init_v4();
     CONSTANTS = {
       INT8_MIN: -128,
@@ -35859,87 +35859,103 @@ var init_ai_characters = __esm({
   }
 });
 
-// ../../lib/db/src/schema/analytics.ts
-import { pgTable as pgTable4, text as text4, serial as serial4, timestamp as timestamp4, integer as integer5, jsonb as jsonb3 } from "drizzle-orm/pg-core";
-var analyticsEventsTable;
-var init_analytics = __esm({
-  "../../lib/db/src/schema/analytics.ts"() {
+// ../../lib/db/src/schema/categories.ts
+import { pgTable as pgTable4, serial as serial4, text as text4, timestamp as timestamp4 } from "drizzle-orm/pg-core";
+var categoriesTable;
+var init_categories = __esm({
+  "../../lib/db/src/schema/categories.ts"() {
     "use strict";
-    init_users();
-    analyticsEventsTable = pgTable4("analytics_events", {
+    categoriesTable = pgTable4("categories", {
       id: serial4("id").primaryKey(),
-      eventType: text4("event_type").notNull(),
-      userId: integer5("user_id").references(() => usersTable.id),
-      sessionId: text4("session_id"),
-      payload: jsonb3("payload").default({}),
+      name: text4("name").notNull().unique(),
+      displayName: text4("display_name").notNull().default(""),
+      domain: text4("domain").notNull().default(""),
       createdAt: timestamp4("created_at", { withTimezone: true }).notNull().defaultNow()
     });
   }
 });
 
+// ../../lib/db/src/schema/analytics.ts
+import { pgTable as pgTable5, text as text5, serial as serial5, timestamp as timestamp5, integer as integer5, jsonb as jsonb3 } from "drizzle-orm/pg-core";
+var analyticsEventsTable;
+var init_analytics = __esm({
+  "../../lib/db/src/schema/analytics.ts"() {
+    "use strict";
+    init_users();
+    analyticsEventsTable = pgTable5("analytics_events", {
+      id: serial5("id").primaryKey(),
+      eventType: text5("event_type").notNull(),
+      userId: integer5("user_id").references(() => usersTable.id),
+      sessionId: text5("session_id"),
+      payload: jsonb3("payload").default({}),
+      createdAt: timestamp5("created_at", { withTimezone: true }).notNull().defaultNow()
+    });
+  }
+});
+
 // ../../lib/db/src/schema/anti_cheat.ts
-import { pgTable as pgTable5, text as text5, serial as serial5, timestamp as timestamp5, integer as integer6, boolean as boolean6, jsonb as jsonb4 } from "drizzle-orm/pg-core";
+import { pgTable as pgTable6, text as text6, serial as serial6, timestamp as timestamp6, integer as integer6, boolean as boolean6, jsonb as jsonb4 } from "drizzle-orm/pg-core";
 var antiCheatLogsTable, rateLimitTable;
 var init_anti_cheat = __esm({
   "../../lib/db/src/schema/anti_cheat.ts"() {
     "use strict";
     init_users();
-    antiCheatLogsTable = pgTable5("anti_cheat_logs", {
-      id: serial5("id").primaryKey(),
+    antiCheatLogsTable = pgTable6("anti_cheat_logs", {
+      id: serial6("id").primaryKey(),
       userId: integer6("user_id").notNull().references(() => usersTable.id),
-      action: text5("action").notNull(),
+      action: text6("action").notNull(),
       details: jsonb4("details").default({}),
       severity: integer6("severity").notNull().default(0),
       flagged: boolean6("flagged").notNull().default(false),
-      createdAt: timestamp5("created_at", { withTimezone: true }).notNull().defaultNow()
+      createdAt: timestamp6("created_at", { withTimezone: true }).notNull().defaultNow()
     });
-    rateLimitTable = pgTable5("rate_limit", {
-      id: serial5("id").primaryKey(),
+    rateLimitTable = pgTable6("rate_limit", {
+      id: serial6("id").primaryKey(),
       userId: integer6("user_id").references(() => usersTable.id),
-      ip: text5("ip"),
-      endpoint: text5("endpoint").notNull(),
+      ip: text6("ip"),
+      endpoint: text6("endpoint").notNull(),
       requestCount: integer6("request_count").notNull().default(1),
-      windowStart: timestamp5("window_start", { withTimezone: true }).notNull()
+      windowStart: timestamp6("window_start", { withTimezone: true }).notNull()
     });
   }
 });
 
 // ../../lib/db/src/schema/behavior.ts
-import { pgTable as pgTable6, text as text6, serial as serial6, timestamp as timestamp6, integer as integer7 } from "drizzle-orm/pg-core";
+import { pgTable as pgTable7, text as text7, serial as serial7, timestamp as timestamp7, integer as integer7 } from "drizzle-orm/pg-core";
 var answerLogsTable;
 var init_behavior = __esm({
   "../../lib/db/src/schema/behavior.ts"() {
     "use strict";
     init_users();
-    answerLogsTable = pgTable6("answer_logs", {
-      id: serial6("id").primaryKey(),
+    answerLogsTable = pgTable7("answer_logs", {
+      id: serial7("id").primaryKey(),
       userId: integer7("user_id").notNull().references(() => usersTable.id),
       questionId: integer7("question_id").notNull(),
-      category: text6("category").notNull().default("general"),
+      category: text7("category").notNull().default("general"),
       difficulty: integer7("difficulty").notNull().default(1),
       correct: integer7("correct").notNull().default(0),
       timeSpentMs: integer7("time_spent_ms").notNull().default(0),
-      createdAt: timestamp6("created_at", { withTimezone: true }).notNull().defaultNow()
+      createdAt: timestamp7("created_at", { withTimezone: true }).notNull().defaultNow()
     });
   }
 });
 
 // ../../lib/db/src/schema/matches.ts
-import { pgTable as pgTable7, text as text7, serial as serial7, timestamp as timestamp7, integer as integer8, jsonb as jsonb5 } from "drizzle-orm/pg-core";
+import { pgTable as pgTable8, text as text8, serial as serial8, timestamp as timestamp8, integer as integer8, jsonb as jsonb5 } from "drizzle-orm/pg-core";
 var matchesTable, matchPlayersTable, matchEventsTable, xpLogTable;
 var init_matches = __esm({
   "../../lib/db/src/schema/matches.ts"() {
     "use strict";
     init_users();
-    matchesTable = pgTable7("matches", {
-      id: serial7("id").primaryKey(),
-      type: text7("type").notNull().default("pvp"),
-      status: text7("status").notNull().default("active"),
-      createdAt: timestamp7("created_at", { withTimezone: true }).notNull().defaultNow(),
-      finishedAt: timestamp7("finished_at", { withTimezone: true })
+    matchesTable = pgTable8("matches", {
+      id: serial8("id").primaryKey(),
+      type: text8("type").notNull().default("pvp"),
+      status: text8("status").notNull().default("active"),
+      createdAt: timestamp8("created_at", { withTimezone: true }).notNull().defaultNow(),
+      finishedAt: timestamp8("finished_at", { withTimezone: true })
     });
-    matchPlayersTable = pgTable7("match_players", {
-      id: serial7("id").primaryKey(),
+    matchPlayersTable = pgTable8("match_players", {
+      id: serial8("id").primaryKey(),
       matchId: integer8("match_id").notNull().references(() => matchesTable.id),
       userId: integer8("user_id").notNull().references(() => usersTable.id),
       score: integer8("score").notNull().default(0),
@@ -35949,182 +35965,183 @@ var init_matches = __esm({
       totalQuestions: integer8("total_questions").notNull().default(0),
       timeMs: integer8("time_ms").notNull().default(0)
     });
-    matchEventsTable = pgTable7("match_events", {
-      id: serial7("id").primaryKey(),
+    matchEventsTable = pgTable8("match_events", {
+      id: serial8("id").primaryKey(),
       matchId: integer8("match_id").notNull().references(() => matchesTable.id),
-      type: text7("type").notNull(),
+      type: text8("type").notNull(),
       payload: jsonb5("payload").default({}),
-      timestamp: timestamp7("timestamp", { withTimezone: true }).notNull().defaultNow()
+      timestamp: timestamp8("timestamp", { withTimezone: true }).notNull().defaultNow()
     });
-    xpLogTable = pgTable7("xp_log", {
-      id: serial7("id").primaryKey(),
+    xpLogTable = pgTable8("xp_log", {
+      id: serial8("id").primaryKey(),
       userId: integer8("user_id").notNull().references(() => usersTable.id),
-      action: text7("action").notNull(),
+      action: text8("action").notNull(),
       amount: integer8("amount").notNull(),
-      createdAt: timestamp7("created_at", { withTimezone: true }).notNull().defaultNow()
-    });
-  }
-});
-
-// ../../lib/db/src/schema/missions.ts
-import { pgTable as pgTable8, text as text8, serial as serial8, timestamp as timestamp8, integer as integer9, boolean as boolean7, jsonb as jsonb6 } from "drizzle-orm/pg-core";
-var userAnsweredQuestionsTable, missionLogsTable;
-var init_missions = __esm({
-  "../../lib/db/src/schema/missions.ts"() {
-    "use strict";
-    init_users();
-    userAnsweredQuestionsTable = pgTable8("user_answered_questions", {
-      id: serial8("id").primaryKey(),
-      userId: integer9("user_id").notNull().references(() => usersTable.id),
-      questionId: integer9("question_id").notNull(),
-      answeredAt: timestamp8("answered_at", { withTimezone: true }).notNull().defaultNow(),
-      correct: boolean7("correct").notNull().default(false)
-    });
-    missionLogsTable = pgTable8("mission_logs", {
-      id: serial8("id").primaryKey(),
-      userId: integer9("user_id").notNull().references(() => usersTable.id),
-      domains: text8("domains").array().notNull().default([]),
-      difficulty: text8("difficulty").notNull().default("agent"),
-      modifiers: jsonb6("modifiers").notNull().default([]),
-      threatLevel: text8("threat_level").notNull().default("moderate"),
-      estimatedXp: integer9("estimated_xp").notNull().default(0),
-      totalXpGained: integer9("total_xp_gained").notNull().default(0),
-      questionsAnswered: integer9("questions_answered").notNull().default(0),
-      questionsCorrect: integer9("questions_correct").notNull().default(0),
-      completedAt: timestamp8("completed_at", { withTimezone: true }),
       createdAt: timestamp8("created_at", { withTimezone: true }).notNull().defaultNow()
     });
   }
 });
 
+// ../../lib/db/src/schema/missions.ts
+import { pgTable as pgTable9, text as text9, serial as serial9, timestamp as timestamp9, integer as integer9, boolean as boolean7, jsonb as jsonb6 } from "drizzle-orm/pg-core";
+var userAnsweredQuestionsTable, missionLogsTable;
+var init_missions = __esm({
+  "../../lib/db/src/schema/missions.ts"() {
+    "use strict";
+    init_users();
+    userAnsweredQuestionsTable = pgTable9("user_answered_questions", {
+      id: serial9("id").primaryKey(),
+      userId: integer9("user_id").notNull().references(() => usersTable.id),
+      questionId: integer9("question_id").notNull(),
+      answeredAt: timestamp9("answered_at", { withTimezone: true }).notNull().defaultNow(),
+      correct: boolean7("correct").notNull().default(false)
+    });
+    missionLogsTable = pgTable9("mission_logs", {
+      id: serial9("id").primaryKey(),
+      userId: integer9("user_id").notNull().references(() => usersTable.id),
+      domains: text9("domains").array().notNull().default([]),
+      difficulty: text9("difficulty").notNull().default("agent"),
+      modifiers: jsonb6("modifiers").notNull().default([]),
+      threatLevel: text9("threat_level").notNull().default("moderate"),
+      estimatedXp: integer9("estimated_xp").notNull().default(0),
+      totalXpGained: integer9("total_xp_gained").notNull().default(0),
+      questionsAnswered: integer9("questions_answered").notNull().default(0),
+      questionsCorrect: integer9("questions_correct").notNull().default(0),
+      completedAt: timestamp9("completed_at", { withTimezone: true }),
+      createdAt: timestamp9("created_at", { withTimezone: true }).notNull().defaultNow()
+    });
+  }
+});
+
 // ../../lib/db/src/schema/questions.ts
-import { pgTable as pgTable9, text as text9, serial as serial9, timestamp as timestamp9, integer as integer10 } from "drizzle-orm/pg-core";
+import { pgTable as pgTable10, text as text10, serial as serial10, timestamp as timestamp10, integer as integer10 } from "drizzle-orm/pg-core";
 var questionsTable, insertQuestionSchema, questionOptionsTable;
 var init_questions = __esm({
   "../../lib/db/src/schema/questions.ts"() {
     "use strict";
     init_drizzle_zod();
-    questionsTable = pgTable9("questions", {
-      id: serial9("id").primaryKey(),
-      type: text9("type").notNull().default("text"),
-      questionText: text9("question_text").notNull(),
+    questionsTable = pgTable10("questions", {
+      id: serial10("id").primaryKey(),
+      type: text10("type").notNull().default("text"),
+      questionText: text10("question_text").notNull(),
       difficulty: integer10("difficulty").notNull().default(1),
-      category: text9("category").notNull().default("general"),
-      mediaUrl: text9("media_url"),
-      correctAnswer: text9("correct_answer").notNull(),
+      category: text10("category").notNull().default("general"),
+      mediaUrl: text10("media_url"),
+      correctAnswer: text10("correct_answer").notNull(),
       timeLimitSeconds: integer10("time_limit_seconds").notNull().default(30),
-      explanation: text9("explanation").notNull().default(""),
-      createdAt: timestamp9("created_at", { withTimezone: true }).notNull().defaultNow()
+      points: integer10("points").notNull().default(100),
+      explanation: text10("explanation").notNull().default(""),
+      createdAt: timestamp10("created_at", { withTimezone: true }).notNull().defaultNow()
     });
     insertQuestionSchema = createInsertSchema(questionsTable).omit({ id: true, createdAt: true });
-    questionOptionsTable = pgTable9("question_options", {
-      id: serial9("id").primaryKey(),
+    questionOptionsTable = pgTable10("question_options", {
+      id: serial10("id").primaryKey(),
       questionId: integer10("question_id").notNull().references(() => questionsTable.id),
-      optionText: text9("option_text").notNull(),
+      optionText: text10("option_text").notNull(),
       isCorrect: integer10("is_correct").notNull().default(0)
     });
   }
 });
 
 // ../../lib/db/src/schema/ranking.ts
-import { pgTable as pgTable10, text as text10, serial as serial10, timestamp as timestamp10, integer as integer11, boolean as boolean8 } from "drizzle-orm/pg-core";
+import { pgTable as pgTable11, text as text11, serial as serial11, timestamp as timestamp11, integer as integer11, boolean as boolean8 } from "drizzle-orm/pg-core";
 var seasonsTable, rankingsTable, achievementsTable, userAchievementsTable, friendsTable, aiPlayerProfilesTable;
 var init_ranking = __esm({
   "../../lib/db/src/schema/ranking.ts"() {
     "use strict";
     init_users();
-    seasonsTable = pgTable10("seasons", {
-      id: serial10("id").primaryKey(),
-      name: text10("name").notNull(),
-      theme: text10("theme").notNull(),
-      startDate: text10("start_date").notNull(),
-      endDate: text10("end_date").notNull(),
+    seasonsTable = pgTable11("seasons", {
+      id: serial11("id").primaryKey(),
+      name: text11("name").notNull(),
+      theme: text11("theme").notNull(),
+      startDate: text11("start_date").notNull(),
+      endDate: text11("end_date").notNull(),
       isActive: boolean8("is_active").notNull().default(false),
-      createdAt: timestamp10("created_at", { withTimezone: true }).notNull().defaultNow()
+      createdAt: timestamp11("created_at", { withTimezone: true }).notNull().defaultNow()
     });
-    rankingsTable = pgTable10("rankings", {
-      id: serial10("id").primaryKey(),
+    rankingsTable = pgTable11("rankings", {
+      id: serial11("id").primaryKey(),
       userId: integer11("user_id").notNull().references(() => usersTable.id),
       seasonId: integer11("season_id").notNull().references(() => seasonsTable.id),
       mmr: integer11("mmr").notNull().default(1e3),
-      rankTier: text10("rank_tier").notNull().default("Bronze"),
+      rankTier: text11("rank_tier").notNull().default("Bronze"),
       rankPoints: integer11("rank_points").notNull().default(0),
-      updatedAt: timestamp10("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
+      updatedAt: timestamp11("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
     });
-    achievementsTable = pgTable10("achievements", {
-      id: serial10("id").primaryKey(),
-      name: text10("name").notNull(),
-      description: text10("description").notNull(),
+    achievementsTable = pgTable11("achievements", {
+      id: serial11("id").primaryKey(),
+      name: text11("name").notNull(),
+      description: text11("description").notNull(),
       rewardXp: integer11("reward_xp").notNull().default(50),
-      iconUrl: text10("icon_url"),
-      condition: text10("condition").notNull().default("")
+      iconUrl: text11("icon_url"),
+      condition: text11("condition").notNull().default("")
     });
-    userAchievementsTable = pgTable10("user_achievements", {
-      id: serial10("id").primaryKey(),
+    userAchievementsTable = pgTable11("user_achievements", {
+      id: serial11("id").primaryKey(),
       userId: integer11("user_id").notNull().references(() => usersTable.id),
       achievementId: integer11("achievement_id").notNull().references(() => achievementsTable.id),
-      unlockedAt: timestamp10("unlocked_at", { withTimezone: true }).notNull().defaultNow()
+      unlockedAt: timestamp11("unlocked_at", { withTimezone: true }).notNull().defaultNow()
     });
-    friendsTable = pgTable10("friends", {
-      id: serial10("id").primaryKey(),
+    friendsTable = pgTable11("friends", {
+      id: serial11("id").primaryKey(),
       userId: integer11("user_id").notNull().references(() => usersTable.id),
       friendId: integer11("friend_id").notNull().references(() => usersTable.id),
-      status: text10("status").notNull().default("pending"),
-      createdAt: timestamp10("created_at", { withTimezone: true }).notNull().defaultNow()
+      status: text11("status").notNull().default("pending"),
+      createdAt: timestamp11("created_at", { withTimezone: true }).notNull().defaultNow()
     });
-    aiPlayerProfilesTable = pgTable10("ai_player_profiles", {
-      id: serial10("id").primaryKey(),
+    aiPlayerProfilesTable = pgTable11("ai_player_profiles", {
+      id: serial11("id").primaryKey(),
       userId: integer11("user_id").notNull().references(() => usersTable.id).unique(),
-      strengths: text10("strengths").array().notNull().default([]),
-      weaknesses: text10("weaknesses").array().notNull().default([]),
-      behaviorType: text10("behavior_type").notNull().default("explorer"),
+      strengths: text11("strengths").array().notNull().default([]),
+      weaknesses: text11("weaknesses").array().notNull().default([]),
+      behaviorType: text11("behavior_type").notNull().default("explorer"),
       intelligenceScore: integer11("intelligence_score").notNull().default(50),
-      learningCurve: text10("learning_curve").notNull().default("steady"),
+      learningCurve: text11("learning_curve").notNull().default("steady"),
       recommendedDifficulty: integer11("recommended_difficulty").notNull().default(3),
       tacticalIQ: integer11("tactical_iq").notNull().default(50),
       riskIndex: integer11("risk_index").notNull().default(50),
       loyaltyScore: integer11("loyalty_score").notNull().default(50),
-      updatedAt: timestamp10("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
+      updatedAt: timestamp11("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
     });
   }
 });
 
 // ../../lib/db/src/schema/rate_limits.ts
-import { pgTable as pgTable11, text as text11, timestamp as timestamp11, integer as integer12, serial as serial11 } from "drizzle-orm/pg-core";
+import { pgTable as pgTable12, text as text12, timestamp as timestamp12, integer as integer12, serial as serial12 } from "drizzle-orm/pg-core";
 var rateLimitsTable;
 var init_rate_limits = __esm({
   "../../lib/db/src/schema/rate_limits.ts"() {
     "use strict";
-    rateLimitsTable = pgTable11("rate_limits", {
-      id: serial11("id").primaryKey(),
-      bucketKey: text11("bucket_key").notNull().unique(),
+    rateLimitsTable = pgTable12("rate_limits", {
+      id: serial12("id").primaryKey(),
+      bucketKey: text12("bucket_key").notNull().unique(),
       count: integer12("count").notNull().default(1),
-      windowStart: timestamp11("window_start", { withTimezone: true }).notNull().defaultNow(),
-      createdAt: timestamp11("created_at", { withTimezone: true }).notNull().defaultNow()
+      windowStart: timestamp12("window_start", { withTimezone: true }).notNull().defaultNow(),
+      createdAt: timestamp12("created_at", { withTimezone: true }).notNull().defaultNow()
     });
   }
 });
 
 // ../../lib/db/src/schema/roles.ts
-import { pgTable as pgTable12, serial as serial12, text as text12, integer as integer13, timestamp as timestamp12 } from "drizzle-orm/pg-core";
+import { pgTable as pgTable13, serial as serial13, text as text13, integer as integer13, timestamp as timestamp13 } from "drizzle-orm/pg-core";
 var rolesTable, permissionsTable, rolePermissionsTable;
 var init_roles = __esm({
   "../../lib/db/src/schema/roles.ts"() {
     "use strict";
-    rolesTable = pgTable12("roles", {
-      id: serial12("id").primaryKey(),
-      name: text12("name").notNull().unique(),
-      description: text12("description"),
-      createdAt: timestamp12("created_at").defaultNow().notNull()
+    rolesTable = pgTable13("roles", {
+      id: serial13("id").primaryKey(),
+      name: text13("name").notNull().unique(),
+      description: text13("description"),
+      createdAt: timestamp13("created_at").defaultNow().notNull()
     });
-    permissionsTable = pgTable12("permissions", {
-      id: serial12("id").primaryKey(),
-      key: text12("key").notNull().unique(),
-      description: text12("description"),
-      createdAt: timestamp12("created_at").defaultNow().notNull()
+    permissionsTable = pgTable13("permissions", {
+      id: serial13("id").primaryKey(),
+      key: text13("key").notNull().unique(),
+      description: text13("description"),
+      createdAt: timestamp13("created_at").defaultNow().notNull()
     });
-    rolePermissionsTable = pgTable12("role_permissions", {
-      id: serial12("id").primaryKey(),
+    rolePermissionsTable = pgTable13("role_permissions", {
+      id: serial13("id").primaryKey(),
       roleId: integer13("role_id").notNull().references(() => rolesTable.id),
       permissionId: integer13("permission_id").notNull().references(() => permissionsTable.id)
     });
@@ -36132,45 +36149,45 @@ var init_roles = __esm({
 });
 
 // ../../lib/db/src/schema/shop.ts
-import { pgTable as pgTable13, text as text13, serial as serial13, timestamp as timestamp13, integer as integer14, boolean as boolean9, jsonb as jsonb7 } from "drizzle-orm/pg-core";
+import { pgTable as pgTable14, text as text14, serial as serial14, timestamp as timestamp14, integer as integer14, boolean as boolean9, jsonb as jsonb7 } from "drizzle-orm/pg-core";
 var shopItemsTable, userInventoryTable, battlePassTable, userBattlePassTable;
 var init_shop = __esm({
   "../../lib/db/src/schema/shop.ts"() {
     "use strict";
     init_users();
     init_ranking();
-    shopItemsTable = pgTable13("shop_items", {
-      id: serial13("id").primaryKey(),
-      name: text13("name").notNull(),
-      description: text13("description").notNull(),
-      type: text13("type").notNull(),
+    shopItemsTable = pgTable14("shop_items", {
+      id: serial14("id").primaryKey(),
+      name: text14("name").notNull(),
+      description: text14("description").notNull(),
+      type: text14("type").notNull(),
       priceCoins: integer14("price_coins").notNull().default(0),
       pricePremium: integer14("price_premium").notNull().default(0),
-      rarity: text13("rarity").notNull().default("common"),
-      iconUrl: text13("icon_url"),
+      rarity: text14("rarity").notNull().default("common"),
+      iconUrl: text14("icon_url"),
       isLimited: boolean9("is_limited").notNull().default(false),
-      availableUntil: timestamp13("available_until", { withTimezone: true }),
-      createdAt: timestamp13("created_at", { withTimezone: true }).notNull().defaultNow()
+      availableUntil: timestamp14("available_until", { withTimezone: true }),
+      createdAt: timestamp14("created_at", { withTimezone: true }).notNull().defaultNow()
     });
-    userInventoryTable = pgTable13("user_inventory", {
-      id: serial13("id").primaryKey(),
+    userInventoryTable = pgTable14("user_inventory", {
+      id: serial14("id").primaryKey(),
       userId: integer14("user_id").notNull().references(() => usersTable.id),
       itemId: integer14("item_id").notNull().references(() => shopItemsTable.id),
       quantity: integer14("quantity").notNull().default(1),
       equipped: boolean9("equipped").notNull().default(false),
-      purchasedAt: timestamp13("purchased_at", { withTimezone: true }).notNull().defaultNow()
+      purchasedAt: timestamp14("purchased_at", { withTimezone: true }).notNull().defaultNow()
     });
-    battlePassTable = pgTable13("battle_pass", {
-      id: serial13("id").primaryKey(),
+    battlePassTable = pgTable14("battle_pass", {
+      id: serial14("id").primaryKey(),
       seasonId: integer14("season_id").notNull().references(() => seasonsTable.id),
-      name: text13("name").notNull(),
+      name: text14("name").notNull(),
       level: integer14("level").notNull(),
       xpRequired: integer14("xp_required").notNull(),
       freeReward: jsonb7("free_reward"),
       premiumReward: jsonb7("premium_reward")
     });
-    userBattlePassTable = pgTable13("user_battle_pass", {
-      id: serial13("id").primaryKey(),
+    userBattlePassTable = pgTable14("user_battle_pass", {
+      id: serial14("id").primaryKey(),
       userId: integer14("user_id").notNull().references(() => usersTable.id),
       battlePassId: integer14("battle_pass_id").notNull().references(() => battlePassTable.id),
       currentLevel: integer14("current_level").notNull().default(0),
@@ -36182,184 +36199,184 @@ var init_shop = __esm({
 });
 
 // ../../lib/db/src/schema/skill_trees.ts
-import { pgTable as pgTable14, text as text14, serial as serial14, timestamp as timestamp14, integer as integer15, boolean as boolean10, jsonb as jsonb8 } from "drizzle-orm/pg-core";
+import { pgTable as pgTable15, text as text15, serial as serial15, timestamp as timestamp15, integer as integer15, boolean as boolean10, jsonb as jsonb8 } from "drizzle-orm/pg-core";
 var skillTreesTable, playerSkillsTable;
 var init_skill_trees = __esm({
   "../../lib/db/src/schema/skill_trees.ts"() {
     "use strict";
     init_users();
-    skillTreesTable = pgTable14("skill_trees", {
-      id: serial14("id").primaryKey(),
-      name: text14("name").notNull(),
-      description: text14("description").notNull(),
-      branch: text14("branch").notNull(),
+    skillTreesTable = pgTable15("skill_trees", {
+      id: serial15("id").primaryKey(),
+      name: text15("name").notNull(),
+      description: text15("description").notNull(),
+      branch: text15("branch").notNull(),
       level: integer15("level").notNull(),
       maxLevel: integer15("max_level").notNull(),
-      iconUrl: text14("icon_url").notNull(),
+      iconUrl: text15("icon_url").notNull(),
       parentSkillId: integer15("parent_skill_id"),
       xpCost: integer15("xp_cost").notNull(),
       statBonus: jsonb8("stat_bonus").default({})
     });
-    playerSkillsTable = pgTable14("player_skills", {
-      id: serial14("id").primaryKey(),
+    playerSkillsTable = pgTable15("player_skills", {
+      id: serial15("id").primaryKey(),
       userId: integer15("user_id").notNull().references(() => usersTable.id),
       skillId: integer15("skill_id").notNull().references(() => skillTreesTable.id),
       currentLevel: integer15("current_level").notNull().default(0),
       unlocked: boolean10("unlocked").notNull().default(false),
-      unlockedAt: timestamp14("unlocked_at", { withTimezone: true })
+      unlockedAt: timestamp15("unlocked_at", { withTimezone: true })
     });
   }
 });
 
 // ../../lib/db/src/schema/stage_matches.ts
-import { pgTable as pgTable15, serial as serial15, integer as integer16, jsonb as jsonb9, timestamp as timestamp15, varchar } from "drizzle-orm/pg-core";
+import { pgTable as pgTable16, serial as serial16, integer as integer16, jsonb as jsonb9, timestamp as timestamp16, varchar } from "drizzle-orm/pg-core";
 var stageMatchesTable;
 var init_stage_matches = __esm({
   "../../lib/db/src/schema/stage_matches.ts"() {
     "use strict";
-    stageMatchesTable = pgTable15("stage_matches", {
-      id: serial15("id").primaryKey(),
+    stageMatchesTable = pgTable16("stage_matches", {
+      id: serial16("id").primaryKey(),
       matchId: integer16("match_id").notNull().unique(),
       hostId: integer16("host_id").notNull(),
       roomCode: varchar("room_code", { length: 10 }).notNull(),
       state: jsonb9("state").notNull(),
-      createdAt: timestamp15("created_at").defaultNow().notNull(),
-      updatedAt: timestamp15("updated_at").defaultNow().notNull()
+      createdAt: timestamp16("created_at").defaultNow().notNull(),
+      updatedAt: timestamp16("updated_at").defaultNow().notNull()
     });
   }
 });
 
 // ../../lib/db/src/schema/story.ts
-import { pgTable as pgTable16, text as text15, serial as serial16, timestamp as timestamp16, integer as integer17, boolean as boolean11, jsonb as jsonb10 } from "drizzle-orm/pg-core";
+import { pgTable as pgTable17, text as text16, serial as serial17, timestamp as timestamp17, integer as integer17, boolean as boolean11, jsonb as jsonb10 } from "drizzle-orm/pg-core";
 var chaptersTable, storyNodesTable, storyChoicesTable, playerProgressTable, loreEntriesTable, userLoreUnlocksTable;
 var init_story = __esm({
   "../../lib/db/src/schema/story.ts"() {
     "use strict";
     init_users();
-    chaptersTable = pgTable16("chapters", {
-      id: serial16("id").primaryKey(),
-      title: text15("title").notNull(),
-      description: text15("description").notNull(),
+    chaptersTable = pgTable17("chapters", {
+      id: serial17("id").primaryKey(),
+      title: text16("title").notNull(),
+      description: text16("description").notNull(),
       orderIndex: integer17("order_index").notNull().default(0),
       unlockLevel: integer17("unlock_level").notNull().default(1),
-      coverImageUrl: text15("cover_image_url"),
-      createdAt: timestamp16("created_at", { withTimezone: true }).notNull().defaultNow()
+      coverImageUrl: text16("cover_image_url"),
+      createdAt: timestamp17("created_at", { withTimezone: true }).notNull().defaultNow()
     });
-    storyNodesTable = pgTable16("story_nodes", {
-      id: serial16("id").primaryKey(),
+    storyNodesTable = pgTable17("story_nodes", {
+      id: serial17("id").primaryKey(),
       chapterId: integer17("chapter_id").notNull().references(() => chaptersTable.id),
-      type: text15("type").notNull().default("dialogue"),
-      content: text15("content").notNull(),
-      speakerName: text15("speaker_name"),
-      mediaUrl: text15("media_url"),
+      type: text16("type").notNull().default("dialogue"),
+      content: text16("content").notNull(),
+      speakerName: text16("speaker_name"),
+      mediaUrl: text16("media_url"),
       orderIndex: integer17("order_index").notNull().default(0)
     });
-    storyChoicesTable = pgTable16("story_choices", {
-      id: serial16("id").primaryKey(),
+    storyChoicesTable = pgTable17("story_choices", {
+      id: serial17("id").primaryKey(),
       nodeId: integer17("node_id").notNull().references(() => storyNodesTable.id),
-      text: text15("text").notNull(),
+      text: text16("text").notNull(),
       nextNodeId: integer17("next_node_id"),
-      consequenceFlag: text15("consequence_flag")
+      consequenceFlag: text16("consequence_flag")
     });
-    playerProgressTable = pgTable16("player_progress", {
-      id: serial16("id").primaryKey(),
+    playerProgressTable = pgTable17("player_progress", {
+      id: serial17("id").primaryKey(),
       userId: integer17("user_id").notNull().references(() => usersTable.id).unique(),
       currentChapterId: integer17("current_chapter_id").notNull().default(1),
       currentNodeId: integer17("current_node_id").notNull().default(1),
       reputationScore: integer17("reputation_score").notNull().default(0),
       storyFlags: jsonb10("story_flags").default({}),
-      updatedAt: timestamp16("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
+      updatedAt: timestamp17("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
     });
-    loreEntriesTable = pgTable16("lore_entries", {
-      id: serial16("id").primaryKey(),
-      title: text15("title").notNull(),
-      content: text15("content").notNull(),
-      category: text15("category").notNull().default("world"),
+    loreEntriesTable = pgTable17("lore_entries", {
+      id: serial17("id").primaryKey(),
+      title: text16("title").notNull(),
+      content: text16("content").notNull(),
+      category: text16("category").notNull().default("world"),
       isSecret: boolean11("is_secret").notNull().default(false),
-      unlockCondition: text15("unlock_condition"),
-      createdAt: timestamp16("created_at", { withTimezone: true }).notNull().defaultNow()
+      unlockCondition: text16("unlock_condition"),
+      createdAt: timestamp17("created_at", { withTimezone: true }).notNull().defaultNow()
     });
-    userLoreUnlocksTable = pgTable16("user_lore_unlocks", {
-      id: serial16("id").primaryKey(),
+    userLoreUnlocksTable = pgTable17("user_lore_unlocks", {
+      id: serial17("id").primaryKey(),
       userId: integer17("user_id").notNull().references(() => usersTable.id),
       loreId: integer17("lore_id").notNull().references(() => loreEntriesTable.id),
-      unlockedAt: timestamp16("unlocked_at", { withTimezone: true }).notNull().defaultNow()
+      unlockedAt: timestamp17("unlocked_at", { withTimezone: true }).notNull().defaultNow()
     });
   }
 });
 
 // ../../lib/db/src/schema/tactical.ts
-import { pgTable as pgTable17, text as text16, serial as serial17, timestamp as timestamp17, integer as integer18, jsonb as jsonb11 } from "drizzle-orm/pg-core";
+import { pgTable as pgTable18, text as text17, serial as serial18, timestamp as timestamp18, integer as integer18, jsonb as jsonb11 } from "drizzle-orm/pg-core";
 var tacticalModulesTable, userTacticalModulesTable;
 var init_tactical = __esm({
   "../../lib/db/src/schema/tactical.ts"() {
     "use strict";
     init_users();
-    tacticalModulesTable = pgTable17("tactical_modules", {
-      id: serial17("id").primaryKey(),
-      moduleId: text16("module_id").notNull().unique(),
-      name: text16("name").notNull(),
-      description: text16("description").notNull(),
+    tacticalModulesTable = pgTable18("tactical_modules", {
+      id: serial18("id").primaryKey(),
+      moduleId: text17("module_id").notNull().unique(),
+      name: text17("name").notNull(),
+      description: text17("description").notNull(),
       energyCost: integer18("energy_cost").notNull().default(1),
-      category: text16("category").notNull().default("assist"),
-      rarity: text16("rarity").notNull().default("common"),
-      createdAt: timestamp17("created_at", { withTimezone: true }).notNull().defaultNow()
+      category: text17("category").notNull().default("assist"),
+      rarity: text17("rarity").notNull().default("common"),
+      createdAt: timestamp18("created_at", { withTimezone: true }).notNull().defaultNow()
     });
-    userTacticalModulesTable = pgTable17("user_tactical_modules", {
-      id: serial17("id").primaryKey(),
+    userTacticalModulesTable = pgTable18("user_tactical_modules", {
+      id: serial18("id").primaryKey(),
       userId: integer18("user_id").notNull().references(() => usersTable.id).unique(),
       tacticalEnergy: integer18("tactical_energy").notNull().default(10),
       maxEnergy: integer18("max_energy").notNull().default(10),
       modules: jsonb11("modules").notNull().default({}),
-      lastEnergyRegen: timestamp17("last_energy_regen", { withTimezone: true }).notNull().defaultNow(),
-      updatedAt: timestamp17("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
+      lastEnergyRegen: timestamp18("last_energy_regen", { withTimezone: true }).notNull().defaultNow(),
+      updatedAt: timestamp18("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
     });
   }
 });
 
 // ../../lib/db/src/schema/team_ops.ts
-import { pgTable as pgTable18, text as text17, serial as serial18, timestamp as timestamp18, integer as integer19, boolean as boolean12, jsonb as jsonb12 } from "drizzle-orm/pg-core";
+import { pgTable as pgTable19, text as text18, serial as serial19, timestamp as timestamp19, integer as integer19, boolean as boolean12, jsonb as jsonb12 } from "drizzle-orm/pg-core";
 var teamOperationsTable, teamMembersTable, teamMatchesTable, teamMatchScoresTable, teamMatchQuestionsTable;
 var init_team_ops = __esm({
   "../../lib/db/src/schema/team_ops.ts"() {
     "use strict";
     init_users();
-    teamOperationsTable = pgTable18("team_operations", {
-      id: serial18("id").primaryKey(),
-      name: text17("name").notNull(),
-      emblem: text17("emblem").notNull().default("default"),
-      color: text17("color").notNull().default("blue"),
+    teamOperationsTable = pgTable19("team_operations", {
+      id: serial19("id").primaryKey(),
+      name: text18("name").notNull(),
+      emblem: text18("emblem").notNull().default("default"),
+      color: text18("color").notNull().default("blue"),
       maxPlayers: integer19("max_players").notNull().default(4),
       captainId: integer19("captain_id").notNull().references(() => usersTable.id),
       tacticalLoadout: jsonb12("tactical_loadout").notNull().default([]),
-      createdAt: timestamp18("created_at", { withTimezone: true }).notNull().defaultNow()
+      createdAt: timestamp19("created_at", { withTimezone: true }).notNull().defaultNow()
     });
-    teamMembersTable = pgTable18("team_members", {
-      id: serial18("id").primaryKey(),
+    teamMembersTable = pgTable19("team_members", {
+      id: serial19("id").primaryKey(),
       teamId: integer19("team_id").notNull().references(() => teamOperationsTable.id),
       userId: integer19("user_id").notNull().references(() => usersTable.id),
       isReady: boolean12("is_ready").notNull().default(false),
-      joinedAt: timestamp18("joined_at", { withTimezone: true }).notNull().defaultNow()
+      joinedAt: timestamp19("joined_at", { withTimezone: true }).notNull().defaultNow()
     });
-    teamMatchesTable = pgTable18("team_matches", {
-      id: serial18("id").primaryKey(),
-      roomCode: text17("room_code").notNull().unique(),
-      type: text17("type").notNull().default("battle"),
-      status: text17("status").notNull().default("lobby"),
-      mode: text17("mode").notNull().default("live"),
+    teamMatchesTable = pgTable19("team_matches", {
+      id: serial19("id").primaryKey(),
+      roomCode: text18("room_code").notNull().unique(),
+      type: text18("type").notNull().default("battle"),
+      status: text18("status").notNull().default("lobby"),
+      mode: text18("mode").notNull().default("live"),
       domainOrder: jsonb12("domain_order").notNull().default([]),
-      domainMode: text17("domain_mode").notNull().default("randomized"),
-      difficulty: text17("difficulty").notNull().default("agent"),
+      domainMode: text18("domain_mode").notNull().default("randomized"),
+      difficulty: text18("difficulty").notNull().default("agent"),
       hostId: integer19("host_id").references(() => usersTable.id),
-      currentDomain: text17("current_domain"),
+      currentDomain: text18("current_domain"),
       currentQuestion: integer19("current_question").notNull().default(0),
       totalQuestions: integer19("total_questions").notNull().default(10),
-      createdAt: timestamp18("created_at", { withTimezone: true }).notNull().defaultNow(),
-      startedAt: timestamp18("started_at", { withTimezone: true }),
-      finishedAt: timestamp18("finished_at", { withTimezone: true })
+      createdAt: timestamp19("created_at", { withTimezone: true }).notNull().defaultNow(),
+      startedAt: timestamp19("started_at", { withTimezone: true }),
+      finishedAt: timestamp19("finished_at", { withTimezone: true })
     });
-    teamMatchScoresTable = pgTable18("team_match_scores", {
-      id: serial18("id").primaryKey(),
+    teamMatchScoresTable = pgTable19("team_match_scores", {
+      id: serial19("id").primaryKey(),
       matchId: integer19("match_id").notNull().references(() => teamMatchesTable.id),
       teamId: integer19("team_id").notNull().references(() => teamOperationsTable.id),
       score: integer19("score").notNull().default(0),
@@ -36370,102 +36387,102 @@ var init_team_ops = __esm({
       currentStreak: integer19("current_streak").notNull().default(0),
       perfectCategories: jsonb12("perfect_categories").notNull().default([])
     });
-    teamMatchQuestionsTable = pgTable18("team_match_questions", {
-      id: serial18("id").primaryKey(),
+    teamMatchQuestionsTable = pgTable19("team_match_questions", {
+      id: serial19("id").primaryKey(),
       matchId: integer19("match_id").notNull().references(() => teamMatchesTable.id),
       questionIndex: integer19("question_index").notNull(),
       questionId: integer19("question_id").notNull(),
-      domain: text17("domain").notNull(),
+      domain: text18("domain").notNull(),
       answeredBy: integer19("answered_by").references(() => teamOperationsTable.id),
       isCorrect: boolean12("is_correct"),
       responseTimeMs: integer19("response_time_ms"),
       buzzerTeam: integer19("buzzer_team").references(() => teamOperationsTable.id),
-      createdAt: timestamp18("created_at", { withTimezone: true }).notNull().defaultNow()
+      createdAt: timestamp19("created_at", { withTimezone: true }).notNull().defaultNow()
     });
   }
 });
 
 // ../../lib/db/src/schema/tournaments.ts
-import { pgTable as pgTable19, text as text18, serial as serial19, timestamp as timestamp19, integer as integer20, boolean as boolean13 } from "drizzle-orm/pg-core";
+import { pgTable as pgTable20, text as text19, serial as serial20, timestamp as timestamp20, integer as integer20, boolean as boolean13 } from "drizzle-orm/pg-core";
 var tournamentsTable, tournamentParticipantsTable, tournamentMatchesTable;
 var init_tournaments = __esm({
   "../../lib/db/src/schema/tournaments.ts"() {
     "use strict";
     init_users();
-    tournamentsTable = pgTable19("tournaments", {
-      id: serial19("id").primaryKey(),
-      name: text18("name").notNull(),
-      description: text18("description").notNull(),
-      type: text18("type").notNull(),
-      status: text18("status").notNull().default("registration"),
+    tournamentsTable = pgTable20("tournaments", {
+      id: serial20("id").primaryKey(),
+      name: text19("name").notNull(),
+      description: text19("description").notNull(),
+      type: text19("type").notNull(),
+      status: text19("status").notNull().default("registration"),
       maxParticipants: integer20("max_participants").notNull(),
       minLevel: integer20("min_level").notNull().default(1),
       entryFee: integer20("entry_fee").notNull().default(0),
       rewardXp: integer20("reward_xp").notNull(),
       rewardCoins: integer20("reward_coins").notNull(),
-      rewardItem: text18("reward_item"),
-      startDate: timestamp19("start_date", { withTimezone: true }).notNull(),
-      endDate: timestamp19("end_date", { withTimezone: true }).notNull(),
-      createdAt: timestamp19("created_at", { withTimezone: true }).notNull().defaultNow()
+      rewardItem: text19("reward_item"),
+      startDate: timestamp20("start_date", { withTimezone: true }).notNull(),
+      endDate: timestamp20("end_date", { withTimezone: true }).notNull(),
+      createdAt: timestamp20("created_at", { withTimezone: true }).notNull().defaultNow()
     });
-    tournamentParticipantsTable = pgTable19("tournament_participants", {
-      id: serial19("id").primaryKey(),
+    tournamentParticipantsTable = pgTable20("tournament_participants", {
+      id: serial20("id").primaryKey(),
       tournamentId: integer20("tournament_id").notNull().references(() => tournamentsTable.id),
       userId: integer20("user_id").notNull().references(() => usersTable.id),
       seed: integer20("seed").notNull().default(0),
       currentRound: integer20("current_round").notNull().default(0),
       isEliminated: boolean13("is_eliminated").notNull().default(false),
       finalPosition: integer20("final_position"),
-      joinedAt: timestamp19("joined_at", { withTimezone: true }).notNull().defaultNow()
+      joinedAt: timestamp20("joined_at", { withTimezone: true }).notNull().defaultNow()
     });
-    tournamentMatchesTable = pgTable19("tournament_matches", {
-      id: serial19("id").primaryKey(),
+    tournamentMatchesTable = pgTable20("tournament_matches", {
+      id: serial20("id").primaryKey(),
       tournamentId: integer20("tournament_id").notNull().references(() => tournamentsTable.id),
       round: integer20("round").notNull(),
       matchIndex: integer20("match_index").notNull(),
       player1Id: integer20("player1_id").references(() => usersTable.id),
       player2Id: integer20("player2_id").references(() => usersTable.id),
       winnerId: integer20("winner_id").references(() => usersTable.id),
-      status: text18("status").notNull().default("pending"),
-      scheduledAt: timestamp19("scheduled_at", { withTimezone: true }),
-      completedAt: timestamp19("completed_at", { withTimezone: true })
+      status: text19("status").notNull().default("pending"),
+      scheduledAt: timestamp20("scheduled_at", { withTimezone: true }),
+      completedAt: timestamp20("completed_at", { withTimezone: true })
     });
   }
 });
 
 // ../../lib/db/src/schema/world_events.ts
-import { pgTable as pgTable20, text as text19, serial as serial20, timestamp as timestamp20, integer as integer21, boolean as boolean14, jsonb as jsonb13 } from "drizzle-orm/pg-core";
+import { pgTable as pgTable21, text as text20, serial as serial21, timestamp as timestamp21, integer as integer21, boolean as boolean14, jsonb as jsonb13 } from "drizzle-orm/pg-core";
 var worldEventsTable, worldEventParticipantsTable, worldStateTable;
 var init_world_events = __esm({
   "../../lib/db/src/schema/world_events.ts"() {
     "use strict";
     init_users();
-    worldEventsTable = pgTable20("world_events", {
-      id: serial20("id").primaryKey(),
-      title: text19("title").notNull(),
-      description: text19("description").notNull(),
-      type: text19("type").notNull(),
-      status: text19("status").notNull().default("upcoming"),
-      startAt: timestamp20("start_at", { withTimezone: true }).notNull(),
-      endAt: timestamp20("end_at", { withTimezone: true }).notNull(),
+    worldEventsTable = pgTable21("world_events", {
+      id: serial21("id").primaryKey(),
+      title: text20("title").notNull(),
+      description: text20("description").notNull(),
+      type: text20("type").notNull(),
+      status: text20("status").notNull().default("upcoming"),
+      startAt: timestamp21("start_at", { withTimezone: true }).notNull(),
+      endAt: timestamp21("end_at", { withTimezone: true }).notNull(),
       conditions: jsonb13("conditions").default({}),
       rewards: jsonb13("rewards").default({}),
-      narrative: text19("narrative"),
-      createdAt: timestamp20("created_at", { withTimezone: true }).notNull().defaultNow()
+      narrative: text20("narrative"),
+      createdAt: timestamp21("created_at", { withTimezone: true }).notNull().defaultNow()
     });
-    worldEventParticipantsTable = pgTable20("world_event_participants", {
-      id: serial20("id").primaryKey(),
+    worldEventParticipantsTable = pgTable21("world_event_participants", {
+      id: serial21("id").primaryKey(),
       eventId: integer21("event_id").notNull().references(() => worldEventsTable.id),
       userId: integer21("user_id").notNull().references(() => usersTable.id),
       contribution: integer21("contribution").notNull().default(0),
       rewardsClaimed: boolean14("rewards_claimed").notNull().default(false),
-      joinedAt: timestamp20("joined_at", { withTimezone: true }).notNull().defaultNow()
+      joinedAt: timestamp21("joined_at", { withTimezone: true }).notNull().defaultNow()
     });
-    worldStateTable = pgTable20("world_state", {
-      id: serial20("id").primaryKey(),
-      key: text19("key").notNull().unique(),
+    worldStateTable = pgTable21("world_state", {
+      id: serial21("id").primaryKey(),
+      key: text20("key").notNull().unique(),
       value: jsonb13("value").notNull(),
-      updatedAt: timestamp20("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
+      updatedAt: timestamp21("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
     });
   }
 });
@@ -36482,6 +36499,7 @@ __export(schema_exports, {
   antiCheatLogsTable: () => antiCheatLogsTable,
   bansTable: () => bansTable,
   battlePassTable: () => battlePassTable,
+  categoriesTable: () => categoriesTable,
   chaptersTable: () => chaptersTable,
   characterMemoryTable: () => characterMemoryTable,
   friendsTable: () => friendsTable,
@@ -36537,6 +36555,7 @@ var init_schema = __esm({
     "use strict";
     init_admin();
     init_ai_characters();
+    init_categories();
     init_analytics();
     init_anti_cheat();
     init_behavior();
@@ -36570,6 +36589,7 @@ __export(src_exports, {
   antiCheatLogsTable: () => antiCheatLogsTable,
   bansTable: () => bansTable,
   battlePassTable: () => battlePassTable,
+  categoriesTable: () => categoriesTable,
   chaptersTable: () => chaptersTable,
   characterMemoryTable: () => characterMemoryTable,
   db: () => db,
@@ -40853,7 +40873,7 @@ var require_pino = __commonJS({
         redact,
         crlf,
         serializers: serializers2,
-        timestamp: timestamp21,
+        timestamp: timestamp22,
         messageKey,
         errorKey,
         nestedKey,
@@ -40903,7 +40923,7 @@ var require_pino = __commonJS({
           chindings = coreChindings(Object.assign({}, base, { name }));
         }
       }
-      const time4 = timestamp21 instanceof Function ? timestamp21 : timestamp21 ? epochTime : nullTime;
+      const time4 = timestamp22 instanceof Function ? timestamp22 : timestamp22 ? epochTime : nullTime;
       const timeSliceIndex = time4().indexOf(":") + 1;
       if (useOnlyCustomLevels && !customLevels) throw Error("customLevels is required if useOnlyCustomLevels is set true");
       if (mixin && typeof mixin !== "function") throw Error(`Unknown mixin type "${typeof mixin}" - expected "function"`);
@@ -41081,8 +41101,8 @@ var init_achievements = __esm({
 async function awardBattlePassXp(userId, amount, source = "gameplay") {
   if (!userId || amount <= 0) return;
   try {
-    const pool3 = getPool();
-    let bp = await pool3.query(
+    const pool2 = getPool();
+    let bp = await pool2.query(
       `SELECT id, current_level, current_xp, is_premium FROM user_battle_pass WHERE user_id = $1`,
       [userId]
     );
@@ -41091,7 +41111,7 @@ async function awardBattlePassXp(userId, amount, source = "gameplay") {
     let currentXp;
     let isPremium;
     if (bp.rows.length === 0) {
-      const insert = await pool3.query(
+      const insert = await pool2.query(
         `INSERT INTO user_battle_pass (user_id, current_level, current_xp, is_premium)
          VALUES ($1, 0, 0, false)
          RETURNING id, current_level, current_xp, is_premium`,
@@ -41123,7 +41143,7 @@ async function awardBattlePassXp(userId, amount, source = "gameplay") {
     if (newXp > (newLevel < maxLevel ? (newLevel + 1) * 500 : 0)) {
       newXp = newLevel < maxLevel ? (newLevel + 1) * 500 : 0;
     }
-    await pool3.query(
+    await pool2.query(
       `UPDATE user_battle_pass SET current_level = $1, current_xp = $2 WHERE id = $3`,
       [newLevel, newXp, bpId]
     );
@@ -41156,7 +41176,7 @@ var init_battlepass = __esm({
 });
 
 // ../../lib/game-engine/src/events.ts
-var EventBus, eventBus, events_default;
+var EventBus, eventBus;
 var init_events = __esm({
   "../../lib/game-engine/src/events.ts"() {
     "use strict";
@@ -41269,360 +41289,18 @@ var init_events = __esm({
         }
       }
     });
-    events_default = eventBus;
   }
 });
 
 // ../../lib/game-engine/src/scoring.ts
-function calcLevel3(xp) {
-  return Math.max(1, Math.floor(xp / XP_PER_LEVEL4) + 1);
-}
-function getRankTier2(rankPoints) {
-  for (let i = RANK_TIERS.length - 1; i >= 0; i--) {
-    if (rankPoints >= RANK_TIERS[i].min) return RANK_TIERS[i].name;
-  }
-  return "Bronze";
-}
-function calculateScore(input) {
-  const baseXp = 10 * input.difficulty;
-  const speedBonus = input.timeSpentMs < 5e3 ? 20 : input.timeSpentMs < 1e4 ? 10 : 0;
-  const newStreak = input.streak + 1;
-  const streakBonus = newStreak >= 5 ? 15 : newStreak >= 3 ? 5 : 0;
-  const rebuzzMultiplier = input.isRebuzz ? 0.5 : 1;
-  const totalXp = Math.round((baseXp + speedBonus + streakBonus) * rebuzzMultiplier);
-  const points = Math.round((100 + speedBonus + streakBonus) * rebuzzMultiplier);
-  return { baseXp, speedBonus, streakBonus, totalXp, points };
-}
-function calculateStageScore(isCorrect, timeSpentMs, streak, wrongAttempts) {
-  if (!isCorrect) return { pointsGained: 0, streakBonus: 0, speedBonus: 0 };
-  const pointsMultiplier = wrongAttempts > 0 ? 0.5 : 1;
-  const speedBonus = timeSpentMs < 5e3 ? 25 : 15;
-  const streakBonus = streak > 0 ? 50 : 0;
-  const pointsGained = Math.round((100 + speedBonus + streakBonus) * pointsMultiplier);
-  return { pointsGained, streakBonus, speedBonus };
-}
-var XP_PER_LEVEL4, RANK_TIERS;
 var init_scoring = __esm({
   "../../lib/game-engine/src/scoring.ts"() {
     "use strict";
-    XP_PER_LEVEL4 = 500;
-    RANK_TIERS = [
-      { min: 0, name: "Bronze" },
-      { min: 500, name: "Silver" },
-      { min: 1e3, name: "Gold" },
-      { min: 1500, name: "Platinum" },
-      { min: 2e3, name: "Diamond" },
-      { min: 3e3, name: "Master" },
-      { min: 4e3, name: "Legend" }
-    ];
   }
 });
 
 // ../../lib/game-engine/src/stage.ts
 import { eq as eq14, sql as sql6 } from "drizzle-orm";
-function generateCode(length = 5) {
-  let code = "";
-  for (let i = 0; i < length; i++) code += CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)];
-  return code;
-}
-function pool() {
-  return getPool();
-}
-function recordEvent(state, type, teamId, data) {
-  state.log.push({
-    type,
-    teamId: teamId ?? null,
-    data: data || null,
-    timestamp: Date.now()
-  });
-}
-function stripQuestion(q) {
-  if (!q) return q;
-  const { correctOptionIds, ...rest } = q;
-  return rest;
-}
-function cacheMatch(state) {
-  stageMatchCache.set(state.id, state);
-}
-async function persistMatch(state) {
-  const stmt = () => pool().query(
-    `INSERT INTO stage_matches (match_id, host_id, room_code, state)
-     VALUES ($1, $2, $3, $4)
-     ON CONFLICT (match_id) DO UPDATE SET state = $4, updated_at = NOW()`,
-    [state.id, state.hostId, state.roomCode, JSON.stringify(state)]
-  );
-  try {
-    await stmt();
-  } catch (e) {
-    if (e?.code === "42P01") {
-      await pool().query(`
-        CREATE TABLE IF NOT EXISTS stage_matches (
-          id SERIAL PRIMARY KEY,
-          match_id BIGINT NOT NULL UNIQUE,
-          host_id INTEGER NOT NULL,
-          room_code VARCHAR(10) NOT NULL,
-          state JSONB NOT NULL,
-          created_at TIMESTAMP DEFAULT NOW() NOT NULL,
-          updated_at TIMESTAMP DEFAULT NOW() NOT NULL
-        )
-      `);
-      await stmt();
-    } else if (e?.code === "22003") {
-      await pool().query(`ALTER TABLE stage_matches ALTER COLUMN match_id TYPE BIGINT`);
-      await stmt();
-    } else {
-      throw e;
-    }
-  }
-}
-async function ensureMatch(matchId, force = false) {
-  if (!force) {
-    const cached2 = stageMatchCache.get(matchId);
-    if (cached2) return cached2;
-  }
-  try {
-    const { rows } = await pool().query(`SELECT state FROM stage_matches WHERE match_id = $1`, [matchId]);
-    if (rows.length === 0) return void 0;
-    const state = rows[0].state;
-    stageMatchCache.set(matchId, state);
-    return state;
-  } catch {
-    return void 0;
-  }
-}
-async function getUserFromToken12(token) {
-  if (!token) return null;
-  const bearerToken = token.replace("Bearer ", "");
-  const [session] = await db.select().from(sessionsTable).where(eq14(sessionsTable.token, bearerToken)).limit(1);
-  if (!session || session.expiresAt < /* @__PURE__ */ new Date()) return null;
-  const [user] = await db.select().from(usersTable).where(eq14(usersTable.id, session.userId)).limit(1);
-  return user || null;
-}
-function createMatch(user, params) {
-  const matchId = Date.now() + Math.floor(Math.random() * 1e3);
-  const roomCode = generateCode(5);
-  const usedCodes = /* @__PURE__ */ new Set();
-  const teamCount = params.teamCount || 2;
-  const teams = [];
-  for (let i = 0; i < teamCount; i++) {
-    let code = generateCode(4);
-    while (usedCodes.has(code)) code = generateCode(4);
-    usedCodes.add(code);
-    teams.push({
-      id: i + 1,
-      name: "",
-      color: TEAM_COLORS[i % 8],
-      emblem: TEAM_EMBLEMS[i % 8],
-      code,
-      score: 0,
-      correct: 0,
-      total: 0,
-      streak: 0,
-      tacticalLoadout: []
-    });
-  }
-  const match = {
-    id: matchId,
-    roomCode,
-    hostId: user.id,
-    teams,
-    questions: [],
-    currentQuestionIndex: 0,
-    phase: "lobby",
-    buzzerTeamId: null,
-    wrongAttempts: 0,
-    timerSeconds: params.timerSeconds || 30,
-    timerStartedAt: null,
-    timerDuration: params.timerSeconds || 30,
-    originalTimerSeconds: params.timerSeconds || 30,
-    domainOrder: params.domains || [],
-    currentDomain: params.domains?.[0] || "general",
-    domains: params.domains || [],
-    difficulty: params.difficulty || "agent",
-    totalQuestions: params.questionCount || 10,
-    buzzedOptionId: null,
-    log: []
-  };
-  recordEvent(match, "match_created", null, { teamCount, domains: params.domains, difficulty: params.difficulty });
-  return match;
-}
-function startMatch(match, questions) {
-  match.questions = questions;
-  match.totalQuestions = questions.length;
-  match.currentQuestionIndex = 0;
-  match.phase = "question";
-  match.timerStartedAt = Date.now();
-  match.currentDomain = match.domainOrder[0] || "general";
-  match.buzzedOptionId = null;
-  recordEvent(match, "match_started", null, { totalQuestions: questions.length });
-}
-function buzz(match, teamId) {
-  if (match.phase !== "question" && match.phase !== "rebuzz") {
-    return { success: false, reason: "Not accepting buzzes" };
-  }
-  if (match.buzzerTeamId !== null) {
-    return { success: false, reason: "already_buzzed" };
-  }
-  match.buzzerTeamId = teamId;
-  match.phase = "buzzed";
-  recordEvent(match, "buzzer_pressed", teamId);
-  return { success: true };
-}
-function submitAnswer(match, teamId, optionId) {
-  const team = match.teams.find((t) => t.id === teamId);
-  if (!team) throw new Error("Team not found");
-  const q = match.questions[match.currentQuestionIndex];
-  const isCorrect = q && q.correctOptionIds.includes(optionId);
-  team.total += 1;
-  const score = calculateStageScore(isCorrect, 0, team.streak, match.wrongAttempts);
-  if (isCorrect) {
-    team.correct += 1;
-    team.score += score.pointsGained;
-    team.streak += 1;
-    match.phase = "answered";
-    match.wrongAttempts = 0;
-    match.buzzedOptionId = optionId;
-    recordEvent(match, "answer_correct", teamId, { pointsGained: score.pointsGained, newScore: team.score });
-    return { correct: true, pointsGained: score.pointsGained, rebuzz: false, newScore: team.score };
-  }
-  team.streak = 0;
-  if (match.wrongAttempts === 0) {
-    match.wrongAttempts = 1;
-    match.buzzerTeamId = null;
-    match.buzzedOptionId = optionId;
-    match.phase = "rebuzz";
-    recordEvent(match, "answer_incorrect", teamId, { rebuzz: true });
-    return { correct: false, pointsGained: 0, rebuzz: true, newScore: team.score };
-  }
-  match.phase = "answered";
-  match.wrongAttempts = 0;
-  match.buzzedOptionId = optionId;
-  recordEvent(match, "answer_incorrect", teamId, { final: true });
-  return { correct: false, pointsGained: 0, rebuzz: false, newScore: team.score };
-}
-function nextQuestion(match) {
-  match.currentQuestionIndex++;
-  match.buzzerTeamId = null;
-  match.buzzedOptionId = null;
-  match.wrongAttempts = 0;
-  match.timerSeconds = match.originalTimerSeconds;
-  if (match.currentQuestionIndex >= match.questions.length) {
-    match.phase = "ended";
-    recordEvent(match, "match_ended", null, { reason: "all_questions_answered" });
-    const winner = match.teams.reduce((best, t) => !best || t.score > best.score ? t : best, match.teams[0]);
-    eventBus.emitSync("MATCH_ENDED", {
-      matchId: match.id,
-      data: { teams: match.teams, winnerTeamId: winner?.id }
-    });
-    return { finished: true };
-  }
-  match.phase = "question";
-  match.timerStartedAt = Date.now();
-  recordEvent(match, "next_question", null, { questionIndex: match.currentQuestionIndex });
-  return { finished: false };
-}
-function skipQuestion(match) {
-  match.buzzerTeamId = null;
-  recordEvent(match, "question_skipped", null, { questionIndex: match.currentQuestionIndex });
-}
-function handleTimeout(match) {
-  if (match.phase === "question") {
-    match.phase = "answered";
-    recordEvent(match, "timer_expired", null, { questionIndex: match.currentQuestionIndex });
-    return true;
-  }
-  return false;
-}
-function addBotTeam(match, botName, difficulty) {
-  const DIFFICULTY_SKILL3 = {
-    recruit: { accuracy: 0.45, avgBuzzMs: 8e3, buzzVariance: 4e3 },
-    agent: { accuracy: 0.6, avgBuzzMs: 6e3, buzzVariance: 3e3 },
-    elite: { accuracy: 0.78, avgBuzzMs: 4e3, buzzVariance: 2e3 },
-    omega: { accuracy: 0.92, avgBuzzMs: 2500, buzzVariance: 1500 }
-  };
-  const bot = {
-    id: 1e3 + match.teams.length,
-    name: botName,
-    color: TEAM_COLORS[match.teams.length % 8],
-    emblem: "ai-" + (match.teams.length + 1),
-    code: `AI-${match.teams.length + 1}`,
-    score: 0,
-    correct: 0,
-    total: 0,
-    streak: 0,
-    tacticalLoadout: [],
-    isBot: true
-  };
-  match.teams.push(bot);
-  return bot;
-}
-function getMatchState(match) {
-  const q = match.questions[match.currentQuestionIndex];
-  return {
-    id: match.id,
-    roomCode: match.roomCode,
-    phase: match.phase,
-    teams: match.teams.filter((t) => t.name).map((t) => ({
-      id: t.id,
-      name: t.name,
-      color: t.color,
-      emblem: t.emblem,
-      code: t.code,
-      score: t.score,
-      correct: t.correct,
-      total: t.total,
-      streak: t.streak,
-      tacticalLoadout: t.tacticalLoadout
-    })),
-    currentQuestionIndex: match.currentQuestionIndex,
-    totalQuestions: match.totalQuestions,
-    currentDomain: match.currentDomain,
-    buzzerTeamId: match.buzzerTeamId,
-    wrongAttempts: match.wrongAttempts,
-    originalTimerSeconds: match.originalTimerSeconds,
-    timerSeconds: match.timerSeconds,
-    question: stripQuestion(q),
-    domains: match.domains,
-    difficulty: match.difficulty
-  };
-}
-async function getMatchForReplay(matchId) {
-  const { rows } = await getPool().query(`SELECT * FROM stage_matches WHERE match_id = $1`, [matchId]);
-  if (rows.length === 0) return null;
-  const state = rows[0].state;
-  return {
-    matchId: rows[0].match_id,
-    roomCode: rows[0].room_code,
-    teams: state.teams.filter((t) => t.name),
-    questions: state.questions.map(stripQuestion),
-    log: state.log,
-    phase: state.phase,
-    createdAt: rows[0].created_at,
-    updatedAt: rows[0].updated_at
-  };
-}
-async function listReplays() {
-  const { rows } = await getPool().query(
-    `SELECT match_id, room_code, host_id, state, created_at, updated_at
-     FROM stage_matches
-     WHERE state->>'phase' = 'ended'
-     ORDER BY updated_at DESC LIMIT 50`
-  );
-  return rows.map((r) => ({
-    matchId: r.match_id,
-    roomCode: r.room_code,
-    hostId: r.host_id,
-    teamCount: (r.state?.teams || []).filter((t) => t.name).length,
-    totalQuestions: r.state?.totalQuestions || 0,
-    phases: r.state?.log?.length || 0,
-    createdAt: r.created_at,
-    updatedAt: r.updated_at
-  }));
-}
-async function getStageMatch(matchId) {
-  return ensureMatch(matchId);
-}
-var DOMAIN_CATEGORIES, DIFFICULTY_CONFIG, TEAM_COLORS, TEAM_EMBLEMS, CODE_CHARS, stageMatchCache;
 var init_stage = __esm({
   "../../lib/game-engine/src/stage.ts"() {
     "use strict";
@@ -41630,132 +41308,17 @@ var init_stage = __esm({
     init_src();
     init_events();
     init_scoring();
-    DOMAIN_CATEGORIES = {
-      cyber_systems: ["technology", "security"],
-      cognitive_analysis: ["logic", "intelligence"],
-      historical_archives: ["history"],
-      threat_intelligence: ["security", "intelligence"],
-      scientific_division: ["technology"],
-      behavioral_analysis: ["intelligence"],
-      global_mapping: ["history", "technology"],
-      cipher_division: ["security", "intelligence"]
-    };
-    DIFFICULTY_CONFIG = {
-      recruit: { diffRange: [1, 3] },
-      agent: { diffRange: [3, 6] },
-      elite: { diffRange: [5, 8] },
-      omega: { diffRange: [7, 10] }
-    };
-    TEAM_COLORS = ["#3b82f6", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#14b8a6", "#f97316"];
-    TEAM_EMBLEMS = ["raven", "wolf", "phoenix", "viper", "titan", "shadow", "ghost", "cipher"];
-    CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-    stageMatchCache = /* @__PURE__ */ new Map();
   }
 });
 
 // ../../lib/game-engine/src/validation.ts
 import { eq as eq15, and as and6 } from "drizzle-orm";
-async function validateAnswer(input) {
-  const anomalies = [];
-  if (input.timeSpentMs < SPEED_LIMIT) {
-    anomalies.push("impossible_speed");
-  } else if (input.timeSpentMs < MIN_ANSWER_TIME) {
-    anomalies.push("suspicious_speed");
-  }
-  if (input.userId) {
-    try {
-      const { rows } = await getPool().query(
-        `SELECT count(*) as cnt FROM answer_logs
-         WHERE user_id = $1 AND question_id = $2
-         AND created_at > now() - interval '30 seconds'`,
-        [input.userId, input.questionId]
-      );
-      if (Number(rows[0]?.cnt || 0) > 0) {
-        anomalies.push("duplicate_answer");
-      }
-    } catch {
-    }
-  }
-  if (input.timeSpentMs < MIN_ANSWER_TIME) {
-    if (input.userId) {
-      await eventBus.emit("ANSWER_INCORRECT", {
-        userId: input.userId,
-        data: { anomalies, timeSpentMs: input.timeSpentMs, questionId: input.questionId, rejected: true }
-      });
-    }
-    return {
-      valid: false,
-      isCorrect: false,
-      correctOptionId: null,
-      explanation: "Answer rejected \u2014 too fast",
-      anomalies,
-      rejected: true
-    };
-  }
-  const [question] = await db.select().from(questionsTable).where(eq15(questionsTable.id, input.questionId)).limit(1);
-  if (!question) {
-    return {
-      valid: false,
-      isCorrect: false,
-      correctOptionId: null,
-      explanation: "Question not found",
-      anomalies,
-      rejected: true
-    };
-  }
-  const [selectedOption] = await db.select().from(questionOptionsTable).where(eq15(questionOptionsTable.id, input.optionId)).limit(1);
-  const isCorrect = selectedOption?.isCorrect === 1;
-  const [correctOption] = await db.select().from(questionOptionsTable).where(and6(
-    eq15(questionOptionsTable.questionId, input.questionId),
-    eq15(questionOptionsTable.isCorrect, 1)
-  )).limit(1);
-  try {
-    await db.insert(
-      (await Promise.resolve().then(() => (init_src(), src_exports))).answerLogsTable
-    ).values({
-      userId: input.userId || 0,
-      questionId: input.questionId,
-      category: question.category,
-      difficulty: question.difficulty,
-      correct: isCorrect ? 1 : 0,
-      timeSpentMs: input.timeSpentMs
-    });
-  } catch {
-  }
-  if (anomalies.length > 0) {
-    try {
-      await getPool().query(
-        `INSERT INTO anti_cheat_logs (user_id, action, details, severity, flagged)
-         VALUES ($1, $2, $3, $4, $5)`,
-        [
-          input.userId || 0,
-          "answer_anomaly",
-          JSON.stringify({ questionId: input.questionId, timeSpentMs: input.timeSpentMs, isCorrect, anomalies }),
-          anomalies.includes("impossible_speed") ? 3 : 1,
-          anomalies.includes("impossible_speed")
-        ]
-      );
-    } catch {
-    }
-  }
-  return {
-    valid: true,
-    isCorrect,
-    correctOptionId: correctOption?.id || null,
-    explanation: question.explanation,
-    anomalies,
-    rejected: false
-  };
-}
-var MIN_ANSWER_TIME, SPEED_LIMIT;
 var init_validation = __esm({
   "../../lib/game-engine/src/validation.ts"() {
     "use strict";
     init_src();
     init_src();
     init_events();
-    MIN_ANSWER_TIME = 300;
-    SPEED_LIMIT = 500;
   }
 });
 
@@ -41763,74 +41326,21 @@ var init_validation = __esm({
 function pickRandom(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
-function generateBotName() {
-  return pickRandom(BOT_NAMES);
-}
-function addBotToMatch(match, name, difficulty = "agent") {
-  const botName = name || generateBotName();
-  const skill = DIFFICULTY_SKILL[difficulty] || DIFFICULTY_SKILL.agent;
-  const bot = {
-    id: 1e3 + match.teams.length,
-    name: botName,
-    color: "",
-    emblem: "",
-    code: `AI-${match.teams.length + 1}`,
-    score: 0,
-    correct: 0,
-    total: 0,
-    streak: 0,
-    tacticalLoadout: [],
-    isBot: true
-  };
-  match.teams.push(bot);
-  return bot;
-}
-function decideBotBuzz(match, difficulty = "agent") {
-  if (match.phase !== "question" || match.buzzerTeamId !== null) return null;
-  const skill = DIFFICULTY_SKILL[difficulty] || DIFFICULTY_SKILL.agent;
-  const elapsed = Date.now() - (match.timerStartedAt || Date.now());
-  const botTeams = match.teams.filter((t) => t.isBot);
-  if (botTeams.length === 0) return null;
-  for (const bot of botTeams) {
-    const buzzChance = Math.min(0.3, elapsed / (skill.avgBuzzMs * 3));
-    if (Math.random() < buzzChance) {
-      const q = match.questions[match.currentQuestionIndex];
-      const willBeCorrect = Math.random() < skill.accuracy;
-      let selectedOptionId = null;
-      if (q && q.correctOptionIds?.length > 0) {
-        const firstCorrect = q.correctOptionIds[0];
-        if (willBeCorrect) {
-          selectedOptionId = firstCorrect;
-        } else {
-          const wrongOptions = q.options.filter((o) => !q.correctOptionIds.includes(o.id));
-          selectedOptionId = wrongOptions[Math.floor(Math.random() * wrongOptions.length)]?.id || null;
-        }
-      }
-      return {
-        action: "buzz",
-        teamId: bot.id,
-        correct: willBeCorrect,
-        selectedOptionId
-      };
-    }
-  }
-  return { action: "wait" };
-}
 function generateAITemplateQuestion(category, difficulty) {
-  let pool3 = QUESTION_TEMPLATES;
+  let pool2 = QUESTION_TEMPLATES;
   if (category) {
-    const filtered = pool3.filter((q) => q.category === category);
-    if (filtered.length > 0) pool3 = filtered;
+    const filtered = pool2.filter((q) => q.category === category);
+    if (filtered.length > 0) pool2 = filtered;
   }
   if (difficulty) {
-    const filtered = pool3.filter((q) => q.difficulty === difficulty);
-    if (filtered.length > 0) pool3 = filtered;
+    const filtered = pool2.filter((q) => q.difficulty === difficulty);
+    if (filtered.length > 0) pool2 = filtered;
     else {
-      const close = pool3.sort((a, b) => Math.abs(a.difficulty - difficulty) - Math.abs(b.difficulty - difficulty));
-      pool3 = [close[0]];
+      const close = pool2.sort((a, b) => Math.abs(a.difficulty - difficulty) - Math.abs(b.difficulty - difficulty));
+      pool2 = [close[0]];
     }
   }
-  const template = pickRandom(pool3);
+  const template = pickRandom(pool2);
   const correctIndex = template.options.indexOf(template.correctAnswer);
   return {
     questionText: template.text,
@@ -41843,9 +41353,6 @@ function generateAITemplateQuestion(category, difficulty) {
 }
 function configureOpenAI(config2) {
   openAIConfig = config2;
-}
-function isOpenAIConfigured() {
-  return !!openAIConfig.apiKey;
 }
 async function callOpenAI(prompt) {
   if (!openAIConfig.apiKey) return null;
@@ -41927,31 +41434,10 @@ Return ONLY valid JSON array:
   }
   return generateQuestionsWithAI(count, category, difficulty);
 }
-function randomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-var BOT_NAMES, DIFFICULTY_SKILL, QUESTION_TEMPLATES, openAIConfig;
+var QUESTION_TEMPLATES, openAIConfig;
 var init_ai = __esm({
   "../../lib/game-engine/src/ai.ts"() {
     "use strict";
-    BOT_NAMES = [
-      "Cipher-7",
-      "Nexus-9",
-      "Phantom-X",
-      "Void-3",
-      "Aegis-1",
-      "Omega-5",
-      "Delta-Z",
-      "Sigma-4",
-      "Talon-6",
-      "Wraith-2"
-    ];
-    DIFFICULTY_SKILL = {
-      recruit: { accuracy: 0.45, avgBuzzMs: 8e3, buzzVariance: 4e3 },
-      agent: { accuracy: 0.6, avgBuzzMs: 6e3, buzzVariance: 3e3 },
-      elite: { accuracy: 0.78, avgBuzzMs: 4e3, buzzVariance: 2e3 },
-      omega: { accuracy: 0.92, avgBuzzMs: 2500, buzzVariance: 1500 }
-    };
     QUESTION_TEMPLATES = [
       {
         category: "technology",
@@ -42007,45 +41493,6 @@ var init_ai = __esm({
 });
 
 // ../../lib/game-engine/src/index.ts
-var src_exports2 = {};
-__export(src_exports2, {
-  DIFFICULTY_CONFIG: () => DIFFICULTY_CONFIG,
-  DOMAIN_CATEGORIES: () => DOMAIN_CATEGORIES,
-  RANK_TIERS: () => RANK_TIERS,
-  XP_PER_LEVEL: () => XP_PER_LEVEL4,
-  addBotTeam: () => addBotTeam,
-  addBotToMatch: () => addBotToMatch,
-  buzz: () => buzz,
-  cacheMatch: () => cacheMatch,
-  calcLevel: () => calcLevel3,
-  calculateScore: () => calculateScore,
-  calculateStageScore: () => calculateStageScore,
-  configureOpenAI: () => configureOpenAI,
-  createMatch: () => createMatch,
-  decideBotBuzz: () => decideBotBuzz,
-  ensureMatch: () => ensureMatch,
-  eventBus: () => eventBus,
-  eventBusInstance: () => events_default,
-  generateAITemplateQuestion: () => generateAITemplateQuestion,
-  generateBotName: () => generateBotName,
-  generateQuestionsWithAI: () => generateQuestionsWithAI,
-  getMatchForReplay: () => getMatchForReplay,
-  getMatchState: () => getMatchState,
-  getRankTier: () => getRankTier2,
-  getStageMatch: () => getStageMatch,
-  getUserFromToken: () => getUserFromToken12,
-  handleTimeout: () => handleTimeout,
-  isOpenAIConfigured: () => isOpenAIConfigured,
-  listReplays: () => listReplays,
-  nextQuestion: () => nextQuestion,
-  persistMatch: () => persistMatch,
-  randomInt: () => randomInt,
-  skipQuestion: () => skipQuestion,
-  startMatch: () => startMatch,
-  stripQuestion: () => stripQuestion,
-  submitAnswer: () => submitAnswer,
-  validateAnswer: () => validateAnswer
-});
 var init_src2 = __esm({
   "../../lib/game-engine/src/index.ts"() {
     "use strict";
@@ -42065,7 +41512,7 @@ __export(stage_exports, {
   getStageMatch: () => getStageMatch2,
   persistMatch: () => persistMatch2
 });
-import { eq as eq23, sql as sql15 } from "drizzle-orm";
+import { eq as eq23, sql as sql15, inArray as inArray2, and as and10, gte, lte } from "drizzle-orm";
 async function getUserFromToken19(token) {
   if (!token) return null;
   const bearerToken = token.replace("Bearer ", "");
@@ -42074,25 +41521,25 @@ async function getUserFromToken19(token) {
   const [user] = await db.select().from(usersTable).where(eq23(usersTable.id, session.userId)).limit(1);
   return user || null;
 }
-function generateCode2(length = 5) {
+function generateCode(length = 5) {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let code = "";
   for (let i = 0; i < length; i++) code += chars[Math.floor(Math.random() * chars.length)];
   return code;
 }
-function pool2() {
+function pool() {
   return getPool();
 }
 async function ensureMatch2(matchId, force = false) {
   if (!force) {
-    const cached2 = stageMatchCache2.get(matchId);
+    const cached2 = stageMatchCache.get(matchId);
     if (cached2) return cached2;
   }
   try {
-    const { rows } = await pool2().query(`SELECT state FROM stage_matches WHERE match_id = $1`, [matchId]);
+    const { rows } = await pool().query(`SELECT state FROM stage_matches WHERE match_id = $1`, [matchId]);
     if (rows.length === 0) return void 0;
     const state = rows[0].state;
-    stageMatchCache2.set(matchId, state);
+    stageMatchCache.set(matchId, state);
     return state;
   } catch (e) {
     console.error("[stage] ensureMatch DB error:", e?.message);
@@ -42100,9 +41547,9 @@ async function ensureMatch2(matchId, force = false) {
   }
 }
 function cacheMatch2(state) {
-  stageMatchCache2.set(state.id, state);
+  stageMatchCache.set(state.id, state);
 }
-function recordEvent2(state, type, teamId, data) {
+function recordEvent(state, type, teamId, data) {
   state.log.push({
     type,
     teamId: teamId ?? null,
@@ -42111,17 +41558,20 @@ function recordEvent2(state, type, teamId, data) {
   });
 }
 async function persistMatch2(state) {
-  const insert = () => pool2().query(
-    `INSERT INTO stage_matches (match_id, host_id, room_code, state) VALUES ($1, $2, $3, $4)
-     ON CONFLICT (match_id) DO UPDATE SET state = $4, updated_at = NOW()`,
-    [state.id, state.hostId, state.roomCode, JSON.stringify(state)]
-  );
+  const insert = () => {
+    cacheMatch2(state);
+    return pool().query(
+      `INSERT INTO stage_matches (match_id, host_id, room_code, state) VALUES ($1, $2, $3, $4)
+       ON CONFLICT (match_id) DO UPDATE SET state = $4, updated_at = NOW()`,
+      [state.id, state.hostId, state.roomCode, JSON.stringify(state)]
+    );
+  };
   try {
     await insert();
   } catch (e) {
     if (e?.code === "42P01") {
       try {
-        await pool2().query(`
+        await pool().query(`
           CREATE TABLE IF NOT EXISTS stage_matches (
             id SERIAL PRIMARY KEY,
             match_id BIGINT NOT NULL UNIQUE,
@@ -42139,7 +41589,7 @@ async function persistMatch2(state) {
       await insert();
     } else if (e?.code === "22003") {
       try {
-        await pool2().query(`ALTER TABLE stage_matches ALTER COLUMN match_id TYPE BIGINT`);
+        await pool().query(`ALTER TABLE stage_matches ALTER COLUMN match_id TYPE BIGINT`);
       } catch (e2) {
         console.error("[stage] alter column failed:", e2);
         throw new Error(`Failed to migrate match_id column: ${e2?.message || "unknown"}`);
@@ -42154,12 +41604,30 @@ async function persistMatch2(state) {
 async function getStageMatch2(matchId) {
   return ensureMatch2(matchId);
 }
+async function loadStageDomains() {
+  const now = Date.now();
+  if (stageDomainCache && now - stageDomainCacheTime < STAGE_CACHE_TTL) return stageDomainCache;
+  try {
+    const all = await db.select().from(categoriesTable);
+    const map2 = {};
+    for (const cat of all) {
+      const domain2 = cat.domain || "general";
+      if (!map2[domain2]) map2[domain2] = [];
+      if (!map2[domain2].includes(cat.name)) map2[domain2].push(cat.name);
+    }
+    stageDomainCache = map2;
+    stageDomainCacheTime = now;
+    return map2;
+  } catch {
+    return {};
+  }
+}
 function stripAnswer(q) {
   if (!q) return q;
   const { correctOptionIds, ...rest } = q;
   return rest;
 }
-var import_express21, router21, stageMatchCache2, DOMAIN_CATEGORIES3, TEAM_COLORS2, TEAM_EMBLEMS2, stage_default;
+var import_express21, router21, stageMatchCache, stageDomainCache, stageDomainCacheTime, STAGE_CACHE_TTL, DIFFICULTY_CONFIG3, TEAM_COLORS, TEAM_EMBLEMS, stage_default;
 var init_stage2 = __esm({
   "src/routes/stage.ts"() {
     "use strict";
@@ -42169,43 +41637,70 @@ var init_stage2 = __esm({
     init_src();
     init_src2();
     router21 = (0, import_express21.Router)();
-    stageMatchCache2 = /* @__PURE__ */ new Map();
-    DOMAIN_CATEGORIES3 = {
-      cyber_systems: ["technology", "security"],
-      cognitive_analysis: ["logic", "intelligence"],
-      historical_archives: ["history"],
-      threat_intelligence: ["security", "intelligence"],
-      scientific_division: ["technology"],
-      behavioral_analysis: ["intelligence"],
-      global_mapping: ["history", "technology"],
-      cipher_division: ["security", "intelligence"]
+    stageMatchCache = /* @__PURE__ */ new Map();
+    stageDomainCache = null;
+    stageDomainCacheTime = 0;
+    STAGE_CACHE_TTL = 6e4;
+    DIFFICULTY_CONFIG3 = {
+      recruit: { diffRange: [1, 3] },
+      agent: { diffRange: [3, 6] },
+      elite: { diffRange: [5, 8] },
+      omega: { diffRange: [7, 10] }
     };
-    TEAM_COLORS2 = ["#3b82f6", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#14b8a6", "#f97316"];
-    TEAM_EMBLEMS2 = ["raven", "wolf", "phoenix", "viper", "titan", "shadow", "ghost", "cipher"];
+    TEAM_COLORS = ["#3b82f6", "#ef4444", "#22c55e", "#eab308", "#a855f7", "#ec4899", "#14b8a6", "#f97316"];
+    TEAM_EMBLEMS = ["raven", "wolf", "phoenix", "viper", "titan", "shadow", "ghost", "cipher"];
+    router21.get("/stage/categories", async (_req, res) => {
+      try {
+        await getPool().query(`CREATE TABLE IF NOT EXISTS categories (
+      id SERIAL PRIMARY KEY, name TEXT NOT NULL UNIQUE,
+      display_name TEXT NOT NULL DEFAULT '', domain TEXT NOT NULL DEFAULT '',
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )`);
+      } catch {
+      }
+      try {
+        const all = await db.select().from(categoriesTable);
+        const domainMap = {};
+        for (const cat of all) {
+          const domain2 = cat.domain || "general";
+          if (!domainMap[domain2]) domainMap[domain2] = { categories: [] };
+          if (!domainMap[domain2].categories.includes(cat.name)) domainMap[domain2].categories.push(cat.name);
+        }
+        const domains = Object.entries(domainMap).map(([id, val]) => ({
+          id,
+          label: id.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+          categories: val.categories
+        }));
+        const allCategoryNames = [...new Set(all.map((c) => c.name))];
+        res.json({ domains, categories: allCategoryNames });
+      } catch {
+        res.json({ domains: [], categories: [] });
+      }
+    });
     router21.post("/stage/create", async (req, res) => {
       const user = await getUserFromToken19(req.headers.authorization);
       if (!user) {
         res.status(401).json({ error: "Not authenticated" });
         return;
       }
-      const { teamCount, domains, difficulty, timerSeconds, questionCount } = req.body;
+      const { teamCount, domains, difficulty, timerSeconds, questionCount, shuffle } = req.body;
       if (!domains || domains.length === 0) {
         res.status(400).json({ error: "Select at least one domain" });
         return;
       }
-      const roomCode = generateCode2(5);
+      const roomCode = generateCode(5);
       const matchId = Date.now() + Math.floor(Math.random() * 1e3);
       const usedCodes = /* @__PURE__ */ new Set();
       const teams = [];
       for (let i = 0; i < (teamCount || 2); i++) {
-        let code = generateCode2(4);
-        while (usedCodes.has(code)) code = generateCode2(4);
+        let code = generateCode(4);
+        while (usedCodes.has(code)) code = generateCode(4);
         usedCodes.add(code);
         teams.push({
           id: i + 1,
           name: "",
-          color: TEAM_COLORS2[i % 8],
-          emblem: TEAM_EMBLEMS2[i % 8],
+          color: TEAM_COLORS[i % 8],
+          emblem: TEAM_EMBLEMS[i % 8],
           code,
           score: 0,
           correct: 0,
@@ -42223,6 +41718,7 @@ var init_stage2 = __esm({
         currentQuestionIndex: 0,
         phase: "lobby",
         buzzerTeamId: null,
+        buzzerName: null,
         wrongAttempts: 0,
         timerSeconds: timerSeconds || 30,
         timerStartedAt: null,
@@ -42233,10 +41729,11 @@ var init_stage2 = __esm({
         domains: domains || [],
         difficulty: difficulty || "agent",
         totalQuestions: questionCount || 10,
+        shuffle: shuffle !== false,
         buzzedOptionId: null,
         log: []
       };
-      recordEvent2(stageMatch, "match_created", null, { teamCount: teams.length, domains, difficulty });
+      recordEvent(stageMatch, "match_created", null, { teamCount: teams.length, domains, difficulty });
       cacheMatch2(stageMatch);
       await persistMatch2(stageMatch);
       res.json({
@@ -42251,7 +41748,7 @@ var init_stage2 = __esm({
         res.status(400).json({ error: "Team code required" });
         return;
       }
-      let match = Array.from(stageMatchCache2.values()).find(
+      let match = Array.from(stageMatchCache.values()).find(
         (m) => m.teams.some((t) => t.code === teamCode.toUpperCase())
       );
       if (!match) {
@@ -42304,7 +41801,7 @@ var init_stage2 = __esm({
       if (name) team.name = name;
       if (color) team.color = color;
       if (emblem) team.emblem = emblem;
-      recordEvent2(match, "team_configured", team.id, { name, color, emblem });
+      recordEvent(match, "team_configured", team.id, { name, color, emblem });
       await persistMatch2(match);
       res.json({ team });
     });
@@ -42331,7 +41828,7 @@ var init_stage2 = __esm({
         if (t.color) team.color = t.color;
         if (t.emblem) team.emblem = t.emblem;
         if (t.tacticalLoadout) team.tacticalLoadout = t.tacticalLoadout;
-        recordEvent2(match, "team_configured", team.id, { name: team.name, color: team.color, emblem: team.emblem });
+        recordEvent(match, "team_configured", team.id, { name: team.name, color: team.color, emblem: team.emblem });
       }
       await persistMatch2(match);
       res.json({ success: true });
@@ -42357,12 +41854,22 @@ var init_stage2 = __esm({
         res.status(400).json({ error: "Need at least 1 team" });
         return;
       }
+      const stageDomains = await loadStageDomains();
       const selectedCategories = [];
       for (const d of match.domains) {
-        const cats = DOMAIN_CATEGORIES3[d];
+        const cats = stageDomains[d];
         if (cats) selectedCategories.push(...cats);
       }
-      const questions = await db.select().from(questionsTable).where(selectedCategories.length > 0 ? sql15`${questionsTable.category} IN (${sql15.join(selectedCategories.map((c) => sql15`${c}`), sql15`, `)})` : void 0).orderBy(sql15`RANDOM()`).limit(match.totalQuestions);
+      const queryFilters = [];
+      if (selectedCategories.length > 0) {
+        queryFilters.push(inArray2(questionsTable.category, selectedCategories));
+      }
+      const diffCfg = DIFFICULTY_CONFIG3[match.difficulty];
+      if (diffCfg) {
+        const [minDiff, maxDiff] = diffCfg.diffRange;
+        queryFilters.push(gte(questionsTable.difficulty, minDiff), lte(questionsTable.difficulty, maxDiff));
+      }
+      const questions = await db.select().from(questionsTable).where(queryFilters.length > 0 ? and10(...queryFilters) : void 0).orderBy(match.shuffle ? sql15`RANDOM()` : questionsTable.id).limit(match.totalQuestions);
       const fullQs = await Promise.all(questions.map(async (q) => {
         const options = await db.select({ id: questionOptionsTable.id, text: questionOptionsTable.optionText, isCorrect: questionOptionsTable.isCorrect }).from(questionOptionsTable).where(eq23(questionOptionsTable.questionId, q.id));
         const correctIds = options.filter((o) => o.isCorrect === 1).map((o) => o.id);
@@ -42371,12 +41878,18 @@ var init_stage2 = __esm({
           questionText: q.questionText,
           difficulty: q.difficulty,
           category: q.category,
+          mediaUrl: q.mediaUrl,
           options: options.map((o) => ({ id: o.id, text: o.text })),
           timeLimit: q.timeLimitSeconds || match.timerSeconds,
+          points: q.points ?? 100,
           type: q.type,
           correctOptionIds: correctIds
         };
       }));
+      if (fullQs.length === 0) {
+        res.status(400).json({ error: "No questions found for the selected domains. Add questions with matching categories first." });
+        return;
+      }
       match.questions = fullQs;
       match.totalQuestions = fullQs.length;
       match.currentQuestionIndex = 0;
@@ -42384,7 +41897,7 @@ var init_stage2 = __esm({
       match.timerStartedAt = Date.now();
       match.currentDomain = match.domainOrder[0] || "general";
       match.buzzedOptionId = null;
-      recordEvent2(match, "match_started", null, { totalQuestions: fullQs.length });
+      recordEvent(match, "match_started", null, { totalQuestions: fullQs.length });
       await persistMatch2(match);
       eventBus.emitSync("MATCH_STARTED", {
         matchId: match.id,
@@ -42393,7 +41906,7 @@ var init_stage2 = __esm({
       res.json({ success: true, totalQuestions: fullQs.length });
     });
     router21.post("/stage/buzz", async (req, res) => {
-      const { matchId, teamId } = req.body;
+      const { matchId, teamId, playerName } = req.body;
       const match = await ensureMatch2(matchId, true);
       if (!match) {
         res.status(404).json({ error: "Match not found" });
@@ -42408,10 +41921,11 @@ var init_stage2 = __esm({
         return;
       }
       match.buzzerTeamId = teamId;
+      match.buzzerName = playerName || null;
       match.phase = "buzzed";
-      recordEvent2(match, "buzzer_pressed", teamId);
+      recordEvent(match, "buzzer_pressed", teamId, { playerName: playerName || null });
       await persistMatch2(match);
-      res.json({ success: true, teamId });
+      res.json({ success: true, teamId, playerName: match.buzzerName });
     });
     router21.post("/stage/answer", async (req, res) => {
       const user = await getUserFromToken19(req.headers.authorization);
@@ -42440,53 +41954,81 @@ var init_stage2 = __esm({
       }
       const q = match.questions[match.currentQuestionIndex];
       const isCorrect = q && q.correctOptionIds?.includes(optionId);
+      const qPoints = q?.points ?? 100;
       team.total += 1;
-      const pointsMultiplier = match.wrongAttempts > 0 ? 0.5 : 1;
-      const speedBonus = match.timerStartedAt ? Date.now() - match.timerStartedAt < 5e3 ? 25 : 15 : 0;
-      const streakBonus = isCorrect && team.streak > 0 ? 50 : 0;
-      const pointsGained = isCorrect ? Math.round((100 + speedBonus + streakBonus) * pointsMultiplier) : 0;
       if (isCorrect) {
+        const gainMultiplier = match.wrongAttempts === 0 ? 0.25 : 0.5;
+        const pointsGained = Math.round(qPoints * gainMultiplier);
         team.correct += 1;
         team.score += pointsGained;
         team.streak += 1;
         match.phase = "answered";
         match.wrongAttempts = 0;
         match.buzzedOptionId = optionId;
-        recordEvent2(match, "answer_correct", team.id, { pointsGained, newScore: team.score });
+        recordEvent(match, "answer_correct", team.id, { pointsGained, newScore: team.score });
         await persistMatch2(match);
-        const answerTimeMs = match.timerStartedAt ? Date.now() - match.timerStartedAt : 0;
-        eventBus.emitSync("ANSWER_CORRECT", {
-          matchId: match.id,
-          teamId: team.id,
-          userId: match.hostId,
-          data: { xpAmount: pointsGained, questionIndex: match.currentQuestionIndex, answerTimeMs }
-        });
         res.json({ success: true, correct: true, pointsGained, newScore: team.score });
         return;
       }
       team.streak = 0;
-      eventBus.emitSync("ANSWER_INCORRECT", {
-        matchId: match.id,
-        teamId: team.id,
-        userId: match.hostId,
-        data: { wrongAttempts: match.wrongAttempts }
-      });
+      const loseMultiplier = match.wrongAttempts === 0 ? 0.5 : 0.25;
+      const pointsLost = Math.round(qPoints * loseMultiplier);
+      team.score = Math.max(0, team.score - pointsLost);
       if (match.wrongAttempts === 0) {
         match.wrongAttempts = 1;
         match.buzzerTeamId = null;
+        match.buzzerName = null;
         match.buzzedOptionId = optionId;
         match.phase = "rebuzz";
-        recordEvent2(match, "answer_incorrect", team.id, { rebuzz: true });
+        recordEvent(match, "answer_incorrect", team.id, { rebuzz: true, pointsLost, newScore: team.score });
         await persistMatch2(match);
-        res.json({ success: true, correct: false, pointsGained: 0, rebuzz: true });
+        res.json({ success: true, correct: false, pointsGained: 0, pointsLost, newScore: team.score, rebuzz: true });
         return;
       }
       match.phase = "answered";
       match.wrongAttempts = 0;
       match.buzzedOptionId = optionId;
-      recordEvent2(match, "answer_incorrect", team.id, { final: true });
+      recordEvent(match, "answer_incorrect", team.id, { final: true, pointsLost, newScore: team.score });
       await persistMatch2(match);
-      res.json({ success: true, correct: false, pointsGained: 0, newScore: team.score });
+      res.json({ success: true, correct: false, pointsGained: 0, pointsLost, newScore: team.score });
+    });
+    router21.post("/stage/mark-correct", async (req, res) => {
+      const user = await getUserFromToken19(req.headers.authorization);
+      if (!user) {
+        res.status(401).json({ error: "Not authenticated" });
+        return;
+      }
+      const { matchId } = req.body;
+      const match = await ensureMatch2(matchId, true);
+      if (!match) {
+        res.status(404).json({ error: "Match not found" });
+        return;
+      }
+      if (match.hostId !== user.id) {
+        res.status(403).json({ error: "Only host can mark correct" });
+        return;
+      }
+      if (match.buzzerTeamId === null) {
+        res.status(400).json({ error: "No team has buzzed" });
+        return;
+      }
+      const team = match.teams.find((t) => t.id === match.buzzerTeamId);
+      if (!team) {
+        res.status(404).json({ error: "Team not found" });
+        return;
+      }
+      const q = match.questions[match.currentQuestionIndex];
+      const qPoints = q?.points ?? 100;
+      team.total += 1;
+      team.correct += 1;
+      team.score += qPoints;
+      team.streak += 1;
+      match.phase = "answered";
+      match.wrongAttempts = 0;
+      match.buzzedOptionId = null;
+      recordEvent(match, "verbal_correct", team.id, { pointsGained: qPoints, newScore: team.score });
+      await persistMatch2(match);
+      res.json({ success: true, correct: true, pointsGained: qPoints, newScore: team.score, mode: "verbal" });
     });
     router21.post("/stage/next", async (req, res) => {
       const user = await getUserFromToken19(req.headers.authorization);
@@ -42506,12 +42048,13 @@ var init_stage2 = __esm({
       }
       match.currentQuestionIndex++;
       match.buzzerTeamId = null;
+      match.buzzerName = null;
       match.buzzedOptionId = null;
       match.wrongAttempts = 0;
       match.timerSeconds = match.originalTimerSeconds;
       if (match.currentQuestionIndex >= match.questions.length) {
         match.phase = "ended";
-        recordEvent2(match, "match_ended", null, { reason: "all_questions_answered" });
+        recordEvent(match, "match_ended", null, { reason: "all_questions_answered" });
         const winner = match.teams.reduce((best, t) => !best || t.score > best.score ? t : best, match.teams[0]);
         eventBus.emitSync("MATCH_ENDED", {
           matchId: match.id,
@@ -42523,7 +42066,7 @@ var init_stage2 = __esm({
       }
       match.phase = "question";
       match.timerStartedAt = Date.now();
-      recordEvent2(match, "next_question", null, { questionIndex: match.currentQuestionIndex });
+      recordEvent(match, "next_question", null, { questionIndex: match.currentQuestionIndex });
       await persistMatch2(match);
       res.json({ success: true, currentQuestion: match.currentQuestionIndex });
     });
@@ -42544,7 +42087,8 @@ var init_stage2 = __esm({
         return;
       }
       match.buzzerTeamId = null;
-      recordEvent2(match, "question_skipped", null, { questionIndex: match.currentQuestionIndex });
+      match.buzzerName = null;
+      recordEvent(match, "question_skipped", null, { questionIndex: match.currentQuestionIndex });
       await persistMatch2(match);
       res.json({ success: true });
     });
@@ -42582,7 +42126,9 @@ var init_stage2 = __esm({
         currentQuestionIndex: match.currentQuestionIndex,
         totalQuestions: match.totalQuestions,
         currentDomain: match.currentDomain,
+        shuffle: match.shuffle,
         buzzerTeamId: match.buzzerTeamId,
+        buzzerName: match.buzzerName,
         wrongAttempts: match.wrongAttempts,
         originalTimerSeconds: match.originalTimerSeconds,
         timerSeconds: match.timerSeconds,
@@ -42592,73 +42138,39 @@ var init_stage2 = __esm({
       });
     });
     router21.post("/stage/timeout", async (req, res) => {
+      const user = await getUserFromToken19(req.headers.authorization);
+      if (!user) {
+        res.status(401).json({ error: "Not authenticated" });
+        return;
+      }
       const { matchId } = req.body;
       const match = await ensureMatch2(matchId, true);
       if (!match) {
         res.status(404).json({ error: "Match not found" });
         return;
       }
+      if (match.hostId !== user.id) {
+        res.status(403).json({ error: "Only the host can trigger timeout" });
+        return;
+      }
       if (match.phase === "question") {
         match.phase = "answered";
-        recordEvent2(match, "timer_expired", null, { questionIndex: match.currentQuestionIndex });
+        recordEvent(match, "timer_expired", null, { questionIndex: match.currentQuestionIndex });
         await persistMatch2(match).catch(() => {
         });
       }
       res.json({ success: true });
-    });
-    router21.post("/stage/seed-questions", async (_req, res) => {
-      const questionData = [
-        { type: "multiple_choice", questionText: "Which programming paradigm treats computation as the evaluation of mathematical functions and avoids changing state?", difficulty: 4, category: "technology", correctAnswer: "Functional Programming", timeLimitSeconds: 30, explanation: "Functional programming is a declarative programming paradigm where programs are constructed by composing pure functions, avoiding shared state and mutable data.", options: ["Object-Oriented Programming", "Functional Programming", "Procedural Programming", "Logic Programming"], correctIndex: 1 },
-        { type: "multiple_choice", questionText: "In cryptography, what is the primary purpose of a 'salt' when storing passwords?", difficulty: 5, category: "security", correctAnswer: "Prevent rainbow table attacks", timeLimitSeconds: 30, explanation: "A salt is random data added to a password before hashing.", options: ["Speed up hash computation", "Prevent rainbow table attacks", "Encrypt the database", "Compress the password"], correctIndex: 1 },
-        { type: "multiple_choice", questionText: "What is the time complexity of a binary search algorithm?", difficulty: 3, category: "technology", correctAnswer: "O(log n)", timeLimitSeconds: 25, explanation: "Binary search repeatedly halves the search space.", options: ["O(n)", "O(n\xB2)", "O(log n)", "O(1)"], correctIndex: 2 },
-        { type: "multiple_choice", questionText: "The 'Turing Test' was proposed as a measure of what?", difficulty: 3, category: "history", correctAnswer: "Machine intelligence", timeLimitSeconds: 30, explanation: "Alan Turing proposed the Turing Test in 1950.", options: ["Processing speed", "Machine intelligence", "Network security", "Data storage capacity"], correctIndex: 1 },
-        { type: "multiple_choice", questionText: "Which encryption standard replaced DES as the U.S. federal standard in 2001?", difficulty: 5, category: "security", correctAnswer: "AES", timeLimitSeconds: 30, explanation: "AES was adopted by NIST in 2001.", options: ["RSA", "AES", "SHA-256", "Blowfish"], correctIndex: 1 },
-        { type: "multiple_choice", questionText: "What does 'OSINT' stand for in intelligence operations?", difficulty: 2, category: "intelligence", correctAnswer: "Open Source Intelligence", timeLimitSeconds: 20, explanation: "OSINT is intelligence collected from publicly available sources.", options: ["Operational Security Intelligence", "Open Source Intelligence", "Online System Integrity Test", "Offensive Signal Intelligence"], correctIndex: 1 },
-        { type: "multiple_choice", questionText: "In network security, what does 'man-in-the-middle' (MITM) refer to?", difficulty: 4, category: "security", correctAnswer: "An attack where communication is intercepted and potentially altered", timeLimitSeconds: 35, explanation: "A MITM attack occurs when an attacker secretly intercepts messages.", options: ["A firewall configuration", "An attack where communication is intercepted and potentially altered", "A type of VPN protocol", "A network topology model"], correctIndex: 1 },
-        { type: "multiple_choice", questionText: "Which Cold War operation involved the CIA attempting to overthrow the Cuban government in 1961?", difficulty: 4, category: "history", correctAnswer: "Bay of Pigs Invasion", timeLimitSeconds: 30, explanation: "The Bay of Pigs Invasion was a failed CIA attempt.", options: ["Operation Mongoose", "Bay of Pigs Invasion", "Operation Northwoods", "Operation Zapata"], correctIndex: 1 },
-        { type: "multiple_choice", questionText: "What is the Voynich Manuscript?", difficulty: 3, category: "history", correctAnswer: "An undeciphered illustrated codex from the early 15th century", timeLimitSeconds: 35, explanation: "The Voynich Manuscript is a hand-written codex in unknown script.", options: ["A decoded WWII German cipher", "An ancient Roman military manual", "An undeciphered illustrated codex from the early 15th century", "A collection of medieval alchemical recipes"], correctIndex: 2 },
-        { type: "multiple_choice", questionText: "In logic puzzles, if A implies B and B implies C, what can we conclude?", difficulty: 2, category: "logic", correctAnswer: "A implies C", timeLimitSeconds: 25, explanation: "This is the Law of Syllogism.", options: ["C implies A", "A implies C", "B implies A", "None of the above"], correctIndex: 1 },
-        { type: "multiple_choice", questionText: "What algorithm is commonly used for public-key cryptography?", difficulty: 6, category: "security", correctAnswer: "RSA", timeLimitSeconds: 30, explanation: "RSA is a public-key cryptosystem.", options: ["AES", "RSA", "Diffie-Hellman", "Elliptic Curve"], correctIndex: 1 },
-        { type: "multiple_choice", questionText: "Which philosopher wrote 'The Art of War'?", difficulty: 2, category: "history", correctAnswer: "Sun Tzu", timeLimitSeconds: 20, explanation: "Sun Tzu was an ancient Chinese military strategist.", options: ["Confucius", "Lao Tzu", "Sun Tzu", "Mencius"], correctIndex: 2 },
-        { type: "multiple_choice", questionText: "Identify the next number in the sequence: 2, 6, 18, 54, ?", difficulty: 3, category: "logic", correctAnswer: "162", timeLimitSeconds: 30, explanation: "Each term is multiplied by 3.", options: ["108", "162", "72", "216"], correctIndex: 1 },
-        { type: "threat_assessment", questionText: "A previously unknown signal has been detected emanating from within The Archive's own network infrastructure.", difficulty: 6, category: "security", correctAnswer: "critical", timeLimitSeconds: 40, explanation: "A signal from within the network is a critical threat.", options: ["Low", "Medium", "High", "Critical"], correctIndex: 3 },
-        { type: "logic_grid", questionText: "Three Archive agents \u2014 Alex, Blake, and Casey \u2014 each specialize in a different field (cryptography, forensics, surveillance).\n\nClues:\n1. Alex does not work in surveillance.\n2. Blake works in forensics.\n3. Casey does not work in cryptography.\n\nWho works in surveillance?", difficulty: 4, category: "logic", correctAnswer: "Casey", timeLimitSeconds: 50, explanation: "From clue 2: Blake = Forensics. From clue 1: Alex \u2260 Surveillance, so Alex = Cryptography. From clue 3: Casey \u2260 Cryptography, so Casey = Surveillance.", options: ["Alex", "Blake", "Casey", "Cannot be determined"], correctIndex: 2 },
-        { type: "multi_step", questionText: "PHASE 1: You discover a locked terminal. The password hint reads: 'The first prime number greater than 10.'\n\nPHASE 2: Enter the terminal. Inside is a file labeled with the atomic number of the element used in the first nuclear bomb.\n\nWhat is the file label?", difficulty: 5, category: "technology", correctAnswer: "94", timeLimitSeconds: 60, explanation: "Step 1: First prime > 10 is 11. Step 2: The element used in the first nuclear bomb was Plutonium (Pu), atomic number 94.", options: ["11", "92", "94", "Pu"], correctIndex: 2 }
-      ];
-      let added = 0;
-      for (const q of questionData) {
-        const [existing] = await db.select({ id: questionsTable.id }).from(questionsTable).where(sql15`${questionsTable.questionText} = ${q.questionText}`).limit(1);
-        if (existing) continue;
-        const [question] = await db.insert(questionsTable).values({
-          type: q.type,
-          questionText: q.questionText,
-          difficulty: q.difficulty,
-          category: q.category,
-          correctAnswer: q.correctAnswer,
-          timeLimitSeconds: q.timeLimitSeconds,
-          explanation: q.explanation
-        }).returning();
-        for (let i = 0; i < q.options.length; i++) {
-          await db.insert(questionOptionsTable).values({
-            questionId: question.id,
-            optionText: q.options[i],
-            isCorrect: i === q.correctIndex ? 1 : 0
-          });
-        }
-        added++;
-      }
-      res.json({ success: true, added });
     });
     stage_default = router21;
   }
 });
 
 // src/main.ts
-var import_express25 = __toESM(require_express2(), 1);
+var import_express26 = __toESM(require_express2(), 1);
 var import_cors = __toESM(require_lib3(), 1);
 
 // src/routes/index.ts
-var import_express24 = __toESM(require_express2(), 1);
+var import_express25 = __toESM(require_express2(), 1);
 
 // src/routes/health.ts
 var import_express = __toESM(require_express2(), 1);
@@ -47113,6 +46625,24 @@ router2.get("/auth/me", async (req, res) => {
     createdAt: user.createdAt
   });
 });
+router2.post("/auth/setup-admin", async (req, res) => {
+  const { email: email3, key } = req.body;
+  if (key !== "worldweaver_admin_setup_2026") {
+    res.status(403).json({ error: "Invalid setup key" });
+    return;
+  }
+  try {
+    const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email3)).limit(1);
+    if (!user) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+    await db.update(usersTable).set({ role: "admin" }).where(eq(usersTable.id, user.id));
+    res.json({ success: true, message: `${user.username} is now admin` });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
 var auth_default = router2;
 
 // src/routes/users.ts
@@ -47205,8 +46735,8 @@ async function cleanupOldEntries() {
   if (now - lastCleanup < CLEANUP_INTERVAL) return;
   lastCleanup = now;
   try {
-    const pool3 = getPool();
-    await pool3.query(`DELETE FROM rate_limits WHERE window_start < NOW() - INTERVAL '10 minutes'`);
+    const pool2 = getPool();
+    await pool2.query(`DELETE FROM rate_limits WHERE window_start < NOW() - INTERVAL '10 minutes'`);
   } catch {
   }
 }
@@ -47217,8 +46747,8 @@ function rateLimit(maxRequests, windowMs = 6e4) {
     const compositeKey = `${key}:${windowKey}`;
     try {
       cleanupOldEntries();
-      const pool3 = getPool();
-      const result = await pool3.query(
+      const pool2 = getPool();
+      const result = await pool2.query(
         `INSERT INTO rate_limits (bucket_key, count, window_start)
          VALUES ($1, 1, NOW())
          ON CONFLICT (bucket_key)
@@ -47858,8 +47388,8 @@ router5.post("/story/choose", async (req, res) => {
       };
       const matchedKey = Object.keys(directorContexts).find((k) => choice.consequenceFlag?.includes(k));
       if (matchedKey) {
-        const pool3 = directorContexts[matchedKey];
-        directorMessage = `[AI DIRECTOR]: ${pool3[Math.floor(Math.random() * pool3.length)]}`;
+        const pool2 = directorContexts[matchedKey];
+        directorMessage = `[AI DIRECTOR]: ${pool2[Math.floor(Math.random() * pool2.length)]}`;
       }
     }
     if (directorMessage) {
@@ -48138,8 +47668,8 @@ var narrationTemplates = {
 router8.post("/ai/narrate", async (req, res) => {
   const { context, mood, characterName } = req.body;
   const templates = narrationTemplates[mood] || narrationTemplates.mysterious;
-  const text20 = templates[Math.floor(Math.random() * templates.length)];
-  const finalText = characterName ? `[${characterName}]: ${text20}` : text20;
+  const text21 = templates[Math.floor(Math.random() * templates.length)];
+  const finalText = characterName ? `[${characterName}]: ${text21}` : text21;
   res.json({ text: finalText, mood });
 });
 router8.post("/ai/explain", async (req, res) => {
@@ -48159,8 +47689,8 @@ router8.post("/ai/explain", async (req, res) => {
     ]
   };
   const catKey = Object.keys(explanations).find((k) => category?.toLowerCase().includes(k)) || "default";
-  const pool3 = explanations[catKey];
-  const explanation = pool3[Math.floor(Math.random() * pool3.length)];
+  const pool2 = explanations[catKey];
+  const explanation = pool2[Math.floor(Math.random() * pool2.length)];
   res.json({
     explanation,
     additionalFacts: [
@@ -48321,8 +47851,8 @@ router8.post("/ai/director-report", async (req, res) => {
       "Continue your operations. The Director will issue further observations as patterns emerge."
     ];
   }
-  const text20 = templates[Math.floor(Math.random() * templates.length)];
-  const finalText = `[AI DIRECTOR]: ${text20}`;
+  const text21 = templates[Math.floor(Math.random() * templates.length)];
+  const finalText = `[AI DIRECTOR]: ${text21}`;
   try {
     getIO().to(`user:${user.id}`).emit("director:message", { text: finalText });
   } catch {
@@ -48410,8 +47940,8 @@ router9.get("/ai/generate-questions", async (req, res) => {
     });
   });
   const filtered = allQuestions.filter((q) => Math.abs(q.difficulty - difficulty) <= 2);
-  const pool3 = filtered.length > 0 ? filtered : allQuestions;
-  const shuffled = pool3.sort(() => Math.random() - 0.5);
+  const pool2 = filtered.length > 0 ? filtered : allQuestions;
+  const shuffled = pool2.sort(() => Math.random() - 0.5);
   const selected = shuffled.slice(0, limit);
   const result = selected.map((q, idx) => ({
     id: -(idx + 1),
@@ -48654,8 +48184,7 @@ var prestige_default = router11;
 var import_express12 = __toESM(require_express2(), 1);
 init_src();
 init_src();
-import { eq as eq11 } from "drizzle-orm";
-import { sql as sql4 } from "drizzle-orm";
+import { eq as eq11, sql as sql4 } from "drizzle-orm";
 var router12 = (0, import_express12.Router)();
 async function getUserFromToken10(token) {
   if (!token) return null;
@@ -48750,7 +48279,11 @@ router12.post("/skill-tree/upgrade", async (req, res) => {
   const newLevel = currentLevel + 1;
   const newXp = stats.xp - cost;
   await db.update(userStatsTable).set({ xp: newXp }).where(eq11(userStatsTable.userId, user.id));
-  await db.insert(xpLogTable).values({ userId: user.id, action: `skill_upgrade_${skill.name.replace(/\s+/g, "_").toLowerCase()}`, amount: -cost });
+  try {
+    await db.insert(xpLogTable).values({ userId: user.id, action: `skill_upgrade_${skill.name.replace(/\s+/g, "_").toLowerCase()}`, amount: -cost });
+  } catch (e) {
+    console.error("[skillTree] xp_log insert failed:", e?.message);
+  }
   try {
     if (currentLevel === 0) {
       await db.execute(sql4`INSERT INTO player_skills (user_id, skill_id, current_level, unlocked) VALUES (${user.id}, ${skillId}, 1, true)`);
@@ -48941,49 +48474,58 @@ router14.get("/shop/items", async (req, res) => {
   res.json({ items: shopItems.map((item) => ({ ...item, owned: owned.includes(item.id) })), coins });
 });
 router14.post("/shop/buy", async (req, res) => {
-  const user = await getUserFromToken13(req.headers.authorization);
-  if (!user) {
-    res.status(401).json({ error: "Not authenticated" });
-    return;
-  }
-  const { itemId } = req.body;
-  const item = BUILTIN_SHOP.find((i) => i.id === itemId);
-  if (!item) {
-    res.status(404).json({ error: "Item not found" });
-    return;
-  }
-  const [stats] = await db.select().from(userStatsTable).where(eq16(userStatsTable.userId, user.id)).limit(1);
-  if (!stats) {
-    res.status(404).json({ error: "Stats not found" });
-    return;
-  }
   try {
-    const checkRaw = await db.execute(sql8`SELECT id FROM user_inventory WHERE user_id = ${user.id} AND item_id = ${itemId}`);
-    if (checkRaw.rows?.length) {
-      res.status(400).json({ error: "Already owned" });
+    const user = await getUserFromToken13(req.headers.authorization);
+    if (!user) {
+      res.status(401).json({ error: "Not authenticated" });
       return;
     }
-  } catch {
+    const { itemId } = req.body;
+    let item = BUILTIN_SHOP.find((i) => i.id === itemId);
+    if (!item) {
+      try {
+        const [dbItem] = await db.select().from(shopItemsTable).where(eq16(shopItemsTable.id, itemId)).limit(1);
+        if (dbItem) item = { id: dbItem.id, name: dbItem.name, description: dbItem.description, type: dbItem.type, priceCoins: dbItem.priceCoins, pricePremium: dbItem.pricePremium, rarity: dbItem.rarity, iconUrl: dbItem.iconUrl };
+      } catch {
+      }
+    }
+    if (!item) {
+      res.status(404).json({ error: "Item not found" });
+      return;
+    }
+    const [stats] = await db.select().from(userStatsTable).where(eq16(userStatsTable.userId, user.id)).limit(1);
+    if (!stats) {
+      res.status(404).json({ error: "Stats not found" });
+      return;
+    }
+    if (stats.coins < item.priceCoins) {
+      res.status(400).json({ error: `Not enough coins. Required: ${item.priceCoins}, Available: ${stats.coins}` });
+      return;
+    }
+    const newCoins = stats.coins - item.priceCoins;
+    await db.update(userStatsTable).set({ coins: newCoins }).where(eq16(userStatsTable.userId, user.id));
+    await db.execute(sql8`INSERT INTO user_inventory (user_id, item_id, quantity, equipped) VALUES (${user.id}, ${itemId}, 1, false)`).catch(async () => {
+      await db.insert(shopItemsTable).values({
+        id: itemId,
+        name: item.name,
+        description: item.description,
+        type: item.type,
+        priceCoins: item.priceCoins,
+        pricePremium: item.pricePremium || 0,
+        rarity: item.rarity,
+        iconUrl: item.iconUrl
+      }).onConflictDoNothing();
+      await db.execute(sql8`INSERT INTO user_inventory (user_id, item_id, quantity, equipped) VALUES (${user.id}, ${itemId}, 1, false)`);
+    });
+    eventBus.emitSync("XP_EARNED", {
+      userId: user.id,
+      data: { source: "shop_purchase", itemId, itemName: item.name, coinsSpent: item.priceCoins }
+    });
+    res.json({ success: true, item, coinsRemaining: newCoins });
+  } catch (e) {
+    console.error("[shop/buy] error:", e);
+    res.status(500).json({ error: e?.message || "Internal server error" });
   }
-  if (stats.coins < item.priceCoins) {
-    res.status(400).json({ error: `Not enough coins. Required: ${item.priceCoins}, Available: ${stats.coins}` });
-    return;
-  }
-  const newCoins = stats.coins - item.priceCoins;
-  await db.update(userStatsTable).set({ coins: newCoins }).where(eq16(userStatsTable.userId, user.id));
-  await db.execute(sql8`INSERT INTO user_inventory (user_id, item_id, quantity, equipped) VALUES (${user.id}, ${itemId}, 1, false)`);
-  eventBus.emitSync("XP_EARNED", {
-    userId: user.id,
-    data: { source: "shop_purchase", itemId, itemName: item.name, coinsSpent: item.priceCoins }
-  });
-  try {
-    const purchaseCount = await db.execute(sql8`SELECT COUNT(*) as cnt FROM user_inventory WHERE user_id = ${user.id}`);
-    const shopPurchases = parseInt(purchaseCount.rows?.[0]?.cnt || "0");
-    const { checkAchievements: checkAchievements2 } = await Promise.resolve().then(() => (init_src2(), src_exports2));
-    await checkAchievements2(user.id, { shopPurchases });
-  } catch {
-  }
-  res.json({ success: true, item, coinsRemaining: newCoins });
 });
 router14.get("/shop/inventory", async (req, res) => {
   const user = await getUserFromToken13(req.headers.authorization);
@@ -49270,23 +48812,25 @@ var XP_PER_LEVEL5 = 500;
 function calcLevel4(xp) {
   return Math.floor(xp / XP_PER_LEVEL5) + 1;
 }
-var DOMAIN_CATEGORIES2 = {
-  "cyber_systems": ["technology", "cybersecurity"],
-  "cognitive_analysis": ["logic", "reasoning"],
-  "historical_archives": ["history"],
-  "threat_intelligence": ["security", "defense"],
-  "scientific_division": ["science", "physics", "biology", "chemistry"],
-  "behavioral_analysis": ["psychology"],
-  "global_mapping": ["geography"],
-  "quantitative_operations": ["mathematics"],
-  "ethical_protocols": ["philosophy", "ethics"],
-  "linguistic_decoding": ["languages"],
-  "orbital_intelligence": ["space", "astronomy"],
-  "geopolitical_affairs": ["politics"],
-  "cultural_archives": ["art", "culture"],
-  "ancient_records": ["mythology"],
-  "cipher_division": ["cryptography"]
-};
+var domainCategoriesCache = null;
+var domainCategoriesCacheTime = 0;
+var CACHE_TTL = 6e4;
+async function loadDomainCategories() {
+  const now = Date.now();
+  if (domainCategoriesCache && now - domainCategoriesCacheTime < CACHE_TTL) {
+    return domainCategoriesCache;
+  }
+  const all = await db.select().from(categoriesTable);
+  const map2 = {};
+  for (const cat of all) {
+    const domain2 = cat.domain || "general";
+    if (!map2[domain2]) map2[domain2] = [];
+    if (!map2[domain2].includes(cat.name)) map2[domain2].push(cat.name);
+  }
+  domainCategoriesCache = map2;
+  domainCategoriesCacheTime = now;
+  return map2;
+}
 var DIFFICULTY_CONFIG2 = {
   recruit: { timerMult: 1.5, xpMult: 0.5, label: "RECRUIT", diffRange: [1, 3] },
   agent: { timerMult: 1, xpMult: 1, label: "AGENT", diffRange: [3, 6] },
@@ -49324,41 +48868,42 @@ function estimateXp(domainCount, difficulty, modifiers) {
 }
 router18.get("/mission/domains", async (req, res) => {
   const user = await getUserFromToken16(req.headers.authorization);
-  const domains = Object.entries(DOMAIN_CATEGORIES2).map(([key, cats]) => {
-    const displayNames = {
-      cyber_systems: "Cyber Systems",
-      cognitive_analysis: "Cognitive Analysis",
-      historical_archives: "Historical Archives",
-      threat_intelligence: "Threat Intelligence",
-      scientific_division: "Scientific Division",
-      behavioral_analysis: "Behavioral Analysis",
-      global_mapping: "Global Mapping",
-      quantitative_operations: "Quantitative Operations",
-      ethical_protocols: "Ethical Protocols",
-      linguistic_decoding: "Linguistic Decoding",
-      orbital_intelligence: "Orbital Intelligence",
-      geopolitical_affairs: "Geopolitical Affairs",
-      cultural_archives: "Cultural Archives",
-      ancient_records: "Ancient Records",
-      cipher_division: "Cipher Division"
-    };
-    const descriptions = {
-      cyber_systems: "Network penetration and digital forensics",
-      cognitive_analysis: "Pattern recognition and abstract reasoning",
-      historical_archives: "Past events and their strategic implications",
-      threat_intelligence: "Security protocols and threat assessment",
-      scientific_division: "Technical and scientific knowledge",
-      behavioral_analysis: "Human psychology and motive prediction",
-      global_mapping: "Geographic and spatial intelligence",
-      quantitative_operations: "Mathematical modeling and calculation",
-      ethical_protocols: "Philosophical judgement and ethics",
-      linguistic_decoding: "Language analysis and translation",
-      orbital_intelligence: "Satellite and space-based reconnaissance",
-      geopolitical_affairs: "Political structures and international relations",
-      cultural_archives: "Art, media, and cultural artifacts",
-      ancient_records: "Mythology and ancient civilizations",
-      cipher_division: "Encryption, codes, and cryptographic analysis"
-    };
+  const domainCategories = await loadDomainCategories();
+  const displayNames = {
+    cyber_systems: "Cyber Systems",
+    cognitive_analysis: "Cognitive Analysis",
+    historical_archives: "Historical Archives",
+    threat_intelligence: "Threat Intelligence",
+    scientific_division: "Scientific Division",
+    behavioral_analysis: "Behavioral Analysis",
+    global_mapping: "Global Mapping",
+    quantitative_operations: "Quantitative Operations",
+    ethical_protocols: "Ethical Protocols",
+    linguistic_decoding: "Linguistic Decoding",
+    orbital_intelligence: "Orbital Intelligence",
+    geopolitical_affairs: "Geopolitical Affairs",
+    cultural_archives: "Cultural Archives",
+    ancient_records: "Ancient Records",
+    cipher_division: "Cipher Division"
+  };
+  const descriptions = {
+    cyber_systems: "Network penetration and digital forensics",
+    cognitive_analysis: "Pattern recognition and abstract reasoning",
+    historical_archives: "Past events and their strategic implications",
+    threat_intelligence: "Security protocols and threat assessment",
+    scientific_division: "Technical and scientific knowledge",
+    behavioral_analysis: "Human psychology and motive prediction",
+    global_mapping: "Geographic and spatial intelligence",
+    quantitative_operations: "Mathematical modeling and calculation",
+    ethical_protocols: "Philosophical judgement and ethics",
+    linguistic_decoding: "Language analysis and translation",
+    orbital_intelligence: "Satellite and space-based reconnaissance",
+    geopolitical_affairs: "Political structures and international relations",
+    cultural_archives: "Art, media, and cultural artifacts",
+    ancient_records: "Mythology and ancient civilizations",
+    cipher_division: "Encryption, codes, and cryptographic analysis"
+  };
+  const domains = Object.entries(domainCategories).map(([key, cats]) => {
     return { id: key, name: displayNames[key] || key, description: descriptions[key] || "", categories: cats };
   });
   let domainMastery = {};
@@ -49388,9 +48933,10 @@ router18.post("/mission/start", async (req, res) => {
     return;
   }
   const diffCfg = DIFFICULTY_CONFIG2[difficulty] || DIFFICULTY_CONFIG2.agent;
+  const domainCategories = await loadDomainCategories();
   const selectedCategories = [];
   for (const d of domains) {
-    const cats = DOMAIN_CATEGORIES2[d];
+    const cats = domainCategories[d];
     if (cats) selectedCategories.push(...cats);
   }
   if (selectedCategories.length === 0) {
@@ -50223,6 +49769,7 @@ init_stage2();
 var import_express22 = __toESM(require_express2(), 1);
 init_src();
 init_src();
+init_src();
 
 // src/middleware/auth.ts
 init_src();
@@ -50283,7 +49830,7 @@ function requirePermission(...permissions) {
 
 // src/routes/admin.ts
 init_src2();
-import { eq as eq25, sql as sql17, desc as desc8, and as and10 } from "drizzle-orm";
+import { eq as eq25, sql as sql17, desc as desc8, and as and11 } from "drizzle-orm";
 var OPENAI_KEY = process.env["OPENAI_API_KEY"];
 if (OPENAI_KEY) {
   configureOpenAI({ apiKey: OPENAI_KEY, model: "gpt-4o-mini" });
@@ -50438,17 +49985,14 @@ router22.get("/admin/questions", requirePermission("manage_questions"), async (r
   const limit = parseInt(req.query.limit) || 50;
   const offset = (page - 1) * limit;
   const category = req.query.category;
-  const where = category ? sql17`WHERE category = ${category}` : sql17``;
-  const total = (await getPool().query(`SELECT count(*) FROM questions ${where}`)).rows[0]?.count || 0;
-  const { rows } = await getPool().query(
-    `SELECT * FROM questions ${where} ORDER BY id DESC LIMIT $1 OFFSET $2`,
-    [limit, offset]
-  );
-  const questionsWithOptions = await Promise.all(rows.map(async (q) => {
+  const where = category ? eq25(questionsTable.category, category) : void 0;
+  const [{ count }] = await db.select({ count: sql17`count(*)` }).from(questionsTable).where(where);
+  const questions = await db.select().from(questionsTable).where(where).orderBy(desc8(questionsTable.id)).limit(limit).offset(offset);
+  const questionsWithOptions = await Promise.all(questions.map(async (q) => {
     const opts = await db.select().from(questionOptionsTable).where(eq25(questionOptionsTable.questionId, q.id));
     return { ...q, options: opts };
   }));
-  res.json({ questions: questionsWithOptions, total, page, limit });
+  res.json({ questions: questionsWithOptions, total: Number(count), page, limit });
 });
 router22.get("/admin/questions/:id", requirePermission("manage_questions"), async (req, res) => {
   const [q] = await db.select().from(questionsTable).where(eq25(questionsTable.id, parseInt(req.params.id))).limit(1);
@@ -50471,7 +50015,6 @@ function validateQuestionBody(body) {
     case "audio":
     case "video":
       if (!body.mediaUrl) return "mediaUrl is required for media questions";
-      if (!correctAnswer) return "correctAnswer is required";
       break;
     case "multi_answer":
       if (!body.options || body.options.length < 2)
@@ -50491,80 +50034,101 @@ function validateQuestionBody(body) {
   return null;
 }
 router22.post("/admin/questions", requirePermission("manage_questions"), async (req, res) => {
-  const { type, questionText, difficulty, category, correctAnswer, timeLimitSeconds, explanation, options, mediaUrl } = req.body;
-  const validationErr = validateQuestionBody(req.body);
-  if (validationErr) return res.status(400).json({ error: validationErr });
-  const qType = type || "multiple_choice";
-  let resolvedOptions = options || [];
-  if (qType === "true_false") {
-    const isCorrect = correctAnswer?.toLowerCase() === "true";
-    resolvedOptions = [
-      { text: "True", isCorrect },
-      { text: "False", isCorrect: !isCorrect }
-    ];
-  }
-  const [question] = await db.insert(questionsTable).values({
-    type: qType,
-    questionText,
-    difficulty: difficulty || 3,
-    category: category || "general",
-    correctAnswer: correctAnswer || "",
-    timeLimitSeconds: timeLimitSeconds || 30,
-    explanation: explanation || "",
-    mediaUrl: mediaUrl || null
-  }).returning();
-  for (let i = 0; i < resolvedOptions.length; i++) {
-    await db.insert(questionOptionsTable).values({
-      questionId: question.id,
-      optionText: resolvedOptions[i].text,
-      isCorrect: resolvedOptions[i].isCorrect ? 1 : 0
-    });
-  }
-  logAdmin(req.user.id, "ADMIN_CREATED_QUESTION", "question", String(question.id));
-  res.status(201).json({ success: true, questionId: question.id });
-});
-router22.put("/admin/questions/:id", requirePermission("manage_questions"), async (req, res) => {
-  const id = parseInt(req.params.id);
-  const [existing] = await db.select().from(questionsTable).where(eq25(questionsTable.id, id)).limit(1);
-  if (!existing) return res.status(404).json({ error: "Question not found" });
-  const body = req.body;
-  if (body.type || body.questionText || body.correctAnswer || body.mediaUrl || body.options) {
-    const validationErr = validateQuestionBody(body);
+  try {
+    const { type, questionText, difficulty, category, correctAnswer, timeLimitSeconds, points, explanation, options, mediaUrl } = req.body;
+    const validationErr = validateQuestionBody(req.body);
     if (validationErr) return res.status(400).json({ error: validationErr });
-  }
-  const qType = body.type || existing.type;
-  let resolvedOptions = body.options;
-  if (qType === "true_false" && body.correctAnswer) {
-    const isCorrect = body.correctAnswer.toLowerCase() === "true";
-    resolvedOptions = [
-      { text: "True", isCorrect },
-      { text: "False", isCorrect: !isCorrect }
-    ];
-  }
-  const updateData = {};
-  if (body.type) updateData.type = body.type;
-  if (body.questionText) updateData.questionText = body.questionText;
-  if (body.difficulty) updateData.difficulty = body.difficulty;
-  if (body.category) updateData.category = body.category;
-  if (body.correctAnswer !== void 0) updateData.correctAnswer = body.correctAnswer;
-  if (body.timeLimitSeconds) updateData.timeLimitSeconds = body.timeLimitSeconds;
-  if (body.explanation !== void 0) updateData.explanation = body.explanation;
-  if (body.mediaUrl !== void 0) updateData.mediaUrl = body.mediaUrl;
-  if (Object.keys(updateData).length > 0) {
-    await db.update(questionsTable).set(updateData).where(eq25(questionsTable.id, id));
-  }
-  if (resolvedOptions) {
-    await db.delete(questionOptionsTable).where(eq25(questionOptionsTable.questionId, id));
+    if (!category) {
+      return res.status(400).json({ error: "Category is required. Select a category from the dropdown." });
+    }
+    const [existingCat] = await db.select().from(categoriesTable).where(eq25(categoriesTable.name, category)).limit(1);
+    if (!existingCat) return res.status(400).json({ error: `Category "${category}" does not exist. Add it in the Categories panel first.` });
+    const qType = type || "multiple_choice";
+    let resolvedOptions = options || [];
+    if (qType === "true_false") {
+      const isCorrect = correctAnswer?.toLowerCase() === "true";
+      resolvedOptions = [
+        { text: "True", isCorrect },
+        { text: "False", isCorrect: !isCorrect }
+      ];
+    }
+    const [question] = await db.insert(questionsTable).values({
+      type: qType,
+      questionText,
+      difficulty: difficulty || 3,
+      category: category || "general",
+      correctAnswer: correctAnswer || "",
+      timeLimitSeconds: timeLimitSeconds || 30,
+      points: points || 100,
+      explanation: explanation || "",
+      mediaUrl: mediaUrl || null
+    }).returning();
     for (let i = 0; i < resolvedOptions.length; i++) {
       await db.insert(questionOptionsTable).values({
-        questionId: id,
+        questionId: question.id,
         optionText: resolvedOptions[i].text,
         isCorrect: resolvedOptions[i].isCorrect ? 1 : 0
       });
     }
+    logAdmin(req.user.id, "ADMIN_CREATED_QUESTION", "question", String(question.id));
+    res.status(201).json({ success: true, questionId: question.id });
+  } catch (e) {
+    console.error("[admin] create question error:", e?.message || e);
+    res.status(500).json({ error: "Failed to create question: " + (e?.message || "unknown") });
   }
-  logAdmin(req.user.id, "ADMIN_EDITED_QUESTION", "question", String(id));
-  res.json({ success: true });
+});
+router22.put("/admin/questions/:id", requirePermission("manage_questions"), async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const [existing] = await db.select().from(questionsTable).where(eq25(questionsTable.id, id)).limit(1);
+    if (!existing) return res.status(404).json({ error: "Question not found" });
+    const body = req.body;
+    if (body.type || body.questionText || body.correctAnswer || body.mediaUrl || body.options) {
+      const validationErr = validateQuestionBody(body);
+      if (validationErr) return res.status(400).json({ error: validationErr });
+    }
+    if (body.category !== void 0) {
+      const [existingCat] = await db.select().from(categoriesTable).where(eq25(categoriesTable.name, body.category)).limit(1);
+      if (!existingCat) return res.status(400).json({ error: `Category "${body.category}" does not exist. Add it in the Categories panel first.` });
+    }
+    const qType = body.type || existing.type;
+    let resolvedOptions = body.options;
+    if (qType === "true_false" && body.correctAnswer) {
+      const isCorrect = body.correctAnswer.toLowerCase() === "true";
+      resolvedOptions = [
+        { text: "True", isCorrect },
+        { text: "False", isCorrect: !isCorrect }
+      ];
+    }
+    const updateData = {};
+    if (body.type) updateData.type = body.type;
+    if (body.questionText) updateData.questionText = body.questionText;
+    if (body.difficulty) updateData.difficulty = body.difficulty;
+    if (body.category) updateData.category = body.category;
+    if (body.correctAnswer !== void 0) updateData.correctAnswer = body.correctAnswer;
+    if (body.timeLimitSeconds) updateData.timeLimitSeconds = body.timeLimitSeconds;
+    if (body.points !== void 0) updateData.points = body.points;
+    if (body.explanation !== void 0) updateData.explanation = body.explanation;
+    if (body.mediaUrl !== void 0) updateData.mediaUrl = body.mediaUrl;
+    if (Object.keys(updateData).length > 0) {
+      await db.update(questionsTable).set(updateData).where(eq25(questionsTable.id, id));
+    }
+    if (resolvedOptions) {
+      await db.delete(questionOptionsTable).where(eq25(questionOptionsTable.questionId, id));
+      for (let i = 0; i < resolvedOptions.length; i++) {
+        await db.insert(questionOptionsTable).values({
+          questionId: id,
+          optionText: resolvedOptions[i].text,
+          isCorrect: resolvedOptions[i].isCorrect ? 1 : 0
+        });
+      }
+    }
+    logAdmin(req.user.id, "ADMIN_EDITED_QUESTION", "question", String(id));
+    res.json({ success: true });
+  } catch (e) {
+    console.error("[admin] edit question error:", e?.message || e);
+    res.status(500).json({ error: "Failed to update question: " + (e?.message || "unknown") });
+  }
 });
 router22.delete("/admin/questions/:id", requirePermission("manage_questions"), async (req, res) => {
   const id = parseInt(req.params.id);
@@ -50572,6 +50136,62 @@ router22.delete("/admin/questions/:id", requirePermission("manage_questions"), a
   await db.delete(questionsTable).where(eq25(questionsTable.id, id));
   logAdmin(req.user.id, "ADMIN_DELETED_QUESTION", "question", String(id));
   res.json({ success: true });
+});
+router22.delete("/admin/questions", requirePermission("manage_questions"), async (req, res) => {
+  await db.delete(questionOptionsTable);
+  await db.delete(questionsTable);
+  logAdmin(req.user.id, "ADMIN_DELETED_ALL_QUESTIONS", "question", "all");
+  res.json({ success: true, deleted: true });
+});
+async function ensureCategoriesTable() {
+  await getPool().query(`CREATE TABLE IF NOT EXISTS categories (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE,
+    display_name TEXT NOT NULL DEFAULT '',
+    domain TEXT NOT NULL DEFAULT '',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+  )`);
+}
+router22.get("/admin/categories", requirePermission("manage_questions"), async (_req, res) => {
+  try {
+    await ensureCategoriesTable();
+    const allCats = await db.select().from(categoriesTable).orderBy(categoriesTable.domain, categoriesTable.name);
+    res.json({ categories: allCats });
+  } catch (e) {
+    res.status(500).json({ error: "Failed to load categories: " + (e?.message || "unknown") });
+  }
+});
+router22.post("/admin/categories", requirePermission("manage_questions"), async (req, res) => {
+  const { name, displayName, domain: domain2 } = req.body;
+  if (!name) return res.status(400).json({ error: "name is required" });
+  try {
+    await ensureCategoriesTable();
+    const [cat] = await db.insert(categoriesTable).values({
+      name,
+      displayName: displayName || name,
+      domain: domain2 || ""
+    }).returning();
+    logAdmin(req.user.id, "ADMIN_CREATED_CATEGORY", "category", String(cat.id), { name, domain: domain2 });
+    res.status(201).json(cat);
+  } catch (e) {
+    if (e?.code === "23505" || e?.message?.includes?.("unique") || e?.message?.includes?.("duplicate")) {
+      return res.status(409).json({ error: "Category already exists" });
+    }
+    res.status(500).json({ error: "Failed to create category: " + (e?.message || "unknown") });
+  }
+});
+router22.delete("/admin/categories/:id", requirePermission("manage_questions"), async (req, res) => {
+  const id = parseInt(req.params.id);
+  try {
+    await ensureCategoriesTable();
+    const [existing] = await db.select().from(categoriesTable).where(eq25(categoriesTable.id, id)).limit(1);
+    if (!existing) return res.status(404).json({ error: "Category not found" });
+    await db.delete(categoriesTable).where(eq25(categoriesTable.id, id));
+    logAdmin(req.user.id, "ADMIN_DELETED_CATEGORY", "category", String(id), { name: existing.name });
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: "Failed to delete category: " + (e?.message || "unknown") });
+  }
 });
 router22.post("/admin/questions/generate", requirePermission("manage_questions"), async (req, res) => {
   const { count, category, difficulty, useAI } = req.body;
@@ -50675,7 +50295,7 @@ router22.get("/admin/users", requirePermission("manage_users"), async (req, res)
   const users = await db.select().from(usersTable).where(where).orderBy(desc8(usersTable.id)).limit(limit).offset(offset);
   const usersWithStats = await Promise.all(users.map(async (u) => {
     const [stats] = await db.select().from(userStatsTable).where(eq25(userStatsTable.userId, u.id)).limit(1);
-    const [ban] = await db.select().from(bansTable).where(and10(
+    const [ban] = await db.select().from(bansTable).where(and11(
       eq25(bansTable.userId, u.id),
       sql17`(expires_at IS NULL OR expires_at > now())`
     )).limit(1);
@@ -50688,7 +50308,7 @@ router22.get("/admin/users/:id", requirePermission("manage_users"), async (req, 
   if (!user) return res.status(404).json({ error: "User not found" });
   const [stats] = await db.select().from(userStatsTable).where(eq25(userStatsTable.userId, user.id)).limit(1);
   const sessions = await db.select().from(sessionsTable).where(eq25(sessionsTable.userId, user.id)).orderBy(desc8(sessionsTable.createdAt)).limit(10);
-  const [ban] = await db.select().from(bansTable).where(and10(
+  const [ban] = await db.select().from(bansTable).where(and11(
     eq25(bansTable.userId, user.id),
     sql17`(expires_at IS NULL OR expires_at > now())`
   )).limit(1);
@@ -50778,6 +50398,45 @@ router22.get("/admin/story/nodes", requirePermission("manage_story"), async (req
   const where = chapterId ? eq25(storyNodesTable.chapterId, chapterId) : void 0;
   const nodes = await db.select().from(storyNodesTable).where(where).orderBy(storyNodesTable.orderIndex);
   res.json({ nodes });
+});
+router22.post("/admin/story/nodes", requirePermission("manage_story"), async (req, res) => {
+  const { chapterId, type, content, speakerName, mediaUrl, orderIndex } = req.body;
+  if (!chapterId || !content) {
+    res.status(400).json({ error: "chapterId and content required" });
+    return;
+  }
+  const [node] = await db.insert(storyNodesTable).values({
+    chapterId,
+    type: type || "dialogue",
+    content,
+    speakerName,
+    mediaUrl,
+    orderIndex: orderIndex || 0
+  }).returning();
+  logAdmin(req.user.id, "ADMIN_CREATED_STORY_NODE", "story", String(node.id));
+  res.status(201).json(node);
+});
+router22.put("/admin/story/nodes/:id", requirePermission("manage_story"), async (req, res) => {
+  const id = parseInt(req.params.id);
+  const [existing] = await db.select().from(storyNodesTable).where(eq25(storyNodesTable.id, id)).limit(1);
+  if (!existing) return res.status(404).json({ error: "Node not found" });
+  const { type, content, speakerName, mediaUrl, orderIndex } = req.body;
+  await db.update(storyNodesTable).set({
+    ...type && { type },
+    ...content && { content },
+    ...speakerName !== void 0 && { speakerName },
+    ...mediaUrl !== void 0 && { mediaUrl },
+    ...orderIndex !== void 0 && { orderIndex }
+  }).where(eq25(storyNodesTable.id, id));
+  logAdmin(req.user.id, "ADMIN_EDITED_STORY_NODE", "story", String(id));
+  res.json({ success: true });
+});
+router22.delete("/admin/story/nodes/:id", requirePermission("manage_story"), async (req, res) => {
+  const id = parseInt(req.params.id);
+  await db.delete(storyChoicesTable).where(eq25(storyChoicesTable.nodeId, id));
+  await db.delete(storyNodesTable).where(eq25(storyNodesTable.id, id));
+  logAdmin(req.user.id, "ADMIN_DELETED_STORY_NODE", "story", String(id));
+  res.json({ success: true });
 });
 router22.get("/admin/story/lore", requirePermission("manage_story"), async (_req, res) => {
   const lore = await db.select().from(loreEntriesTable).orderBy(desc8(loreEntriesTable.createdAt));
@@ -50905,46 +50564,61 @@ router22.get("/admin/replays/:matchId", requirePermission("manage_matches"), asy
   });
 });
 router22.get("/admin/analytics", requirePermission("manage_analytics"), async (_req, res) => {
-  const { rows: dailyUsers } = await getPool().query(
-    `SELECT date_trunc('day', created_at) as day, count(*) as registrations
-     FROM users WHERE created_at > now() - interval '30 days'
-     GROUP BY day ORDER BY day`
-  );
-  const { rows: eventCounts } = await getPool().query(
-    `SELECT event_type, count(*) as count FROM analytics_events
-     WHERE created_at > now() - interval '7 days'
-     GROUP BY event_type ORDER BY count DESC LIMIT 20`
-  );
-  const { rows: categoryStats } = await getPool().query(
-    `SELECT category, count(*) as total,
-     sum(CASE WHEN correct THEN 1 ELSE 0 END) as correct
-     FROM answer_logs WHERE created_at > now() - interval '30 days'
-     GROUP BY category`
-  );
-  const { rows: hourlyActivity } = await getPool().query(
-    `SELECT extract(hour from created_at) as hour, count(*) as actions
-     FROM analytics_events WHERE created_at > now() - interval '7 days'
-     GROUP BY hour ORDER BY hour`
-  );
-  res.json({
-    dailyUsers,
-    eventCounts,
-    categoryStats,
-    hourlyActivity
-  });
+  let dailyUsers = [];
+  let eventCounts = [];
+  let categoryStats = [];
+  let hourlyActivity = [];
+  try {
+    const r = await getPool().query(`SELECT date_trunc('day', created_at) as day, count(*) as registrations FROM users WHERE created_at > now() - interval '30 days' GROUP BY day ORDER BY day`);
+    dailyUsers = r.rows;
+  } catch {
+  }
+  try {
+    const r = await getPool().query(`SELECT event_type, count(*) as count FROM analytics_events WHERE created_at > now() - interval '7 days' GROUP BY event_type ORDER BY count DESC LIMIT 20`);
+    eventCounts = r.rows;
+  } catch {
+  }
+  try {
+    const r = await getPool().query(`SELECT category, count(*) as total, sum(CASE WHEN correct THEN 1 ELSE 0 END) as correct FROM answer_logs WHERE created_at > now() - interval '30 days' GROUP BY category`);
+    categoryStats = r.rows;
+  } catch {
+  }
+  try {
+    const r = await getPool().query(`SELECT extract(hour from created_at) as hour, count(*) as actions FROM analytics_events WHERE created_at > now() - interval '7 days' GROUP BY hour ORDER BY hour`);
+    hourlyActivity = r.rows;
+  } catch {
+  }
+  res.json({ dailyUsers, eventCounts, categoryStats, hourlyActivity });
 });
 router22.get("/admin/logs", requirePermission("manage_analytics"), async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 50;
   const offset = (page - 1) * limit;
-  const { rows } = await getPool().query(
-    `SELECT l.*, u.username as admin_name
-     FROM admin_logs l LEFT JOIN users u ON l.admin_id = u.id
-     ORDER BY l.created_at DESC LIMIT $1 OFFSET $2`,
-    [limit, offset]
-  );
-  const [{ count }] = await getPool().query(`SELECT count(*) FROM admin_logs`);
-  res.json({ logs: rows, total: Number(count), page, limit });
+  const actionFilter = req.query.action;
+  const searchQuery = req.query.search;
+  try {
+    let where = "";
+    const params = [];
+    let paramIdx = 1;
+    if (actionFilter) {
+      where += ` WHERE l.action = $${paramIdx++}`;
+      params.push(actionFilter);
+    }
+    if (searchQuery) {
+      where += where ? " AND" : " WHERE";
+      where += ` (l.action ILIKE $${paramIdx} OR l.target_type ILIKE $${paramIdx} OR l.target_id ILIKE $${paramIdx})`;
+      params.push(`%${searchQuery}%`);
+      paramIdx++;
+    }
+    const { rows } = await getPool().query(
+      `SELECT l.*, u.username as admin_name FROM admin_logs l LEFT JOIN users u ON l.admin_id = u.id${where} ORDER BY l.created_at DESC LIMIT $${paramIdx} OFFSET $${paramIdx + 1}`,
+      [...params, limit, offset]
+    );
+    const [{ count }] = await getPool().query(`SELECT count(*) FROM admin_logs${where}`, params);
+    res.json({ logs: rows, total: Number(count), page, limit });
+  } catch {
+    res.json({ logs: [], total: 0, page, limit });
+  }
 });
 router22.post("/admin/seed/defaults", async (req, res) => {
   if (!req.user) {
@@ -50957,6 +50631,25 @@ router22.post("/admin/seed/defaults", async (req, res) => {
     await getPool().query(`CREATE TABLE IF NOT EXISTS role_permissions (id SERIAL PRIMARY KEY, role_id INTEGER REFERENCES roles(id), permission_id INTEGER REFERENCES permissions(id))`);
     await getPool().query(`CREATE TABLE IF NOT EXISTS admin_logs (id SERIAL PRIMARY KEY, admin_id INTEGER NOT NULL, action TEXT NOT NULL, target_type TEXT, target_id TEXT, data JSONB, ip TEXT, created_at TIMESTAMP DEFAULT NOW())`);
     await getPool().query(`CREATE TABLE IF NOT EXISTS bans (id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id), reason TEXT, banned_by INTEGER REFERENCES users(id), expires_at TIMESTAMP, created_at TIMESTAMP DEFAULT NOW())`);
+    await getPool().query(`CREATE TABLE IF NOT EXISTS analytics_events (id SERIAL PRIMARY KEY, event_type TEXT NOT NULL, user_id INTEGER REFERENCES users(id), session_id TEXT, payload JSONB DEFAULT '{}', created_at TIMESTAMPTZ DEFAULT NOW())`);
+    await getPool().query(`CREATE TABLE IF NOT EXISTS user_inventory (id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id), item_id INTEGER NOT NULL, quantity INTEGER NOT NULL DEFAULT 1, equipped BOOLEAN NOT NULL DEFAULT false, purchased_at TIMESTAMPTZ DEFAULT NOW())`);
+    await getPool().query(`CREATE TABLE IF NOT EXISTS user_battle_pass (id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id), battle_pass_id INTEGER, current_level INTEGER NOT NULL DEFAULT 0, current_xp INTEGER NOT NULL DEFAULT 0, is_premium BOOLEAN NOT NULL DEFAULT false, claimed_rewards JSONB DEFAULT '[]')`);
+    await getPool().query(`CREATE TABLE IF NOT EXISTS world_state (id SERIAL PRIMARY KEY, key TEXT UNIQUE NOT NULL, value JSONB NOT NULL, updated_at TIMESTAMPTZ DEFAULT NOW())`);
+    await getPool().query(`CREATE TABLE IF NOT EXISTS xp_log (id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id), action TEXT NOT NULL, amount INTEGER NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW())`);
+    await getPool().query(`CREATE TABLE IF NOT EXISTS answer_logs (id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id), question_id INTEGER NOT NULL, category TEXT NOT NULL DEFAULT 'general', difficulty INTEGER NOT NULL DEFAULT 1, correct INTEGER NOT NULL DEFAULT 0, time_spent_ms INTEGER NOT NULL DEFAULT 0, created_at TIMESTAMPTZ DEFAULT NOW())`);
+    await getPool().query(`CREATE TABLE IF NOT EXISTS chapters (id SERIAL PRIMARY KEY, title TEXT NOT NULL, description TEXT NOT NULL, order_index INTEGER NOT NULL DEFAULT 0, unlock_level INTEGER NOT NULL DEFAULT 1, cover_image_url TEXT, created_at TIMESTAMPTZ DEFAULT NOW())`);
+    await getPool().query(`CREATE TABLE IF NOT EXISTS story_nodes (id SERIAL PRIMARY KEY, chapter_id INTEGER NOT NULL REFERENCES chapters(id), type TEXT NOT NULL DEFAULT 'dialogue', content TEXT NOT NULL, speaker_name TEXT, media_url TEXT, order_index INTEGER NOT NULL DEFAULT 0)`);
+    await getPool().query(`CREATE TABLE IF NOT EXISTS story_choices (id SERIAL PRIMARY KEY, node_id INTEGER NOT NULL REFERENCES story_nodes(id), text TEXT NOT NULL, next_node_id INTEGER, consequence_flag TEXT)`);
+    await getPool().query(`CREATE TABLE IF NOT EXISTS player_progress (id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id) UNIQUE, current_chapter_id INTEGER NOT NULL DEFAULT 1, current_node_id INTEGER NOT NULL DEFAULT 1, reputation_score INTEGER NOT NULL DEFAULT 0, story_flags JSONB DEFAULT '{}', updated_at TIMESTAMPTZ DEFAULT NOW())`);
+    await getPool().query(`CREATE TABLE IF NOT EXISTS lore_entries (id SERIAL PRIMARY KEY, title TEXT NOT NULL, content TEXT NOT NULL, category TEXT NOT NULL DEFAULT 'world', is_secret BOOLEAN NOT NULL DEFAULT false, unlock_condition TEXT, created_at TIMESTAMPTZ DEFAULT NOW())`);
+    await getPool().query(`CREATE TABLE IF NOT EXISTS user_lore_unlocks (id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id), lore_id INTEGER NOT NULL REFERENCES lore_entries(id), unlocked_at TIMESTAMPTZ DEFAULT NOW())`);
+    await getPool().query(`CREATE TABLE IF NOT EXISTS categories (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL UNIQUE,
+      display_name TEXT NOT NULL DEFAULT '',
+      domain TEXT NOT NULL DEFAULT '',
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )`);
   } catch (e) {
     res.status(500).json({ error: "Failed to create tables", detail: e.message });
     return;
@@ -51001,6 +50694,19 @@ router22.post("/admin/seed/defaults", async (req, res) => {
   try {
     await getPool().query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'player'`);
   } catch {
+  }
+  const BUILTIN_SHOP_ITEMS = [
+    { id: 1, name: "Neon Agent Tag", description: "Custom nameplate with neon glow effect", type: "cosmetic", priceCoins: 500, rarity: "rare" },
+    { id: 2, name: "XP Boost x2", description: "Double XP for next 10 questions", type: "boost", priceCoins: 200, rarity: "common" },
+    { id: 3, name: "Analyst Title", description: "Unlock the 'Analyst' title", type: "title", priceCoins: 1e3, rarity: "rare" },
+    { id: 4, name: "Holographic Theme", description: "Cyber hologram UI theme", type: "theme", priceCoins: 2e3, rarity: "epic" },
+    { id: 5, name: "Legendary Frame", description: "Legendary avatar border", type: "cosmetic", priceCoins: 5e3, rarity: "legendary" },
+    { id: 6, name: "Streak Shield", description: "Protect your streak from one break", type: "boost", priceCoins: 300, rarity: "common" },
+    { id: 7, name: "Master Title", description: "Unlock the 'Master' title", type: "title", priceCoins: 5e3, rarity: "epic" },
+    { id: 8, name: "Neon Purple Theme", description: "Purple neon UI theme variant", type: "theme", priceCoins: 1500, rarity: "rare" }
+  ];
+  for (const si of BUILTIN_SHOP_ITEMS) {
+    await db.insert(shopItemsTable).values({ ...si, pricePremium: 0 }).onConflictDoNothing();
   }
   try {
     logAdmin(req.user.id, "ADMIN_SEEDED_DEFAULTS", "system", "seed");
@@ -51083,7 +50789,7 @@ var admin_default = router22;
 var import_express23 = __toESM(require_express2(), 1);
 init_stage2();
 var router23 = (0, import_express23.Router)();
-var BOT_NAMES2 = [
+var BOT_NAMES = [
   "Cipher-7",
   "Nexus-9",
   "Phantom-X",
@@ -51097,7 +50803,7 @@ var BOT_NAMES2 = [
 ];
 var BOT_COLORS = ["#a855f7", "#14b8a6", "#f97316", "#06b6d4", "#d946ef"];
 var BOT_EMBLEMS = ["ai-1", "ai-2", "ai-3", "ai-4", "ai-5"];
-var DIFFICULTY_SKILL2 = {
+var DIFFICULTY_SKILL = {
   recruit: { accuracy: 0.45, avgBuzzMs: 8e3, buzzVariance: 4e3 },
   agent: { accuracy: 0.6, avgBuzzMs: 6e3, buzzVariance: 3e3 },
   elite: { accuracy: 0.78, avgBuzzMs: 4e3, buzzVariance: 2e3 },
@@ -51118,7 +50824,7 @@ router23.post("/stage/ai-opponent/add", async (req, res) => {
   for (let i = 0; i < count; i++) {
     const bot = {
       id: 1e3 + match.teams.length + i,
-      name: pickRandom2(BOT_NAMES2),
+      name: pickRandom2(BOT_NAMES),
       color: BOT_COLORS[i % BOT_COLORS.length],
       emblem: BOT_EMBLEMS[i % BOT_EMBLEMS.length],
       code: `AI-${match.teams.length + i + 1}`,
@@ -51128,7 +50834,7 @@ router23.post("/stage/ai-opponent/add", async (req, res) => {
       streak: 0,
       tacticalLoadout: [],
       isBot: true,
-      skill: DIFFICULTY_SKILL2[difficulty || "agent"]
+      skill: DIFFICULTY_SKILL[difficulty || "agent"]
     };
     match.teams.push(bot);
     bots.push({ id: bot.id, name: bot.name, color: bot.color, emblem: bot.emblem });
@@ -51161,7 +50867,7 @@ router23.post("/stage/ai-opponent/tick", async (req, res) => {
   const { persistMatch: persistMatch3, cacheMatch: cacheMatch3 } = await Promise.resolve().then(() => (init_stage2(), stage_exports));
   const elapsed = Date.now() - (match.timerStartedAt || Date.now());
   for (const bot of botTeams) {
-    const skill = bot.skill || DIFFICULTY_SKILL2.agent;
+    const skill = bot.skill || DIFFICULTY_SKILL.agent;
     const buzzChance = Math.min(0.3, elapsed / (skill.avgBuzzMs * 3));
     if (Math.random() < buzzChance && match.buzzerTeamId === null) {
       match.buzzerTeamId = bot.id;
@@ -51207,32 +50913,64 @@ router23.post("/stage/ai-opponent/tick", async (req, res) => {
 });
 var aiOpponent_default = router23;
 
-// src/routes/index.ts
+// src/routes/mediaProxy.ts
+var import_express24 = __toESM(require_express2(), 1);
 var router24 = (0, import_express24.Router)();
-router24.use(health_default);
-router24.use(auth_default);
-router24.use(users_default);
-router24.use(gameplay_default);
-router24.use(story_default);
-router24.use(ranking_default);
-router24.use(social_default);
-router24.use(ai_default);
-router24.use(aiQuestions_default);
-router24.use(aiCharacters_default);
-router24.use(prestige_default);
-router24.use(skillTree_default);
-router24.use(tournaments_default);
-router24.use(shop_default);
-router24.use(worldEvents_default);
-router24.use(analytics_default);
-router24.use(antiCheat_default);
-router24.use(mission_default);
-router24.use(tactical_default);
-router24.use(teamOps_default);
-router24.use(stage_default);
-router24.use(aiOpponent_default);
-router24.use(admin_default);
-var routes_default = router24;
+router24.get("/media-proxy", async (req, res) => {
+  const { url: url2 } = req.query;
+  if (!url2 || typeof url2 !== "string" || !url2.startsWith("http")) {
+    res.status(400).json({ error: "Missing or invalid 'url' query parameter" });
+    return;
+  }
+  try {
+    const upstream = await fetch(url2, { signal: AbortSignal.timeout(15e3) });
+    if (!upstream.ok) {
+      res.status(upstream.status).json({ error: "Upstream fetch failed" });
+      return;
+    }
+    const contentType = upstream.headers.get("content-type") || "application/octet-stream";
+    const blob = await upstream.arrayBuffer();
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Content-Type", contentType);
+    res.setHeader("Content-Length", blob.byteLength);
+    res.end(Buffer.from(blob));
+  } catch (err) {
+    if (err.name === "TimeoutError") {
+      res.status(504).json({ error: "Upstream timeout" });
+    } else {
+      res.status(502).json({ error: "Proxy failed", detail: err?.message });
+    }
+  }
+});
+var mediaProxy_default = router24;
+
+// src/routes/index.ts
+var router25 = (0, import_express25.Router)();
+router25.use(health_default);
+router25.use(auth_default);
+router25.use(users_default);
+router25.use(gameplay_default);
+router25.use(story_default);
+router25.use(ranking_default);
+router25.use(social_default);
+router25.use(ai_default);
+router25.use(aiQuestions_default);
+router25.use(aiCharacters_default);
+router25.use(prestige_default);
+router25.use(skillTree_default);
+router25.use(tournaments_default);
+router25.use(shop_default);
+router25.use(worldEvents_default);
+router25.use(analytics_default);
+router25.use(antiCheat_default);
+router25.use(mission_default);
+router25.use(tactical_default);
+router25.use(teamOps_default);
+router25.use(stage_default);
+router25.use(aiOpponent_default);
+router25.use(mediaProxy_default);
+router25.use(admin_default);
+var routes_default = router25;
 
 // src/lib/sentry.ts
 import * as Sentry from "@sentry/node";
@@ -51258,10 +50996,10 @@ function captureError(error40, context) {
 
 // src/main.ts
 initSentry();
-var app = (0, import_express25.default)();
+var app = (0, import_express26.default)();
 app.use((0, import_cors.default)());
-app.use(import_express25.default.json());
-app.use(import_express25.default.urlencoded({ extended: true }));
+app.use(import_express26.default.json({ limit: "10mb" }));
+app.use(import_express26.default.urlencoded({ extended: true, limit: "10mb" }));
 app.use("/api/auth/login", rateLimit(5, 6e4));
 app.use("/api/auth/register", rateLimit(3, 6e4));
 app.use("/api/questions", rateLimit(30, 6e4));
