@@ -628,7 +628,7 @@ export default function HostControl() {
       <div className={`min-h-screen text-white overflow-hidden relative ${step === "stage" ? "" : "pt-14"}`}>
         <div className="fixed inset-0 pointer-events-none bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.3)_50%)] bg-[length:100%_4px] z-50 opacity-10" />
 
-        <div className="absolute top-0 left-0 right-0 z-40 p-4 flex items-center justify-between">
+        <div className="absolute top-0 left-0 right-0 z-[60] p-4 flex items-center justify-between">
           <div className="font-mono text-xs tracking-widest text-zinc-600">
             STAGE <span className="text-blue-400">MODE</span>
             {question && <span className="ml-3 text-zinc-800">Q{questionIndex + 1}/{totalQuestions}</span>}
