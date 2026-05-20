@@ -161,28 +161,27 @@ export default function StageResults() {
                         );
                       })}
                     </div>
-                    {q.explanation && (
-                      <div>
-                        <button onClick={() => setExpandedId(expandedId === q.id ? null : q.id)}
-                          className="font-mono text-xs text-blue-400 hover:text-blue-300 transition-colors">
-                          {expandedId === q.id ? "▲ HIDE EXPLANATION" : "▼ SHOW EXPLANATION"}
-                        </button>
-                        <button onClick={() => showExplanation(q.id)}
-                          className="font-mono text-xs text-yellow-400 hover:text-yellow-300 transition-colors ml-4">
-                          📺 SHOW ON DISPLAY
-                        </button>
-                        <AnimatePresence>
-                          {expandedId === q.id && (
-                            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-                              className="overflow-hidden">
-                              <div className="mt-2 p-3 bg-blue-500/5 border border-blue-500/20 rounded font-mono text-sm text-zinc-300 leading-relaxed">
-                                {q.explanation}
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-4">
+                      <button onClick={() => q.explanation && setExpandedId(expandedId === q.id ? null : q.id)}
+                        className={`font-mono text-xs transition-colors ${q.explanation ? "text-blue-400 hover:text-blue-300" : "text-zinc-700 cursor-default"}`}>
+                        {q.explanation ? (expandedId === q.id ? "▲ اخفاء" : "▼ شرح") : ""}
+                      </button>
+                      <button onClick={() => showExplanation(q.id)}
+                        disabled={!q.explanation}
+                        className="font-mono text-xs text-yellow-400 hover:text-yellow-300 transition-colors disabled:text-zinc-700 disabled:cursor-not-allowed">
+                        📺 عرض على الشاشة
+                      </button>
+                    </div>
+                    <AnimatePresence>
+                      {expandedId === q.id && q.explanation && (
+                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                          className="overflow-hidden">
+                          <div className="mt-2 p-3 bg-blue-500/5 border border-blue-500/20 rounded font-mono text-sm text-zinc-300 leading-relaxed">
+                            {q.explanation}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </motion.div>
               );
