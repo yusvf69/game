@@ -20,9 +20,10 @@ function mimeFromUrl(url: string): string {
 export async function convertToBlobUrl(url: string): Promise<string> {
   if (url.startsWith("blob:") || url.startsWith("data:")) return url;
   try {
-    const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(url)}`;
+    const base = import.meta.env.VITE_API_URL || "";
+    const proxyUrl = `${base}/api/media-proxy?url=${encodeURIComponent(url)}`;
     const res = await fetch(proxyUrl);
-    if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
+    if (!res.ok) throw new Error(`proxy fetch failed: ${res.status}`);
     const buf = await res.arrayBuffer();
     const blob = new Blob([buf], { type: mimeFromUrl(url) });
     return URL.createObjectURL(blob);

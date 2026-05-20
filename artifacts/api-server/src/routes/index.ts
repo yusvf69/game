@@ -22,6 +22,7 @@ import teamOpsRouter from "./teamOps";
 import stageRouter from "./stage";
 import adminRouter from "./admin";
 import aiOpponentRouter from "./aiOpponent";
+import mediaProxyRouter from "./mediaProxy";
 
 const router: IRouter = Router();
 router.use(healthRouter);
@@ -46,6 +47,7 @@ router.use(tacticalRouter);
 router.use(teamOpsRouter);
 router.use(stageRouter);
 router.use(aiOpponentRouter);
+router.use(mediaProxyRouter);
 router.use(adminRouter);
 
 export default router;
