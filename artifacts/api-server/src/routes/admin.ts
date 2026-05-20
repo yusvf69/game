@@ -598,10 +598,10 @@ router.post("/admin/questions/generate", requirePermission("manage_questions"), 
 
 router.get("/admin/questions/export", requirePermission("manage_questions"), async (req, res) => {
   try {
-    const { rows } = await getPool().query(`SELECT * FROM questions ORDER BY id`);
-    const questions = await Promise.all(rows.map(async (q: any) => {
-      const opts = await db.select().from(questionOptionsTable).where(eq(questionOptionsTable.questionId, q.id));
-      return { ...q, options: opts };
+    const { rows: qRows } = await getPool().query(`SELECT * FROM questions ORDER BY id`);
+    const questions = await Promise.all(qRows.map(async (q: any) => {
+      const { rows: optRows } = await getPool().query(`SELECT * FROM question_options WHERE question_id = $1`, [q.id]);
+      return { ...q, options: optRows };
     }));
     res.setHeader("Content-Type", "application/json");
     res.setHeader("Content-Disposition", `attachment; filename="questions-export-${Date.now()}.json"`);
