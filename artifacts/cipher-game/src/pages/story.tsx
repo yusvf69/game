@@ -4,6 +4,7 @@ import { NavBar } from "@/components/NavBar";
 import { useAOSStore } from "@/stores/aosStore";
 import AOSLayout from "@/components/aos/AOSLayout";
 import AOSBoot from "@/components/aos/AOSBoot";
+import { convertToBlobUrl } from "@/lib/utils";
 import {
   useGetChapters,
   useGetChapter,
@@ -46,6 +47,13 @@ function ChapterNode({ node, onChoice, onContinue, isPending, lastXp = 0, lastCh
   node: StoryNode; onChoice: (choiceId: number) => void; onContinue?: () => void; isPending: boolean;
   lastXp?: number; lastChapterXp?: number; showComplete?: boolean; hasContinue?: boolean;
 }) {
+  const [mediaBlobUrl, setMediaBlobUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!node.mediaUrl) { setMediaBlobUrl(null); return; }
+    convertToBlobUrl(node.mediaUrl).then(setMediaBlobUrl);
+  }, [node.mediaUrl]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -75,9 +83,9 @@ function ChapterNode({ node, onChoice, onContinue, isPending, lastXp = 0, lastCh
       {node.mediaUrl && (
         <div className="rounded-lg overflow-hidden border border-blue-500/20">
           {node.mediaUrl.match(/\.(mp4|webm|ogg)$/i) ? (
-            <video src={node.mediaUrl} controls className="w-full max-h-64 object-cover" />
+            <video src={mediaBlobUrl || node.mediaUrl} controls className="w-full max-h-64 object-cover" />
           ) : (
-            <img src={node.mediaUrl} alt="Story visual" className="w-full max-h-64 object-cover" />
+            <img src={mediaBlobUrl || node.mediaUrl} alt="Story visual" className="w-full max-h-64 object-cover" />
           )}
         </div>
       )}

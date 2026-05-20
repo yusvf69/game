@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AOSLayout from "@/components/aos/AOSLayout";
 import { initAudio, playMatchStart, playTick, playMatchEnd } from "@/lib/audio";
+import { convertToBlobUrl } from "@/lib/utils";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "";
 
@@ -48,13 +49,7 @@ export default function StagePage() {
     const mu = question?.mediaUrl;
     if (!mu || mu === prevMediaUrl.current) return;
     prevMediaUrl.current = mu;
-    if (mu.startsWith("data:")) {
-      fetch(mu).then(r => r.blob()).then(blob => {
-        setMediaBlobUrl(URL.createObjectURL(blob));
-      }).catch(() => setMediaBlobUrl(mu));
-    } else {
-      setMediaBlobUrl(mu);
-    }
+    convertToBlobUrl(mu).then(setMediaBlobUrl);
     return () => { if (mediaBlobUrl?.startsWith("blob:")) URL.revokeObjectURL(mediaBlobUrl); };
   }, [question?.mediaUrl]);
 

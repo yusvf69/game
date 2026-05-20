@@ -1,5 +1,7 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import WebGLDecrypt from "@/components/aos/WebGLDecrypt";
+import { convertToBlobUrl } from "@/lib/utils";
 
 interface QuestionOption {
   id: number;
@@ -27,8 +29,14 @@ interface Props {
 }
 
 export default function QuestionRenderer({ question, answerState, selectedOption, onAnswer, isPending, eliminatedOptionIds }: Props) {
+  const [mediaBlobUrl, setMediaBlobUrl] = useState<string | null>(null);
   const isEliminated = (optId: number) => eliminatedOptionIds?.includes(optId);
   const type = question.type;
+
+  useEffect(() => {
+    if (!question.mediaUrl) { setMediaBlobUrl(null); return; }
+    convertToBlobUrl(question.mediaUrl).then(setMediaBlobUrl);
+  }, [question.mediaUrl]);
 
   const renderOptions = (options: QuestionOption[], customClass = "") => {
     const visibleOptions = eliminatedOptionIds
@@ -83,7 +91,7 @@ export default function QuestionRenderer({ question, answerState, selectedOption
             {question.questionText}
           </div>
           {question.mediaUrl && (
-            <img src={question.mediaUrl} alt="Signal waveform" className="mt-3 w-full h-20 object-cover rounded opacity-60" />
+            <img src={mediaBlobUrl || question.mediaUrl} alt="Signal waveform" className="mt-3 w-full h-20 object-cover rounded opacity-60" />
           )}
         </div>
         <div className="font-mono text-xs text-zinc-600 tracking-widest">SELECT DECODED MESSAGE</div>
@@ -100,7 +108,7 @@ export default function QuestionRenderer({ question, answerState, selectedOption
           <p className="font-mono text-sm text-zinc-300 mb-4">{question.questionText}</p>
           {question.mediaUrl && (
             <div className="flex justify-center mb-4">
-              <img src={question.mediaUrl} alt="Pattern sequence" className="max-h-48 rounded-lg border border-purple-500/20" />
+              <img src={mediaBlobUrl || question.mediaUrl} alt="Pattern sequence" className="max-h-48 rounded-lg border border-purple-500/20" />
             </div>
           )}
         </div>
@@ -118,7 +126,7 @@ export default function QuestionRenderer({ question, answerState, selectedOption
           <p className="font-mono text-sm text-zinc-300 mb-4">{question.questionText}</p>
           {question.mediaUrl && (
             <div className="flex justify-center mb-4">
-              <audio src={question.mediaUrl} controls className="w-full max-w-md" />
+              <audio src={mediaBlobUrl || question.mediaUrl} controls className="w-full max-w-md" />
             </div>
           )}
           <motion.div
@@ -150,7 +158,7 @@ export default function QuestionRenderer({ question, answerState, selectedOption
           {question.mediaUrl && (
             <div className="flex justify-center mb-4">
               <WebGLDecrypt
-                src={question.mediaUrl}
+                src={mediaBlobUrl || question.mediaUrl}
                 alt="Visual for recognition"
                 className="max-h-64"
                 decryptDuration={3500}
@@ -270,9 +278,9 @@ export default function QuestionRenderer({ question, answerState, selectedOption
       {question.mediaUrl && (
         <div className="rounded-lg overflow-hidden border border-blue-500/20">
           {question.mediaUrl.match(/\.(mp4|webm|ogg)$/i) ? (
-            <video src={question.mediaUrl} controls className="w-full max-h-64 object-cover" />
+            <video src={mediaBlobUrl || question.mediaUrl} controls className="w-full max-h-64 object-cover" />
           ) : (
-            <img src={question.mediaUrl} alt="Question media" className="w-full max-h-64 object-cover" />
+            <img src={mediaBlobUrl || question.mediaUrl} alt="Question media" className="w-full max-h-64 object-cover" />
           )}
         </div>
       )}

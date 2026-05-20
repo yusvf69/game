@@ -4,6 +4,7 @@ import { getToken } from "@/lib/auth";
 import AOSLayout from "@/components/aos/AOSLayout";
 import { NavBar } from "@/components/NavBar";
 import { initAudio, playMatchStart, playCorrect, playWrong, playMatchEnd, playTick } from "@/lib/audio";
+import { convertToBlobUrl } from "@/lib/utils";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "";
 
@@ -131,10 +132,8 @@ export default function HostControl() {
 
   useEffect(() => {
     const mu = question?.mediaUrl;
-    if (!mu || !mu.startsWith("data:")) { setMediaBlobUrl(null); return; }
-    fetch(mu).then(r => r.blob()).then(blob => {
-      setMediaBlobUrl(URL.createObjectURL(blob));
-    }).catch(() => setMediaBlobUrl(mu));
+    if (!mu) { setMediaBlobUrl(null); return; }
+    convertToBlobUrl(mu).then(setMediaBlobUrl);
     return () => { if (mediaBlobUrl?.startsWith("blob:")) URL.revokeObjectURL(mediaBlobUrl); };
   }, [question?.mediaUrl]);
 
