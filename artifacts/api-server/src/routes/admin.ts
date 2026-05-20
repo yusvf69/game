@@ -597,14 +597,19 @@ router.post("/admin/questions/generate", requirePermission("manage_questions"), 
 // ─── Import / Export Questions ──────────────────────────────────────────
 
 router.get("/admin/questions/export", requirePermission("manage_questions"), async (req, res) => {
-  const { rows } = await getPool().query(`SELECT * FROM questions ORDER BY id`);
-  const questions = await Promise.all(rows.map(async (q: any) => {
-    const opts = await db.select().from(questionOptionsTable).where(eq(questionOptionsTable.questionId, q.id));
-    return { ...q, options: opts };
-  }));
-  res.setHeader("Content-Type", "application/json");
-  res.setHeader("Content-Disposition", `attachment; filename="questions-export-${Date.now()}.json"`);
-  res.json(questions);
+  try {
+    const { rows } = await getPool().query(`SELECT * FROM questions ORDER BY id`);
+    const questions = await Promise.all(rows.map(async (q: any) => {
+      const opts = await db.select().from(questionOptionsTable).where(eq(questionOptionsTable.questionId, q.id));
+      return { ...q, options: opts };
+    }));
+    res.setHeader("Content-Type", "application/json");
+    res.setHeader("Content-Disposition", `attachment; filename="questions-export-${Date.now()}.json"`);
+    res.json(questions);
+  } catch (e: any) {
+    console.error("[admin] export error:", e?.message || e);
+    res.status(500).json({ error: "Export failed: " + (e?.message || "unknown") });
+  }
 });
 
 router.post("/admin/questions/import", requirePermission("manage_questions"), async (req, res) => {
