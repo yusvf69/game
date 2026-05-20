@@ -630,7 +630,8 @@ router.get("/stage/:id", async (req, res) => {
   }
 
   const q = match.questions[match.currentQuestionIndex];
-  const qStrip = q ? stripAnswer(q) : null;
+  const showAnswer = match.phase === "answered" || match.phase === "ended";
+  const qStrip = q ? (showAnswer ? q : stripAnswer(q)) : null;
 
   res.json({
     id: match.id,

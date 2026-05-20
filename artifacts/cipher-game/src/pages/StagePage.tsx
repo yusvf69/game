@@ -14,6 +14,7 @@ interface StageTeam {
 interface StageQuestion {
   id: number; questionText: string;
   options: { id: number; text: string }[];
+  correctOptionIds?: number[];
   timeLimit: number; category: string; difficulty: number;
   mediaUrl?: string | null; type?: string;
 }
@@ -227,7 +228,7 @@ export default function StagePage() {
             </motion.div>
           )}
 
-          {(phase === "question" || phase === "buzzed") && question && (
+          {(phase === "question" || phase === "buzzed" || phase === "answered") && question && (
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-5xl text-center">
               <div className="font-mono text-[10px] text-zinc-700 tracking-widest mb-4">
                 QUESTION {questionIndex + 1}
@@ -235,6 +236,7 @@ export default function StagePage() {
                 <span className="text-blue-400">{question.category?.toUpperCase()}</span>
                 <span className="text-zinc-800 mx-2">DIFF {question.difficulty}</span>
                 {wrongAttempts > 0 && <span className="text-yellow-400 mx-2">◈ SECOND CHANCE ◈</span>}
+                {phase === "answered" && <span className="text-zinc-700 mx-2">// ANSWERED</span>}
               </div>
               <div className="font-mono text-2xl md:text-4xl lg:text-5xl font-bold text-zinc-100 leading-relaxed mb-8 max-w-4xl mx-auto">
                 {question.questionText}
@@ -265,12 +267,24 @@ export default function StagePage() {
                 </div>
               )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-3xl mx-auto mb-6">
-                {question.options.map((opt, i) => (
-                  <div key={opt.id} className="glass-strong border border-zinc-800/60 rounded-lg px-6 py-4 font-mono text-lg text-zinc-300">
-                    <span className="text-zinc-600 mr-3">{String.fromCharCode(65 + i)}.</span>
-                    {opt.text}
-                  </div>
-                ))}
+                {question.options.map((opt, i) => {
+                  const isCorrect = question.correctOptionIds?.includes(opt.id);
+                  const showResult = phase === "answered" && isCorrect !== undefined;
+                  return (
+                    <div key={opt.id}
+                      className={`rounded-lg px-6 py-4 font-mono text-lg transition-all ${
+                        showResult && isCorrect
+                          ? "border-2 border-green-500 bg-green-500/20 text-green-300"
+                          : showResult && !isCorrect
+                          ? "border border-zinc-800/60 text-zinc-600 opacity-50"
+                          : "glass-strong border border-zinc-800/60 text-zinc-300"
+                      }`}>
+                      <span className="text-zinc-600 mr-3">{String.fromCharCode(65 + i)}.</span>
+                      {opt.text}
+                      {showResult && isCorrect && <span className="ml-2 text-green-400">✓</span>}
+                    </div>
+                  );
+                })}
               </div>
               {timerActive && (
                 <div className="max-w-md mx-auto mb-6">
@@ -282,7 +296,7 @@ export default function StagePage() {
                 </div>
               )}
               <AnimatePresence>
-                {buzzerTeam && (
+                {buzzerTeam && phase !== "answered" && (
                   <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} className="inline-block">
                     <motion.div animate={{ boxShadow: ["0 0 20px rgba(239,68,68,0.3)", "0 0 80px rgba(239,68,68,0.8)", "0 0 20px rgba(239,68,68,0.3)"] }}
                       transition={{ duration: 0.5, repeat: Infinity }}
@@ -298,15 +312,12 @@ export default function StagePage() {
                   </motion.div>
                 )}
               </AnimatePresence>
-            </motion.div>
-          )}
 
-          {phase === "answered" && !winner && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center">
-              <div className="font-mono text-4xl md:text-6xl font-black text-zinc-900 tracking-widest mb-4">
-                {buzzerTeam ? "RESPONSE RECORDED" : "TIME EXPIRED"}
-              </div>
-              <div className="font-mono text-sm text-zinc-700 tracking-widest">AWAITING HOST...</div>
+              {phase === "answered" && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4">
+                  <div className="font-mono text-sm text-zinc-700 tracking-widest">AWAITING HOST...</div>
+                </motion.div>
+              )}
             </motion.div>
           )}
 

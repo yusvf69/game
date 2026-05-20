@@ -254,6 +254,21 @@ export default function AdminQuestions() {
     loadQuestions();
   }
 
+  async function deleteMediaQuestions() {
+    if (!confirm("Delete ALL image/audio/video questions?")) return;
+    if (!confirm("Are you sure? All media questions and their options will be permanently deleted.")) return;
+    setLoading(true);
+    try {
+      const r = await adminFetch("/admin/questions/media", { method: "DELETE" });
+      const d = await r.json();
+      setMsg(d.error || `Deleted ${d.deleted} media question(s)`);
+      loadQuestions();
+    } catch {
+      setMsg("Failed to delete media questions");
+      setLoading(false);
+    }
+  }
+
   async function deleteAllQuestions() {
     if (!confirm("Delete ALL questions? This cannot be undone!")) return;
     if (!confirm("Are you sure? All questions and their options will be permanently deleted.")) return;
@@ -577,6 +592,9 @@ const DIFFICULTY_TIERS = [
         </AdminButton>
         <AdminButton onClick={() => setShowCategoryPanel(!showCategoryPanel)}>
           <Tag className="w-4 h-4 inline mr-1" /> Categories
+        </AdminButton>
+        <AdminButton variant="danger" onClick={deleteMediaQuestions}>
+          <Image className="w-4 h-4 inline mr-1" /> Delete Media
         </AdminButton>
         <AdminButton variant="danger" onClick={deleteAllQuestions}>
           <Trash2 className="w-4 h-4 inline mr-1" /> Delete All

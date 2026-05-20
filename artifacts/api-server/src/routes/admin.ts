@@ -485,6 +485,23 @@ router.put("/admin/questions/:id", requirePermission("manage_questions"), async 
   }
 });
 
+// IMPORTANT: /media must be before /:id or Express matches "media" as :id
+router.delete("/admin/questions/media", requirePermission("manage_questions"), async (req, res) => {
+  try {
+    const { rows } = await getPool().query(`SELECT id FROM questions WHERE type IN ('image','audio','video')`);
+    const ids: number[] = rows.map((r: any) => r.id);
+    if (ids.length > 0) {
+      await getPool().query(`DELETE FROM question_options WHERE question_id = ANY($1::int[])`, [ids]);
+      await getPool().query(`DELETE FROM questions WHERE id = ANY($1::int[])`, [ids]);
+    }
+    logAdmin(req.user!.id, "ADMIN_DELETED_MEDIA_QUESTIONS", "question", `deleted ${ids.length}`);
+    res.json({ success: true, deleted: ids.length });
+  } catch (e: any) {
+    console.error("[admin] delete media questions error:", e?.message || e);
+    res.status(500).json({ error: "Failed to delete media questions: " + (e?.message || "unknown") });
+  }
+});
+
 router.delete("/admin/questions/:id", requirePermission("manage_questions"), async (req, res) => {
   const id = parseInt(req.params.id);
   await db.delete(questionOptionsTable).where(eq(questionOptionsTable.questionId, id));

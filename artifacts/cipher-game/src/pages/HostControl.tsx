@@ -692,7 +692,31 @@ export default function HostControl() {
                 ))}
               </div>
 
-              <div className="flex items-center justify-center gap-4">
+              <div className="flex items-center justify-center gap-4 flex-wrap">
+                <motion.button onClick={async () => {
+                  setLoading(true);
+                  try {
+                    const res = await fetch(`${BASE_URL}/api/stage/create`, {
+                      method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                      body: JSON.stringify({ teamCount: teams.length, domains: selectedDomains, difficulty, timerSeconds, questionCount, shuffle }),
+                    });
+                    const d = await res.json();
+                    if (!res.ok) throw new Error(d.error || "Failed");
+                    await fetch(`${BASE_URL}/api/stage/batch-config`, {
+                      method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                      body: JSON.stringify({ matchId: d.matchId, teams: teams.map((t, i) => ({ teamIndex: i, name: t.name, color: COLORS.find(c => c.id === t.color)?.hex || t.color, emblem: t.emblem, tacticalLoadout: t.tacticalLoadout })) }),
+                    });
+                    setMatchId(d.matchId); setRoomCode(d.roomCode); setTeamCodes(d.teams.map((t: any) => t.code));
+                    setAnswerResult(null); setSelectedOptionId(null); setRebuzzOpen(false); setWrongAttempts(0);
+                    setStep("lobby");
+                  } catch (e: any) { setError(e.message); }
+                  setLoading(false);
+                }}
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
+                  className="px-8 py-3 font-mono text-sm bg-purple-600/20 text-purple-400 border border-purple-500/40 rounded-lg hover:bg-purple-600/40 transition-all disabled:opacity-30"
+                  disabled={loading}>
+                  {loading ? "RE-MATCHING..." : "◈ RE-MATCH ◈"}
+                </motion.button>
                 <motion.button onClick={() => { setStep("create"); setMatchId(null); setAnswerResult(null); setSelectedOptionId(null); setRebuzzOpen(false); setWrongAttempts(0); }}
                   initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}
                   className="px-8 py-3 font-mono text-sm bg-blue-600/20 text-blue-400 border border-blue-500/40 rounded-lg hover:bg-blue-600/40 transition-all">
