@@ -269,16 +269,19 @@ export default function AdminQuestions() {
   }
 
   async function exportQuestions() {
-    const r = await adminFetch("/admin/questions/export");
-    const data = await r.json();
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `questions-export-${Date.now()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    setMsg("Exported");
+    try {
+      const r = await adminFetch("/admin/questions/export");
+      if (!r.ok) { setMsg(`Export failed (${r.status})`); return; }
+      const data = await r.json();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `questions-export-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setMsg("Exported");
+    } catch { setMsg("Export failed"); }
   }
 
   async function importQuestions(file: File) {
