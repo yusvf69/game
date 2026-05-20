@@ -110,11 +110,14 @@ function recordEvent(state: StageMatchState, type: string, teamId?: number | nul
 }
 
 async function persistMatch(state: StageMatchState): Promise<void> {
-  const insert = () => pool().query(
-    `INSERT INTO stage_matches (match_id, host_id, room_code, state) VALUES ($1, $2, $3, $4)
-     ON CONFLICT (match_id) DO UPDATE SET state = $4, updated_at = NOW()`,
-    [state.id, state.hostId, state.roomCode, JSON.stringify(state)],
-  );
+  const insert = () => {
+    cacheMatch(state);
+    return pool().query(
+      `INSERT INTO stage_matches (match_id, host_id, room_code, state) VALUES ($1, $2, $3, $4)
+       ON CONFLICT (match_id) DO UPDATE SET state = $4, updated_at = NOW()`,
+      [state.id, state.hostId, state.roomCode, JSON.stringify(state)],
+    );
+  };
   try {
     await insert();
   } catch (e: any) {
