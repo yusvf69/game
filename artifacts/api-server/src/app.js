@@ -41731,6 +41731,7 @@ var init_stage2 = __esm({
         totalQuestions: questionCount || 10,
         shuffle: shuffle !== false,
         buzzedOptionId: null,
+        currentExplanation: null,
         log: []
       };
       recordEvent(stageMatch, "match_created", null, { teamCount: teams.length, domains, difficulty });
@@ -42132,10 +42133,67 @@ var init_stage2 = __esm({
         wrongAttempts: match.wrongAttempts,
         originalTimerSeconds: match.originalTimerSeconds,
         timerSeconds: match.timerSeconds,
+        timerStartedAt: match.timerStartedAt,
+        currentExplanation: match.currentExplanation,
         question: qStrip,
         domains: match.domains,
         difficulty: match.difficulty
       });
+    });
+    router21.get("/stage/:id/results", async (req, res) => {
+      const matchId = parseInt(req.params.id);
+      const match = await ensureMatch2(matchId);
+      if (!match) {
+        res.status(404).json({ error: "Match not found" });
+        return;
+      }
+      res.json({
+        id: match.id,
+        teams: match.teams.filter((t) => t.name).map((t) => ({
+          id: t.id,
+          name: t.name,
+          color: t.color,
+          emblem: t.emblem,
+          score: t.score,
+          correct: t.correct,
+          total: t.total
+        })),
+        questions: match.questions.map((q) => ({
+          id: q.id,
+          questionText: q.questionText,
+          difficulty: q.difficulty,
+          category: q.category,
+          mediaUrl: q.mediaUrl,
+          type: q.type,
+          options: q.options || [],
+          correctOptionIds: q.correctOptionIds || [],
+          points: q.points ?? 100,
+          explanation: q.explanation || ""
+        })),
+        finished: true
+      });
+    });
+    router21.post("/stage/:id/show-explanation", async (req, res) => {
+      const user = await getUserFromToken19(req.headers.authorization);
+      if (!user) {
+        res.status(401).json({ error: "Not authenticated" });
+        return;
+      }
+      const matchId = parseInt(req.params.id);
+      const match = await ensureMatch2(matchId, true);
+      if (!match) {
+        res.status(404).json({ error: "Match not found" });
+        return;
+      }
+      if (match.hostId !== user.id) {
+        res.status(403).json({ error: "Only host can control" });
+        return;
+      }
+      const { explanation } = req.body;
+      match.currentExplanation = explanation || null;
+      recordEvent(match, "show_explanation", null, { explanation });
+      await persistMatch2(match);
+      res.json({ success: true });
     });
     router21.post("/stage/timeout", async (req, res) => {
       const user = await getUserFromToken19(req.headers.authorization);

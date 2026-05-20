@@ -24,6 +24,7 @@ import TeamOpsPage from "@/pages/TeamOpsPage";
 import BuzzerPage from "@/pages/BuzzerPage";
 import LocalOperationPage from "@/pages/LocalOperationPage";
 import StagePage from "@/pages/StagePage";
+import StageResults from "@/pages/StageResults";
 import HostControl from "@/pages/HostControl";
 import AdminLayout from "@/pages/admin/AdminLayout";
 import NotFound from "@/pages/not-found";
@@ -96,6 +97,7 @@ function Router() {
         {() => <ProtectedRoute component={LocalOperationPage} />}
       </Route>
       <Route path="/stage" component={StagePage} />
+      <Route path="/stage-results" component={StageResults} />
       <Route path="/host-control">
         {() => <ProtectedRoute component={HostControl} />}
       </Route>

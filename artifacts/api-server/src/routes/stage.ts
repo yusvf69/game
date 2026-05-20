@@ -72,6 +72,7 @@ interface StageMatchState {
   totalQuestions: number;
   shuffle: boolean;
   buzzedOptionId: number | null;
+  currentExplanation: string | null;
   log: StageEvent[];
 }
 
@@ -275,6 +276,7 @@ router.post("/stage/create", async (req, res) => {
     totalQuestions: questionCount || 10,
     shuffle: shuffle !== false,
     buzzedOptionId: null,
+    currentExplanation: null,
     log: [],
   };
 
@@ -648,10 +650,57 @@ router.get("/stage/:id", async (req, res) => {
     wrongAttempts: match.wrongAttempts,
     originalTimerSeconds: match.originalTimerSeconds,
     timerSeconds: match.timerSeconds,
+    timerStartedAt: match.timerStartedAt,
+    currentExplanation: match.currentExplanation,
     question: qStrip,
     domains: match.domains,
     difficulty: match.difficulty,
   });
+});
+
+// GET /stage/:id/results — return all questions with correct answers for review
+router.get("/stage/:id/results", async (req, res) => {
+  const matchId = parseInt(req.params.id);
+  const match = await ensureMatch(matchId);
+  if (!match) { res.status(404).json({ error: "Match not found" }); return; }
+
+  res.json({
+    id: match.id,
+    teams: match.teams.filter(t => t.name).map(t => ({
+      id: t.id, name: t.name, color: t.color, emblem: t.emblem,
+      score: t.score, correct: t.correct, total: t.total,
+    })),
+    questions: match.questions.map(q => ({
+      id: q.id,
+      questionText: q.questionText,
+      difficulty: q.difficulty,
+      category: q.category,
+      mediaUrl: q.mediaUrl,
+      type: q.type,
+      options: q.options || [],
+      correctOptionIds: q.correctOptionIds || [],
+      points: q.points ?? 100,
+      explanation: q.explanation || "",
+    })),
+    finished: true,
+  });
+});
+
+// POST /stage/:id/show-explanation — set the current explanation to display on the main screen
+router.post("/stage/:id/show-explanation", async (req, res) => {
+  const user = await getUserFromToken(req.headers.authorization);
+  if (!user) { res.status(401).json({ error: "Not authenticated" }); return; }
+
+  const matchId = parseInt(req.params.id);
+  const match = await ensureMatch(matchId, true);
+  if (!match) { res.status(404).json({ error: "Match not found" }); return; }
+  if (match.hostId !== user.id) { res.status(403).json({ error: "Only host can control" }); return; }
+
+  const { explanation } = req.body;
+  match.currentExplanation = explanation || null;
+  recordEvent(match, "show_explanation", null, { explanation });
+  await persistMatch(match);
+  res.json({ success: true });
 });
 
 // POST /stage/timeout — handle timer expiry from frontend polling

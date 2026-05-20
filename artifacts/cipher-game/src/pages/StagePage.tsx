@@ -41,6 +41,8 @@ export default function StagePage() {
   const [wrongAttempts, setWrongAttempts] = useState(0);
   const [connected, setConnected] = useState(false);
   const [mediaBlobUrl, setMediaBlobUrl] = useState<string | null>(null);
+  const [currentExplanation, setCurrentExplanation] = useState<string | null>(null);
+  const explanationTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevMediaUrl = useRef<string | null>(null);
 
   useEffect(() => { initAudio(); }, []);
@@ -110,6 +112,12 @@ export default function StagePage() {
           setTimerActive(d.phase === "question" || d.phase === "rebuzz");
         } else {
           setTimerActive(false);
+        }
+
+        if (d.currentExplanation) {
+          setCurrentExplanation(d.currentExplanation);
+          if (explanationTimeout.current) clearTimeout(explanationTimeout.current);
+          explanationTimeout.current = setTimeout(() => setCurrentExplanation(null), 15000);
         }
 
         if (d.phase === "ended") {
@@ -343,6 +351,27 @@ export default function StagePage() {
         )}
 
         {error && <div className="absolute bottom-8 left-0 right-0 text-center font-mono text-xs text-red-400">{error}</div>}
+
+        {currentExplanation && (
+          <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-8"
+            onClick={() => { setCurrentExplanation(null); if (explanationTimeout.current) clearTimeout(explanationTimeout.current); }}>
+            <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }}
+              className="max-w-3xl w-full glass-strong cipher-border rounded-xl p-8 md:p-12 text-center"
+              onClick={e => e.stopPropagation()}>
+              <div className="font-mono text-[10px] text-blue-400 tracking-widest mb-4">EXPLANATION</div>
+              <div className="font-mono text-xl md:text-3xl text-zinc-100 leading-relaxed">
+                {currentExplanation}
+              </div>
+              <div className="mt-8">
+                <button onClick={() => { setCurrentExplanation(null); if (explanationTimeout.current) clearTimeout(explanationTimeout.current); }}
+                  className="font-mono text-xs tracking-widest text-zinc-600 hover:text-zinc-400 transition-colors">
+                  DISMISS
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
       </div>
     </AOSLayout>
   );
