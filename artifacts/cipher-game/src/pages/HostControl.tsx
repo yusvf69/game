@@ -96,6 +96,7 @@ export default function HostControl() {
   const [rebuzzOpen, setRebuzzOpen] = useState(false);
   const [rebuzzExcludedTeam, setRebuzzExcludedTeam] = useState("");
   const [connectedTeamIds, setConnectedTeamIds] = useState<number[]>([]);
+  const [mediaBlobUrl, setMediaBlobUrl] = useState<string | null>(null);
 
   useEffect(() => { initAudio(); }, []);
 
@@ -127,6 +128,15 @@ export default function HostControl() {
     if (answerResult.correct) playCorrect();
     else playWrong();
   }, [answerResult]);
+
+  useEffect(() => {
+    const mu = question?.mediaUrl;
+    if (!mu || !mu.startsWith("data:")) { setMediaBlobUrl(null); return; }
+    fetch(mu).then(r => r.blob()).then(blob => {
+      setMediaBlobUrl(URL.createObjectURL(blob));
+    }).catch(() => setMediaBlobUrl(mu));
+    return () => { if (mediaBlobUrl?.startsWith("blob:")) URL.revokeObjectURL(mediaBlobUrl); };
+  }, [question?.mediaUrl]);
 
   useEffect(() => {
     if (timerActive && timerValue > 0 && timerValue <= 5) {
@@ -666,16 +676,16 @@ export default function HostControl() {
               {question.mediaUrl && (
                 <div className="max-w-2xl mx-auto mb-6 rounded-lg overflow-hidden border border-zinc-800/60">
                   {question.type === "image" ? (
-                    <img src={question.mediaUrl} alt="Question media" className="w-full max-h-64 object-contain bg-black/40"
+                    <img src={mediaBlobUrl || question.mediaUrl} alt="Question media" className="w-full max-h-64 object-contain bg-black/40"
                       onError={(e) => { console.error("[HostControl] image load error", (e.target as HTMLImageElement).src?.slice(0, 80)); e.currentTarget.style.display = "none"; }} />
                   ) : question.type === "audio" ? (
-                    <audio src={question.mediaUrl} controls className="w-full p-4 bg-black/40"
+                    <audio src={mediaBlobUrl || question.mediaUrl} controls className="w-full p-4 bg-black/40"
                       onError={(e) => console.error("[HostControl] audio load error", (e.target as HTMLAudioElement).src?.slice(0, 80))} />
                   ) : question.type === "video" ? (
-                    <video src={question.mediaUrl} controls className="w-full max-h-64 bg-black/40"
+                    <video src={mediaBlobUrl || question.mediaUrl} controls className="w-full max-h-64 bg-black/40"
                       onError={(e) => console.error("[HostControl] video load error", (e.target as HTMLVideoElement).src?.slice(0, 80))} />
                   ) : (
-                    <img src={question.mediaUrl} alt="Media" className="w-full max-h-64 object-contain bg-black/40"
+                    <img src={mediaBlobUrl || question.mediaUrl} alt="Media" className="w-full max-h-64 object-contain bg-black/40"
                       onError={(e) => { console.error("[HostControl] media fallback load error", (e.target as HTMLImageElement).src?.slice(0, 80)); e.currentTarget.style.display = "none"; }} />
                   )}
                 </div>

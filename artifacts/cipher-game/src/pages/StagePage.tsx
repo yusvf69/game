@@ -39,8 +39,24 @@ export default function StagePage() {
   const [error, setError] = useState<string | null>(null);
   const [wrongAttempts, setWrongAttempts] = useState(0);
   const [connected, setConnected] = useState(false);
+  const [mediaBlobUrl, setMediaBlobUrl] = useState<string | null>(null);
+  const prevMediaUrl = useRef<string | null>(null);
 
   useEffect(() => { initAudio(); }, []);
+
+  useEffect(() => {
+    const mu = question?.mediaUrl;
+    if (!mu || mu === prevMediaUrl.current) return;
+    prevMediaUrl.current = mu;
+    if (mu.startsWith("data:")) {
+      fetch(mu).then(r => r.blob()).then(blob => {
+        setMediaBlobUrl(URL.createObjectURL(blob));
+      }).catch(() => setMediaBlobUrl(mu));
+    } else {
+      setMediaBlobUrl(mu);
+    }
+    return () => { if (mediaBlobUrl?.startsWith("blob:")) URL.revokeObjectURL(mediaBlobUrl); };
+  }, [question?.mediaUrl]);
 
   const prevPhase = useRef<string>("idle");
   const prevTickSecond = useRef<number>(-1);
@@ -223,16 +239,16 @@ export default function StagePage() {
               {question.mediaUrl && (
                 <div className="max-w-2xl mx-auto mb-6 rounded-lg overflow-hidden border border-zinc-800/60">
                   {question.type === "image" ? (
-                    <img src={question.mediaUrl} alt="Question media" className="w-full max-h-64 object-contain bg-black/40"
+                    <img src={mediaBlobUrl || question.mediaUrl} alt="Question media" className="w-full max-h-64 object-contain bg-black/40"
                       onError={(e) => { console.error("[StagePage] image load error", (e.target as HTMLImageElement).src?.slice(0, 80)); e.currentTarget.style.display = "none"; }} />
                   ) : question.type === "audio" ? (
-                    <audio src={question.mediaUrl} controls className="w-full p-4 bg-black/40"
+                    <audio src={mediaBlobUrl || question.mediaUrl} controls className="w-full p-4 bg-black/40"
                       onError={(e) => console.error("[StagePage] audio load error", (e.target as HTMLAudioElement).src?.slice(0, 80))} />
                   ) : question.type === "video" ? (
-                    <video src={question.mediaUrl} controls className="w-full max-h-64 bg-black/40"
+                    <video src={mediaBlobUrl || question.mediaUrl} controls className="w-full max-h-64 bg-black/40"
                       onError={(e) => console.error("[StagePage] video load error", (e.target as HTMLVideoElement).src?.slice(0, 80))} />
                   ) : (
-                    <img src={question.mediaUrl} alt="Media" className="w-full max-h-64 object-contain bg-black/40"
+                    <img src={mediaBlobUrl || question.mediaUrl} alt="Media" className="w-full max-h-64 object-contain bg-black/40"
                       onError={(e) => { console.error("[StagePage] media fallback load error", (e.target as HTMLImageElement).src?.slice(0, 80)); e.currentTarget.style.display = "none"; }} />
                   )}
                 </div>
