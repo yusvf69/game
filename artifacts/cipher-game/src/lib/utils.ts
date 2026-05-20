@@ -24,8 +24,9 @@ export async function convertToBlobUrl(url: string): Promise<string> {
     const proxyUrl = `${base}/api/media-proxy?url=${encodeURIComponent(url)}`;
     const res = await fetch(proxyUrl);
     if (!res.ok) throw new Error(`proxy fetch failed: ${res.status}`);
+    const contentType = res.headers.get("content-type") || mimeFromUrl(url);
     const buf = await res.arrayBuffer();
-    const blob = new Blob([buf], { type: mimeFromUrl(url) });
+    const blob = new Blob([buf], { type: contentType });
     return URL.createObjectURL(blob);
   } catch {
     return url;
