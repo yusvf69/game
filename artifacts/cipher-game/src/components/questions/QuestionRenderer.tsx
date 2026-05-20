@@ -313,11 +313,19 @@ export default function QuestionRenderer({ question, answerState, selectedOption
       <p className="font-mono text-base text-zinc-100 leading-relaxed">{question.questionText}</p>
       {question.mediaUrl && (
         <div className="rounded-lg overflow-hidden border border-blue-500/20">
-          {question.mediaUrl.match(/\.(mp4|webm|ogg)$/i) ? (
-            <video src={mediaBlobUrl || question.mediaUrl} controls className="w-full max-h-64 object-cover" />
-          ) : (
-            <img src={mediaBlobUrl || question.mediaUrl} alt="Question media" className="w-full max-h-64 object-cover" />
-          )}
+          {(() => {
+            const url = mediaBlobUrl || question.mediaUrl;
+            if (url.startsWith("data:audio/")) {
+              return <audio src={url} controls className="w-full p-4 bg-black/20" />;
+            }
+            if (url.startsWith("data:video/")) {
+              return <video src={url} controls className="w-full max-h-64 object-cover" />;
+            }
+            if (url.match(/\.(mp4|webm|ogg)$/i)) {
+              return <video src={url} controls className="w-full max-h-64 object-cover" />;
+            }
+            return <img src={url} alt="Question media" className="w-full max-h-64 object-cover" />;
+          })()}
         </div>
       )}
       {renderOptions(question.options)}

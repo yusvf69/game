@@ -697,19 +697,27 @@ export default function HostControl() {
               </div>
               {question.mediaUrl && (
                 <div className="max-w-2xl mx-auto mb-6 rounded-lg overflow-hidden border border-zinc-800/60">
-                  {question.type === "image" ? (
-                    <img src={mediaBlobUrl || question.mediaUrl} alt="Question media" className="w-full max-h-64 object-contain bg-black/40"
-                      onError={(e) => { console.error("[HostControl] image load error", (e.target as HTMLImageElement).src?.slice(0, 80)); e.currentTarget.style.display = "none"; }} />
-                  ) : question.type === "audio" ? (
-                    <audio src={mediaBlobUrl || question.mediaUrl} controls className="w-full p-4 bg-black/40"
-                      onError={(e) => console.error("[HostControl] audio load error", (e.target as HTMLAudioElement).src?.slice(0, 80))} />
-                  ) : question.type === "video" ? (
-                    <video src={mediaBlobUrl || question.mediaUrl} controls className="w-full max-h-64 bg-black/40"
-                      onError={(e) => console.error("[HostControl] video load error", (e.target as HTMLVideoElement).src?.slice(0, 80))} />
-                  ) : (
-                    <img src={mediaBlobUrl || question.mediaUrl} alt="Media" className="w-full max-h-64 object-contain bg-black/40"
-                      onError={(e) => { console.error("[HostControl] media fallback load error", (e.target as HTMLImageElement).src?.slice(0, 80)); e.currentTarget.style.display = "none"; }} />
-                  )}
+                  {(() => {
+                    const url = mediaBlobUrl || question.mediaUrl;
+                    if (url.startsWith("data:audio/")) {
+                      return <audio src={url} controls className="w-full p-4 bg-black/40"
+                        onError={(e) => console.error("[HostControl] audio load error", (e.target as HTMLAudioElement).src?.slice(0, 80))} />;
+                    }
+                    if (url.startsWith("data:video/")) {
+                      return <video src={url} controls className="w-full max-h-64 bg-black/40"
+                        onError={(e) => console.error("[HostControl] video load error", (e.target as HTMLVideoElement).src?.slice(0, 80))} />;
+                    }
+                    if (question.type === "audio") {
+                      return <audio src={url} controls className="w-full p-4 bg-black/40"
+                        onError={(e) => console.error("[HostControl] audio load error", (e.target as HTMLAudioElement).src?.slice(0, 80))} />;
+                    }
+                    if (question.type === "video") {
+                      return <video src={url} controls className="w-full max-h-64 bg-black/40"
+                        onError={(e) => console.error("[HostControl] video load error", (e.target as HTMLVideoElement).src?.slice(0, 80))} />;
+                    }
+                    return <img src={url} alt="Question media" className="w-full max-h-64 object-contain bg-black/40"
+                      onError={(e) => { console.error("[HostControl] image load error", (e.target as HTMLImageElement).src?.slice(0, 80)); e.currentTarget.style.display = "none"; }} />;
+                  })()}
                 </div>
               )}
 
