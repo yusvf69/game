@@ -5,8 +5,8 @@ const router = Router();
 router.get("/media-proxy", async (req, res) => {
   const { url } = req.query;
 
-  if (!url || typeof url !== "string") {
-    res.status(400).json({ error: "Missing 'url' query parameter" });
+  if (!url || typeof url !== "string" || !url.startsWith("http")) {
+    res.status(400).json({ error: "Missing or invalid 'url' query parameter" });
     return;
   }
 
@@ -18,25 +18,17 @@ router.get("/media-proxy", async (req, res) => {
     }
 
     const contentType = upstream.headers.get("content-type") || "application/octet-stream";
-    const contentLength = upstream.headers.get("content-length");
+    const blob = await upstream.arrayBuffer();
 
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Content-Type", contentType);
-    if (contentLength) res.setHeader("Content-Length", contentLength);
-
-    if (upstream.body) {
-      for await (const chunk of upstream.body as any) {
-        res.write(chunk);
-      }
-      res.end();
-    } else {
-      res.end();
-    }
+    res.setHeader("Content-Length", blob.byteLength);
+    res.end(Buffer.from(blob));
   } catch (err: any) {
-    if (err.name === "TimeoutError" || err.name === "AbortError") {
+    if (err.name === "TimeoutError") {
       res.status(504).json({ error: "Upstream timeout" });
     } else {
-      res.status(502).json({ error: "Proxy fetch failed", detail: err?.message });
+      res.status(502).json({ error: "Proxy failed", detail: err?.message });
     }
   }
 });
