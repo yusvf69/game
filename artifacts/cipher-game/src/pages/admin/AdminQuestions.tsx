@@ -202,6 +202,10 @@ export default function AdminQuestions() {
   const [showAiPanel, setShowAiPanel] = useState(false);
   const [aiCount, setAiCount] = useState("5");
   const [aiCategory, setAiCategory] = useState("");
+  const [showBulkPanel, setShowBulkPanel] = useState(false);
+  const [bulkText, setBulkText] = useState("");
+  const [bulkParsing, setBulkParsing] = useState(false);
+  const [bulkResults, setBulkResults] = useState<{ index: number; questionId?: number; error?: string }[] | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -460,6 +464,60 @@ const DIFFICULTY_TIERS = [
 
   const categoryOptions = categories.map(c => ({ label: `${c.displayName || c.name}${c.domain ? ` (${c.domain})` : ""}`, value: c.name }));
 
+  function parseBulkText(text: string): any[] {
+    const blocks = text.split(/^---\s*$/m).filter(b => b.trim());
+    const questions: any[] = [];
+
+    const DIFF_MAP: Record<string, number> = {
+      recruit: 2, RECRUIT: 2, agent: 4, AGENT: 4, elite: 7, ELITE: 7, omega: 9, OMEGA: 9,
+    };
+
+    for (const block of blocks) {
+      const lines = block.trim().split("\n");
+      const q: any = { type: "multiple_choice", options: [], points: 100, difficulty: 4, timeLimitSeconds: 30, explanation: "", mediaUrl: "", correctAnswer: "" };
+
+      for (const line of lines) {
+        const t = line.trim();
+        if (t.startsWith("Q:")) q.questionText = t.slice(2).trim();
+        else if (/^[A-D]:/.test(t)) {
+          const text = t.slice(2).trim();
+          const isCorrect = text.endsWith("*");
+          q.options.push({ text: isCorrect ? text.slice(0, -1).trim() : text, isCorrect });
+        } else if (t.startsWith("TYPE:")) q.type = t.slice(5).trim().toLowerCase();
+        else if (t.startsWith("CAT:")) q.category = t.slice(4).trim();
+        else if (t.startsWith("DIFF:")) q.difficulty = (DIFF_MAP[t.slice(5).trim()] ?? parseInt(t.slice(5).trim())) || 4;
+        else if (t.startsWith("PTS:")) q.points = parseInt(t.slice(4).trim()) || 100;
+        else if (t.startsWith("EXP:")) q.explanation = t.slice(4).trim();
+        else if (t.startsWith("URL:")) q.mediaUrl = t.slice(4).trim();
+      }
+
+      if (q.type === "true_false" && q.options.length === 0) q.correctAnswer = "true";
+      if (q.type === "cipher" && !q.correctAnswer) q.correctAnswer = q.questionText || "";
+
+      if (q.questionText) questions.push(q);
+    }
+    return questions;
+  }
+
+  async function handleBulkSubmit() {
+    if (!bulkText.trim()) return;
+    setBulkParsing(true);
+    setBulkResults(null);
+    const parsed = parseBulkText(bulkText);
+    if (parsed.length === 0) { setMsg("No valid questions found"); setBulkParsing(false); return; }
+    try {
+      const r = await adminFetch("/admin/questions/bulk", {
+        method: "POST",
+        body: JSON.stringify({ questions: parsed }),
+      });
+      const d = await r.json();
+      setBulkResults(d.results || []);
+      setMsg(d.created > 0 ? `Created ${d.created} question(s)` : "All failed");
+      if (d.created > 0) loadQuestions();
+    } catch { setMsg("Network error"); }
+    setBulkParsing(false);
+  }
+
   const headers = ["ID", "Type", "Text", "Category", "Diff", "Options", "Created", "Actions"];
   const rows = questions.map(q => {
     const typeInfo = QUESTION_TYPES.find(t => t.value === q.type);
@@ -510,6 +568,9 @@ const DIFFICULTY_TIERS = [
         />
         <AdminButton onClick={() => setShowAiPanel(!showAiPanel)}>
           <Sparkles className="w-4 h-4 inline mr-1" /> AI Generate
+        </AdminButton>
+        <AdminButton onClick={() => { setShowBulkPanel(!showBulkPanel); setBulkResults(null); }}>
+          <ListChecks className="w-4 h-4 inline mr-1" /> Bulk Add
         </AdminButton>
         <AdminButton onClick={() => setShowCategoryPanel(!showCategoryPanel)}>
           <Tag className="w-4 h-4 inline mr-1" /> Categories
@@ -624,6 +685,60 @@ const DIFFICULTY_TIERS = [
                   <Sparkles className="w-4 h-4 mr-1" /> {aiGenerating ? "Generating..." : "Generate"}
                 </AdminButton>
               </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ─── Bulk Add ─────────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {showBulkPanel && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden mb-4">
+            <div className="bg-zinc-900/50 border border-zinc-800/60 rounded-xl p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-primary flex items-center gap-2">
+                  <ListChecks className="w-4 h-4" /> Bulk Add Questions
+                </h3>
+                <button onClick={() => setShowBulkPanel(false)} className="text-muted-foreground hover:text-foreground">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="text-[10px] font-mono text-zinc-500 mb-3 leading-relaxed space-y-1">
+                <p>Q: Question text here</p>
+                <p>A: Correct option* <span className="text-zinc-700">// * = correct</span></p>
+                <p>B: Wrong option</p>
+                <p>TYPE: multiple_choice <span className="text-zinc-700">// multiple_choice, true_false, multi_answer, cipher, image, audio, video</span></p>
+                <p>CAT: category_name</p>
+                <p>DIFF: AGENT <span className="text-zinc-700">// RECRUIT / AGENT / ELITE / OMEGA</span></p>
+                <p>PTS: 100 <span className="text-zinc-700">// optional, default 100</span></p>
+                <p>EXP: Explanation text</p>
+                <p>URL: https://... <span className="text-zinc-700">// media URL or data URL</span></p>
+                <p className="text-zinc-700">--- <span className="text-zinc-800">// separator between questions</span></p>
+              </div>
+
+              <textarea value={bulkText} onChange={e => setBulkText(e.target.value)}
+                rows={12}
+                placeholder={`Q: What is the capital of France?\nA: Berlin\nB: Paris*\nC: London\nCAT: geography\nDIFF: AGENT\nPTS: 100\n---\nQ: Listen to the clip\nTYPE: audio\nURL: https://example.com/sound.mp3\nCAT: science\nDIFF: ELITE`}
+                className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-200 text-sm font-mono focus:outline-none focus:border-zinc-600 transition-colors resize-none mb-3" />
+
+              <div className="flex items-center gap-3">
+                <AdminButton onClick={handleBulkSubmit} disabled={bulkParsing || !bulkText.trim()}>
+                  <ListChecks className="w-4 h-4 mr-1" /> {bulkParsing ? "Creating..." : `Add Questions (${parseBulkText(bulkText).length} parsed)`}
+                </AdminButton>
+                <AdminButton variant="ghost" onClick={() => { setBulkText(""); setBulkResults(null); }}>Clear</AdminButton>
+              </div>
+
+              {bulkResults && bulkResults.length > 0 && (
+                <div className="mt-3 max-h-48 overflow-y-auto space-y-1">
+                  {bulkResults.map((r, i) => (
+                    <div key={i} className={`font-mono text-xs px-3 py-1.5 rounded ${r.questionId ? "text-green-400 bg-green-500/5" : "text-red-400 bg-red-500/5"}`}>
+                      #{r.index + 1}: {r.questionId ? `✓ Created (ID: ${r.questionId})` : `✗ ${r.error}`}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </motion.div>
         )}

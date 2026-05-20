@@ -316,6 +316,95 @@ router.post("/admin/questions", requirePermission("manage_questions"), async (re
   }
 });
 
+// POST /admin/questions/bulk — create multiple questions at once
+router.post("/admin/questions/bulk", requirePermission("manage_questions"), async (req, res) => {
+  try {
+    const { questions } = req.body;
+    if (!Array.isArray(questions) || questions.length === 0) {
+      return res.status(400).json({ error: "questions array is required" });
+    }
+
+    const DIFFICULTY_MAP: Record<string, number> = {
+      recruit: 2, RECRUIT: 2,
+      agent: 4, AGENT: 4,
+      elite: 7, ELITE: 7,
+      omega: 9, OMEGA: 9,
+    };
+
+    const results: { index: number; questionId?: number; error?: string }[] = [];
+
+    for (let i = 0; i < questions.length; i++) {
+      const q = questions[i];
+      try {
+        const difficulty = q.difficulty != null
+          ? (DIFFICULTY_MAP[String(q.difficulty)] ?? (parseInt(String(q.difficulty)) || 4))
+          : 4;
+
+        const validationErr = validateQuestionBody({
+          ...q,
+          difficulty,
+          timeLimitSeconds: q.timeLimitSeconds || 30,
+          points: q.points ?? 100,
+        });
+        if (validationErr) { results.push({ index: i, error: validationErr }); continue; }
+
+        if (!q.category) { results.push({ index: i, error: "Category is required" }); continue; }
+        const [existingCat] = await db.select().from(categoriesTable).where(eq(categoriesTable.name, q.category)).limit(1);
+        if (!existingCat) { results.push({ index: i, error: `Category "${q.category}" does not exist` }); continue; }
+
+        const qType = q.type || "multiple_choice";
+        let resolvedOptions = q.options || [];
+
+        if (qType === "true_false" && q.correctAnswer) {
+          const isCorrect = String(q.correctAnswer).toLowerCase() === "true";
+          resolvedOptions = [
+            { text: "True", isCorrect },
+            { text: "False", isCorrect: !isCorrect },
+          ];
+        }
+
+        const [question] = await db.insert(questionsTable).values({
+          type: qType,
+          questionText: q.questionText,
+          difficulty,
+          category: q.category,
+          correctAnswer: q.correctAnswer || "",
+          timeLimitSeconds: q.timeLimitSeconds || 30,
+          points: q.points ?? 100,
+          explanation: q.explanation || "",
+          mediaUrl: q.mediaUrl || null,
+        }).returning();
+
+        for (let j = 0; j < resolvedOptions.length; j++) {
+          await db.insert(questionOptionsTable).values({
+            questionId: question.id,
+            optionText: resolvedOptions[j].text,
+            isCorrect: resolvedOptions[j].isCorrect ? 1 : 0,
+          });
+        }
+
+        logAdmin(req.user!.id, "ADMIN_CREATED_QUESTION", "question", String(question.id));
+        results.push({ index: i, questionId: question.id });
+      } catch (e: any) {
+        results.push({ index: i, error: e?.message || "unknown error" });
+      }
+    }
+
+    const created = results.filter(r => r.questionId != null).length;
+    const failed = results.filter(r => r.error).length;
+
+    res.status(failed > 0 && created === 0 ? 400 : 201).json({
+      success: created > 0,
+      created,
+      failed,
+      results,
+    });
+  } catch (e: any) {
+    console.error("[admin] bulk create error:", e?.message || e);
+    res.status(500).json({ error: "Bulk create failed: " + (e?.message || "unknown") });
+  }
+});
+
 router.put("/admin/questions/:id", requirePermission("manage_questions"), async (req, res) => {
   try {
     const id = parseInt(req.params.id);
