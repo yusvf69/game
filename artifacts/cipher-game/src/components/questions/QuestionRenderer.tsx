@@ -149,6 +149,42 @@ export default function QuestionRenderer({ question, answerState, selectedOption
     );
   }
 
+  if (type === "audio") {
+    return (
+      <div className="space-y-4">
+        <div className="glass-strong cipher-border rounded-lg p-6">
+          <p className="font-mono text-[10px] text-green-400 tracking-widest mb-3">AUDIO INTELLIGENCE</p>
+          <p className="font-mono text-sm text-zinc-300 mb-4">{question.questionText}</p>
+          {question.mediaUrl && (
+            <div className="flex justify-center mb-4">
+              <audio src={mediaBlobUrl || question.mediaUrl} controls className="w-full max-w-md" />
+            </div>
+          )}
+        </div>
+        <div className="font-mono text-xs text-zinc-600 tracking-widest">SELECT ANSWER</div>
+        {renderOptions(question.options)}
+      </div>
+    );
+  }
+
+  if (type === "video") {
+    return (
+      <div className="space-y-4">
+        <div className="glass-strong cipher-border rounded-lg p-6">
+          <p className="font-mono text-[10px] text-red-400 tracking-widest mb-3">VIDEO FEED</p>
+          <p className="font-mono text-sm text-zinc-300 mb-4">{question.questionText}</p>
+          {question.mediaUrl && (
+            <div className="flex justify-center mb-4">
+              <video src={mediaBlobUrl || question.mediaUrl} controls className="w-full max-h-64 rounded-lg" />
+            </div>
+          )}
+        </div>
+        <div className="font-mono text-xs text-zinc-600 tracking-widest">SELECT ANSWER</div>
+        {renderOptions(question.options)}
+      </div>
+    );
+  }
+
   if (type === "visual_recognition") {
     return (
       <div className="space-y-4">
