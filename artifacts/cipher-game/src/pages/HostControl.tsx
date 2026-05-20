@@ -635,13 +635,21 @@ export default function HostControl() {
             {wrongAttempts > 0 && <span className="ml-3 text-yellow-400">REBUZZ</span>}
             <span className="ml-3 text-zinc-800 cursor-pointer select-all" onClick={() => navigator.clipboard?.writeText(String(matchId))} title="Copy match ID">ID: {matchId}</span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            {matchId && (
+              <a href={`/stage-results?matchId=${matchId}`} target="_blank"
+                className="font-mono text-[10px] text-yellow-500/50 hover:text-yellow-400 border border-yellow-600/20 hover:border-yellow-500/40 rounded px-2.5 py-1 transition-all">
+                📋 RESULTS
+              </a>
+            )}
+            <div className="flex items-center gap-4">
             {scores.map(t => (
               <div key={t.id} className="text-right" style={{ color: t.color }}>
                 <div className="font-mono text-lg font-black">{t.score}</div>
                 <div className="font-mono text-[9px] opacity-60 tracking-widest">{t.name}</div>
               </div>
             ))}
+          </div>
           </div>
         </div>
 
